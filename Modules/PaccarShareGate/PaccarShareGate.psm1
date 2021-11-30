@@ -14,4 +14,4 @@ Foreach ($import in @($Public + $Private)) {
 }
 
 # Export only the Public functions ($Public.BaseName) for the (WIP) modules
-Export-ModuleMember -Function @($Public).BaseName
+Export-ModuleMember -Function @($Public).BaseName -Verbose

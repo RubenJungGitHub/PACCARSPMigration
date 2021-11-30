@@ -17,7 +17,8 @@ if ($settings.environment -ne 'production') {
 }
 Write-Verbose "NodeID = $($settings.NodeId)"
 Write-Verbose "Used Database = $($settings.SQLDetails.Name),$($settings.SQLDetails.Database)"
-
+$ModulePath =  -Join($Settings.FilePath.LocalWorkSpaceModule,'Public')
+#Set-Location -Path $ModulePath
 do {
     $action = ('++++++++++++++++++++++++++++++++++++++++++++++++++++++', 'Create DataBase', 'Remove DataBase', 'Register All Sites and Lists', 'Migrate Fake', 'Migrate Real', 
         'Deactive All Test Lists', 'Activate CSV', 'Quit') | Out-GridView -Title 'Choose Activity (Only working on dev and test env)' -PassThru
@@ -51,7 +52,7 @@ do {
             Write-Host 'Database Removed.....'
         }
         'Register All Sites and Lists' {
-            Invoke-RJMUsFromSourceFile
+            Start-RJDBRegistrationCycle
             #Register-MtHAllSitesLists 
         }
         'Register Set of Sites and Lists' {
