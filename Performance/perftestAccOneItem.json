@@ -1,0 +1,22 @@
+﻿{
+    "testdata": [
+        {
+            "Bucket": "XXS",
+            "Amount": 3,
+            "FileCount": 1
+        }
+    ],
+    "tests": [
+        {
+            "Name": "test 1 : Migrate 1 XXS Buckets on 1 node, 1 VM",
+            "NodeId": [
+                1
+            ],
+            "NextAction": "first",
+            "Bucket": "XXS",
+            "AmountPerNode": 1,
+            "deletetarget": "items",
+            "repeat": 3
+        }
+    ]
+}

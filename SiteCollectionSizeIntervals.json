@@ -1,0 +1,34 @@
+﻿{
+    "SCSizeintervals": [
+        {
+            "SCBucket": "XS",
+            "MinimumItemCount": 0,
+            "MaximumItemCount": 250
+        },
+        {
+            "SCBucket": "S",
+            "MinimumItemCount": 250,
+            "MaximumItemCount": 500
+        },
+        {
+            "SCBucket": "M",
+            "MinimumItemCount": 500,
+            "MaximumItemCount": 2000
+        },
+        {
+            "SCBucket": "L",
+            "MinimumItemCount": 2000,
+            "MaximumItemCount": 10000
+        },
+        {
+            "SCBucket": "XL",
+            "MinimumItemCount": 10000,
+            "MaximumItemCount": 50000
+        },
+        {
+            "SCBucket": "XXL",
+            "MinimumItemCount": 50000,
+            "MaximumItemCount": 1000000
+        }
+    ]
+}

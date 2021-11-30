@@ -1,0 +1,128 @@
+﻿{
+    "Validate": true,
+    "FilePath": {
+        "SettingsFile": "C:\\GITWorkSpace\\BuZa\\MtHBuZaShareGate\\Settings.json",
+        "Logging": "D:\\Beheer\\Data\\BuZa\\Logging",
+        "SGErrorReports": "D:\\Beheer\\ShareGateReports",
+        "MUInput": "D:\\Beheer\\Data\\BuZa",
+        "Script": "D:\\Beheer\\Data\\BuZa\\Scripts",
+        "TempDocs": "D:\\Beheer\\Data\\BuZa\\TempDocs",
+        "VerifyDocs": "D:\\Beheer\\Data\\BuZa\\Verify",
+        "Mappings": "D:\\Beheer\\Data\\BuZa\\Mappings",
+        "WordsFile": "C:\\GITWorkSpace\\BuZa\\MtHBuZaShareGate\\Tests\\Wordsfile.csv"
+    },
+    "SGErrorReports" : "SGErrorReport",
+    "PopulateMUCreationItemCountThreshold" : 10000,
+    "Environment": "o365",
+    "NodeId": 1,
+    "MaxNodeId": 3,
+    "DatabaseDetails": [
+        {
+            "Name": "O365",
+            "Instance": ".\\SQLExpress",
+            "Database": "SQLO365",
+            "DeleteDB": true
+        },
+        {
+            "Name": "TestonO365",
+            "Instance": ".\\SQLExpress",
+            "Database": "SQLTestO365",
+            "DeleteDB":true
+        },
+        {
+            "Name": "AEF",
+            "Instance": ".\\SQLExpress",
+            "Database": "SQLAEF",
+            "DeleteDB": true
+        },
+        {
+            "Name": "TestonAEF",
+            "Instance": ".\\SQLExpress",
+            "Database": "SQLTestAEF",
+            "DeleteDB": true
+        },
+        {
+            "Name": "AEF2",
+            "Instance": "NLWBUZAAS98\\SQLExpress,1433",
+            "Database": "SQLAEF",
+            "DeleteDB": true
+        },
+        {
+            "Name": "TestonAEF2",
+            "Instance": "NLWBUZAAS98\\SQLExpress,1433",
+            "Database": "SQLTestAEF",
+            "DeleteDB": true
+        },
+        {
+            "Name": "Accept",
+            "Instance": "NLWBUZACN11\\SHAREPOINT,49002",
+            "Database": "SGABUZ_ShareGate_Migration",
+            "DeleteDB": false
+        },
+        {
+            "Name": "TestonAccept",
+            "Instance": "NLWBUZAAS98\\SQLExpress,1433",
+            "Database": "SQLTestAccept",
+            "DeleteDB": true
+        },
+        {
+            "Name": "Production",
+            "Instance": "???",
+            "Database": "SGPBUZ_ShareGate_Migration",
+            "DeleteDB": false
+        }
+    ],
+    "EnvironmentDetails": [
+        {
+            "Name": "o365",
+            "UserName": "admin@rubentesttenant.onmicrosoft.com",
+            "LoginType": "Credentials",
+            "SPVersion": "SharePointOnline",
+            "MigrationURLS": [
+                {
+                    "SourceTenantDomain": "rubentesttenant.sharepoint.com",
+                    "DestinationTenantDomain": "rubentesttenant.sharepoint.com",
+                    "ManagedPath": [
+                        "subject",
+                        "sites"
+                    ],
+                    "SitePrefix": "M1-",
+                    "DemoSite":[
+                     "/sites/TSBuzaDemoSource",
+                     "/sites/TSBuzaDemoSource2",
+                     "/sites/TSBuzaDemoSource3",
+                     "/sites/TSBuzaDemoSource4",
+                     "/sites/TestMySitesSource"
+                    ],
+                    "DemoList": "Demo"
+                }
+            ],
+            "TimeZone": "Coordinated Universal Time",
+            "Database": "O365",
+            "ExecuteTestOnDB": "TestonO365",
+            "DeleteNotFoundMUS": true,
+            "MUSourceItemsDeleteSync": true,
+            "ComputerNames": [
+                "DESKTOP-Q0P52LG"
+            ],
+            "EncryptedPassword": "01000000d08c9ddf0115d1118c7a00c04fc297eb0100000069ca977c5d50fa4b9e52d4608db41127000000000200000000001066000000010000200000003d66629a5c0543eed35171310454b4fc68f8c2af44181fcd9ce4ac7d64b6ca47000000000e8000000002000020000000becaf88dbc25113511c56fe034c9045fee10633ddcbcc2bb8f42ef217e48151120000000a123134a549af1cd8f153ad6660c55ee789be8e6cc95b90fd12ae51aa4d5573840000000c67a57a2e416d185b4c202b029fe12baa1fd73007e1c43a69eb113e056cfbe6d2dc5f3267572dfe04436f306371d919c3059e6a67ebfe3a38a26a5ed88fc4c45"
+        }
+    ],
+    "StartUp": {
+        "LocalModules": "BuzaSharegate",
+        "SPModuleVersion": "SharePointPnPPowerShell2013",
+        "Verbose": true,
+        "RealMigration": true,
+        "PSVersion": "5.1",
+        "PesterVersion": "5.2.2",
+        "Needs64bit": true,
+        "Elevated": false
+    },
+    "Sharegate": {
+        "UserMap": false,
+        "TemplateMap": false,
+        "PermissionsMap": false,
+        "PropertyMap": false,
+        "MigrationMode": "Insane"
+    }
+}

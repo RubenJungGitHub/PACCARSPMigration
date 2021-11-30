@@ -1,0 +1,35 @@
+﻿{
+    "testdata": [
+        {
+            "Bucket": "XS",
+            "Amount": 5,
+            "FileCount": 13
+        }
+    ],
+    "tests": [
+        {
+            "Name": "test 1 : Migrate 1 XS Buckets on 3 nodes",
+            "NodeId": [
+                1,
+                2,
+                3
+            ],
+            "NextAction": "first",
+            "Bucket": "XS",
+            "AmountPerNode": 2,
+            "deletetarget": "items",
+            "repeat": 2
+        },
+        {
+            "Name": "test 2 : Migrate 4 XS Buckets on 2 nodes",
+            "NodeId": [
+                1,2
+            ],
+            "NextAction": "first",
+            "Bucket": "XS",
+            "AmountPerNode": 4,
+            "deletetarget": "items",
+            "repeat" : 1
+        }
+    ]
+}

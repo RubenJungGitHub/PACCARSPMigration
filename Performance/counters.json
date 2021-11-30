@@ -1,0 +1,178 @@
+﻿{
+    "servers": [
+        {
+            "old": "\\\\NLWBUZAAS96\\",
+            "new": "",
+            "name" : "ShareGate server 1"
+        },
+        {
+            "old": "\\\\NLWBUZAAS98\\",
+            "new": "",
+            "name" : "ShareGate server 2"
+        },
+        {
+            "old": "\\\\NLWBUZAWS50\\",
+            "new": "",
+            "name" : "SP2019 Front-End server 1"
+        },
+        {
+            "old": "\\\\NLWBUZAWS52\\",
+            "new": "",
+            "name" : "SP2019 Front-End server 2"
+        },
+        {
+            "old": "\\\\NLWBUZAWS54\\",
+            "new": "",
+            "name" : "SP2019 Back-End server 1"
+        },
+        {
+            "old": "\\\\NLWBUZAWS56\\",
+            "new": "",
+            "name" : "SP2019 Back-End server 2"
+        },
+        {
+            "old": "\\\\NLWBUZAWS02\\",
+            "new": "",
+            "name" : "SP2013 Front-End server 1"
+        },
+        {
+            "old": "\\\\NLWBUZAWS04\\",
+            "new": "",
+            "name" : "SP2013 Front-End server 2"
+        },
+        {
+            "old": "\\\\NLWBUZAWS10\\",
+            "new": "",
+            "name" : "SP2013 Back-End server 1"
+        },
+        {
+            "old": "\\\\NLWBUZAWS12\\",
+            "new": "",
+            "name" : "SP2013 Back-End server 2"
+        },
+        {
+            "old": "\\\\NLWBUZACN02\\",
+            "new": "",
+            "name" : "SP2013 SQL Cluster Node 1"
+        },
+        {
+            "old": "\\\\NLWBUZACN04\\",
+            "new": "",
+            "name" : "SP2013 SQL Cluster Node 2"
+        },
+        {
+            "old": "\\\\NLWBUZACN12\\",
+            "new": "",
+            "name" : "SP2019 SQL Cluster Node 1"
+        },
+        {
+            "old": "\\\\NLWBUZACN14\\",
+            "new": "",
+            "name" : "SP2019 SQL Cluster Node 2"
+        }
+    ],
+    "namesdisk": [
+        {
+            "old": "LogicalDisk(D:)\\",
+            "new": "D-"
+        },
+        {
+            "old": "LogicalDisk(HarddiskVolume2)\\",
+            "new": "V2-"
+        },
+        {
+            "old": "LogicalDisk(C:)\\",
+            "new": "C-"
+        },
+        {
+            "old": "LogicalDisk(E:)\\",
+            "new": "E-"
+        },
+        {
+            "old": "LogicalDisk(HarddiskVolume4)\\",
+            "new": "V4-"
+        },
+        {
+            "old": "LogicalDisk(E:\\MSSQL\\DATA\\MP-DATA01)\\",
+            "new": "SQLD-"
+        },
+        {
+            "old": "LogicalDisk(E:\\MSSQL\\LOG\\MP-LOG01)\\",
+            "new": "SQLL-"
+        },
+        {
+            "old": "LogicalDisk(E:\\MSSQL\\TEMPDB\\MP-TEMPDB1)\\",
+            "new": "SQLT-"
+        }
+    ],
+    "namesnetwork" : [
+        {
+            "old": "Network Interface(Microsoft Hyper-V Network Adapter)\\",
+            "new": "NA1-"
+        },
+        {
+            "old": "Network Interface(Microsoft Hyper-V Network Adapter _2)\\",
+            "new": "NA2-"
+        },
+        {
+            "old": "Network Interface(Microsoft Hyper-V Network Adapter _3)\\",
+            "new": "NA3-"
+        }
+    ],
+    "disk": [
+        {
+            "old": "Avg. Disk Queue Length",
+            "new": "DiskQueue"
+        },
+        {
+            "old": "Avg. Disk sec/Transfer",
+            "new": "Transfer"
+        },
+        {
+            "old": "Avg. Disk sec/Read",
+            "new": "Read"
+        },
+        {
+            "old": "Avg. Disk sec/Write",
+            "new": "Write"
+        },
+        {
+            "old": "Disk Transfers/sec",
+            "new": "Transfers"
+        }
+    ],
+    "Memory": [
+        {
+            "old": "Memory\\Page Faults/sec",
+            "new": "PageFaults"
+        },
+        {
+            "old": "Memory\\Available Bytes",
+            "new": "AvBytes"
+        },
+        {
+            "old": "Memory\\Pool Paged Bytes",
+            "new": "PoolPagedBytes"
+        },
+        {
+            "old": "Memory\\Pool Nonpaged Bytes",
+            "new": "PoolNonPagedBytes"
+        }
+    ],
+    "Network": [
+        {
+            "old": "Bytes Sent/sec",
+            "new": "BytesSent"
+        },
+        {
+            "old": "Bytes Received/sec",
+            "new": "BytesReceived"
+        }
+    ],
+    "Processor" : [
+        {
+            "old": "Processor(_Total)\\% Processor Time",
+            "new": "ProcessorTime"
+        }
+    ]
+}

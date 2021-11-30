@@ -1,0 +1,317 @@
+﻿{
+    "testdata": [
+        {
+            "Bucket": "XS",
+            "Amount": 4,
+            "FileCount": 13
+        },
+        {
+            "Bucket": "M",
+            "Amount": 4,
+            "FileCount": 175
+        },
+        {
+            "Bucket": "XL",
+            "Amount": 2,
+            "FileCount": 3000
+        }
+    ],
+    "tests": [
+        {
+            "Name": "test 1a : Migrate 2 M Buckets on 1 node, 1 VM",
+            "NodeId": [
+                1
+            ],
+            "NextAction": "first",
+            "Bucket": "M",
+            "AmountPerNode": 2,
+            "deletetarget": "items",
+            "repeat": 3
+        },
+        {
+            "Name": "test 1b : Migrate 2 M Buckets on 2 nodes, 1 VM",
+            "NodeId": [
+                1,
+                2
+            ],
+            "NextAction": "first",
+            "Bucket": "M",
+            "AmountPerNode": 2,
+            "deletetarget": "items",
+            "repeat": 3
+        },
+        {
+            "Name": "test 1c : Migrate 2 M Buckets on 3 nodes, 1 VM",
+            "NodeId": [
+                1,
+                2,
+                3
+            ],
+            "NextAction": "first",
+            "Bucket": "M",
+            "AmountPerNode": 2,
+            "deletetarget": "items",
+            "repeat": 3
+        },
+        {
+            "Name": "test 1d : Migrate 2 M Buckets on 4 nodes, 1 VM",
+            "NodeId": [
+                1,
+                2,
+                3,
+                4
+            ],
+            "NextAction": "first",
+            "Bucket": "M",
+            "AmountPerNode": 2,
+            "deletetarget": "items",
+            "repeat": 3
+        },
+        {
+            "Name": "test 1e : Migrate 2 M Buckets on 2 nodes, 2 VMs",
+            "NodeId": [
+                1,
+                5
+            ],
+            "NextAction": "first",
+            "Bucket": "M",
+            "AmountPerNode": 2,
+            "deletetarget": "items",
+            "repeat": 3
+        },
+        {
+            "Name": "test 1f : Migrate 2 M Buckets on 4 nodes, 2VMs",
+            "NodeId": [
+                1,
+                2,
+                5,
+                6
+            ],
+            "NextAction": "first",
+            "Bucket": "M",
+            "AmountPerNode": 2,
+            "deletetarget": "items",
+            "repeat": 3
+        },
+        {
+            "Name": "test 1g : Migrate 2 M Buckets on 6 nodes, 2VMs",
+            "NodeId": [
+                1,
+                2,
+                3,
+                5,
+                6,
+                7
+            ],
+            "NextAction": "first",
+            "Bucket": "M",
+            "AmountPerNode": 2,
+            "deletetarget": "items",
+            "repeat": 3
+        },
+        {
+            "Name": "test 1h : Migrate 2M Buckets on 8 nodes, 2 VMs",
+            "NodeId": [
+                1,
+                2,
+                3,
+                4,
+                5,
+                6,
+                7,
+                8
+            ],
+            "NextAction": "first",
+            "Bucket": "M",
+            "AmountPerNode": 2,
+            "deletetarget": "items",
+            "repeat": 3
+        },
+        {
+            "Name": "test 2a : Migrate 1 XL Buckets on 1 node, 1 VM",
+            "NodeId": [
+                1
+            ],
+            "NextAction": "first",
+            "Bucket": "XL",
+            "AmountPerNode": 1,
+            "deletetarget": "items",
+            "repeat": 3
+        },
+        {
+            "Name": "test 2b : Migrate 2 XL Buckets on 2 nodes, 1 VM",
+            "NodeId": [
+                1,
+                2
+            ],
+            "NextAction": "first",
+            "Bucket": "XL",
+            "AmountPerNode": 1,
+            "deletetarget": "items",
+            "repeat": 3
+        },
+        {
+            "Name": "test 2c : Migrate 2 XL Buckets on 3 nodes, 1 VM",
+            "NodeId": [
+                1,
+                2,
+                3
+            ],
+            "NextAction": "first",
+            "Bucket": "XL",
+            "AmountPerNode": 1,
+            "deletetarget": "items",
+            "repeat": 3
+        },
+        {
+            "Name": "test 3d : Migrate 2 M Buckets on 4 nodes, 1 VM",
+            "NodeId": [
+                1,
+                2,
+                3,
+                4
+            ],
+            "NextAction": "first",
+            "Bucket": "XL",
+            "AmountPerNode": 1,
+            "deletetarget": "items",
+            "repeat": 3
+        },
+        {
+            "Name": "test 3e : Migrate 2 M Buckets on 2 nodes, 2 VMs",
+            "NodeId": [
+                1,
+                5
+            ],
+            "NextAction": "first",
+            "Bucket": "XL",
+            "AmountPerNode": 1,
+            "deletetarget": "items",
+            "repeat": 3
+        },
+        {
+            "Name": "test 4f : Migrate 2 M Buckets on 4 nodes, 2VMs",
+            "NodeId": [
+                1,
+                2,
+                5,
+                6
+            ],
+            "NextAction": "first",
+            "Bucket": "XL",
+            "AmountPerNode": 1,
+            "deletetarget": "items",
+            "repeat": 3
+        },
+        {
+            "Name": "test 4a : Migrate 2 XS Buckets on 1 node, 1 VM",
+            "NodeId": [
+                1
+            ],
+            "NextAction": "first",
+            "Bucket": "XS",
+            "AmountPerNode": 2,
+            "deletetarget": "items",
+            "repeat": 3
+        },
+        {
+            "Name": "test 4b : Migrate 2 XS Buckets on 2 nodes, 1 VM",
+            "NodeId": [
+                1,
+                2
+            ],
+            "NextAction": "first",
+            "Bucket": "XS",
+            "AmountPerNode": 2,
+            "deletetarget": "items",
+            "repeat": 3
+        },
+        {
+            "Name": "test 4c : Migrate 2 XS Buckets on 3 nodes, 1 VM",
+            "NodeId": [
+                1,
+                2,
+                3
+            ],
+            "NextAction": "first",
+            "Bucket": "XS",
+            "AmountPerNode": 2,
+            "deletetarget": "items",
+            "repeat": 3
+        },
+        {
+            "Name": "test 4d : Migrate 2 XS Buckets on 4 nodes, 1 VM",
+            "NodeId": [
+                1,
+                2,
+                3,
+                4
+            ],
+            "NextAction": "first",
+            "Bucket": "XS",
+            "AmountPerNode": 2,
+            "deletetarget": "items",
+            "repeat": 3
+        },
+        {
+            "Name": "test 4e : Migrate 2 XS Buckets on 2 nodes, 2 VMs",
+            "NodeId": [
+                1,
+                5
+            ],
+            "NextAction": "first",
+            "Bucket": "XS",
+            "AmountPerNode": 2,
+            "deletetarget": "items",
+            "repeat": 3
+        },
+        {
+            "Name": "test 4f : Migrate 2 XS Buckets on 4 nodes, 2VMs",
+            "NodeId": [
+                1,
+                2,
+                5,
+                6
+            ],
+            "NextAction": "first",
+            "Bucket": "XS",
+            "AmountPerNode": 2,
+            "deletetarget": "items",
+            "repeat": 3
+        },
+        {
+            "Name": "test 4g : Migrate 2 XS Buckets on 6 nodes, 2VMs",
+            "NodeId": [
+                1,
+                2,
+                3,
+                5,
+                6,
+                7
+            ],
+            "NextAction": "first",
+            "Bucket": "XS",
+            "AmountPerNode": 2,
+            "deletetarget": "items",
+            "repeat": 3
+        },
+        {
+            "Name": "test 4h : Migrate 2XS Buckets on 8 nodes, 2 VMs",
+            "NodeId": [
+                1,
+                2,
+                3,
+                4,
+                5,
+                6,
+                7,
+                8
+            ],
+            "NextAction": "first",
+            "Bucket": "XS",
+            "AmountPerNode": 2,
+            "deletetarget": "items",
+            "repeat": 3
+        }
+    ]
+}

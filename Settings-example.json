@@ -1,0 +1,199 @@
+{
+  "FilePath": {
+    "SettingFile": "D:\\Beheer\\BuZaShareGate\\Settings.json",
+    "Logging": "D:\\Beheer\\Data\\Buza\\Logging",
+    "MUInput": "D:\\Beheer\\Data\\Buza",
+    "Script": "D:\\Beheer\\BuzaShareGate",
+    "TempDocs": "D:\\Beheer\\Data\\Temp",
+    "VerifyDocs": "D:\\Beheer\\Data\\Verify",
+    "Mappings": "D:\\Beheer\\Data\\Buza\\Mappings",
+    "WordsFile": "D:\\Beheer\\BuZaShareGate\\Tests\\wordsfile.csv"
+  },
+  "SGErrorReports" : "SGErrorReport",
+  "PopulateMUCreationItemCountThreshold" : 200,
+  "Environment": "",
+  "NodeId": 1,
+  "MaxNodeId": 2,
+  "NumberOfPrcessingNodes": 10,
+  "DatabaseDetails": [
+    {
+      "Name": "O365",
+      "Instance": ".\\SQLExpress",
+      "Database": "SQLO365",
+      "DeleteDB": true
+    },
+    {
+      "Name": "TestonO365",
+      "Instance": ".\\SQLExpress",
+      "Database": "SQLTestO365",
+      "DeleteDB": true
+    },
+    {
+      "Name": "AEF",
+      "Instance": "NLWBUZAAS98\\SQLExpress,1433",
+      "Database": "SQLAEF",
+      "DeleteDB": true
+    },
+    {
+      "Name": "TestonAEF",
+      "Instance": "NLWBUZAAS98\\SQLExpress,1433",
+      "Database": "SQLTestAEF",
+      "DeleteDB": true
+    },
+    {
+      "Name": "Accept",
+      "Instance": "BUZSQLA04HAGL06,49001",
+      "Database": "SGABUZ_ShareGate_Migration",
+      "DeleteDB": false
+    },
+    {
+      "Name": "TestonAccept",
+      "Instance": "NLWBUZAAS98\\SQLExpress,1433",
+      "Database": "SQLTestAccept",
+      "DeleteDB": true
+    },
+    {
+      "Name": "Production",
+      "Instance": "BUZSQLP03BAGL02,49002",
+      "Database": "SGPBUZ_ShareGate_Migration",
+      "DeleteDB": false
+    }
+  ],
+  "EnvironmentDetails": [
+    {
+      "Name": "o365",
+      "UserName": "admin@rubentesttenant.onmicrosoft.com",
+      "LoginType": "Credentials",
+      "SPVersion": "SharePointOnline",
+      "MigrationURLS": [
+        {
+          "SourceTenantDomain": "rubentesttenant.sharepoint.com",
+          "DestinationTenantDomain": "rubentesttenant.sharepoint.com",
+          "ManagedPath": [
+            "subject",
+            "sites"
+          ],
+          "SitePrefix": "M1-",
+          "DemoSite":[
+            "/sites/TSBuzaDemoSource",
+            "/sites/TSBuzaDemoSource2",
+            "/sites/TestMySitesSource"
+           ],
+          "DemoList": "Demo"
+        },
+        {
+          "SourceTenantDomain": "rubentesttenant.sharepoint.com",
+          "DestinationTenantDomain": "rubentesttenant.sharepoint.com",
+          "ManagedPath": [
+            "subject",
+            "sites"
+          ],
+          "SitePrefix": "M2-",
+          "DemoSite": "/sites/TestMySitesSource",
+          "DemoList": "DemoMySites"
+        }
+      ],
+      "TimeZone": "Coordinated Universal Time",
+      "Database": "O365",
+      "ExecuteTestOnDB": "TestonO365",
+      "DeleteNotFoundMUS": true,
+      "MUSourceItemsDeleteSync": true,
+      "ComputerNames": [
+        "DESKTOP-Q0P52LG"
+      ]
+    },
+    {
+      "Name": "aef",
+      "UserName": "svc-SPa-ShareGate",
+      "LoginType": "Credentials",
+      "SPVersion": "SharePoint2013",
+      "MigrationURLS": [
+        {
+          "WebAppUrl": "https://dec-sp-wa1.plaza.aef.buzaservices.nl",
+          "SourceTenantDomain": "247.plaza.aef.buzaservices.nl",
+          "DestinationTenantDomain": "a247.plaza.aef.buzaservices.nl",
+          "ManagedPath": [
+            "subject",
+            "sites"
+          ],
+          "SitePrefix": "",
+          "DemoSite":[
+            "/sites/TSBuzaDemoSource",
+            "/sites/TSBuzaDemoSource2",
+            "/sites/TestMySitesSource"
+           ],
+          "DemoList": "Demo"
+        }
+      ],
+      "TimeZone": "Local",
+      "ComputerNames": [
+        "NLWBUZAAS98"
+      ],
+      "SharePointComputerName": "NLWBUZDWS03",
+      "SPScheduledTaskAccountName": "ACC-MBZHS\\svc-SPd-SchedTask",
+      "Database": "AEF",
+      "ExecuteTestOnDB": "TestonAEF",
+      "DeleteNotFoundMUS": true,
+      "MUSourceItemsDeleteSync": true
+    },
+    {
+      "Name": "acceptance",
+      "UserName": "svc-SPa-ShareGate",
+      "LoginType": "Current",
+      "SPVersion": "SharePoint2013",
+      "MigrationURLS": [
+        {
+          "WebAppUrl": "https://aec-sp-wa1.plaza.buzaservices.nl",
+          "SourceTenantDomain": "247.plaza.buzaservices.nl",
+          "DestinationTenantDomain": "a247.plaza.buzaservices.nl",
+          "ManagedPath": [
+            "subject",
+            "sites"
+          ],
+          "SitePrefix": "",
+          "DemoSite":[
+            "/sites/TSBuzaDemoSource",
+            "/sites/TSBuzaDemoSource2",
+            "/sites/TestMySitesSource"
+           ],
+          "DemoList": "Demo"
+        },
+        {
+          "WebAppUrl": "https://aec-sp-wa2.plaza.buzaservices.nl",
+          "SourceTenantDomain": "my.plaza.buzaservices.nl",
+          "DestinationTenantDomain": "amy.plaza.buzaservices.nl",
+          "ManagedPath": [
+            "personal"
+          ],
+          "SitePrefix": ""
+        }
+      ],
+      "TimeZone": "Local",
+      "ComputerNames": [
+        "NLWBUZPAS99",
+        "NLWBUZPAS97",
+        "NLWBUZPAS95"
+      ],
+      "SharePointComputerName": "NLWBUZPWS09",
+      "SPScheduledTaskAccountName": "PRD-MBZHS\\svc-SPp-SchedTask",
+      "Database": "Production",
+      "ExecuteTestOnDB": "None",
+      "DeleteNotFoundMUS": true,
+      "MUSourceItemsDeleteSync": true
+    }
+  ],
+  "StartUp": {
+    "SPModuleVersion": "SharePointPnPPowerShell2013",
+    "Verbose": true,
+    "RealMigration": false,
+    "PSVersion": "5.1",
+    "PesterVersion": "5.3.1",
+    "Needs64bit": true,
+    "Elevated": false
+  },
+  "Sharegate": {
+    "UserMap": false,
+    "TemplateMap": false,
+    "MigrationMode": "Insane"
+  }
+}

@@ -1,0 +1,64 @@
+﻿{
+    "testdata": [
+        {
+            "Bucket": "XS",
+            "Amount": 5,
+            "FileCount": 13
+        },
+        {
+            "Bucket": "S",
+            "Amount": 0,
+            "FileCount": 63
+        },
+        {
+            "Bucket": "M",
+            "Amount": 3,
+            "FileCount": 175
+        },
+        {
+            "Bucket": "L",
+            "Amount": 0,
+            "FileCount": 625
+        },
+        {
+            "Bucket": "XL",
+            "Amount": 1,
+            "FileCount": 3000
+        }
+    ],
+    "tests": [
+        {
+            "Name": "test 1 : Migrate 1 XS Bucket on 1 node",
+            "NodeId": [
+                1
+            ],
+            "NextAction": "first",
+            "Bucket": "XS",
+            "AmountPerNode": 1,
+            "deletetarget": "items",
+            "repeat" : 5
+        },
+        {
+            "Name": "test 2 : Migrate 1 XL Bucket on 1 node",
+            "NodeId": [
+                1
+            ],
+            "NextAction": "first",
+            "Bucket": "M",
+            "AmountPerNode": 1,
+            "deletetarget": "items",
+            "repeat" : 5
+        },
+        {
+            "Name": "test 2 : Migrate 1 XL Bucket on 1 node",
+            "NodeId": [
+                1
+            ],
+            "NextAction": "first",
+            "Bucket": "XL",
+            "AmountPerNode": 1,
+            "deletetarget": "items",
+            "repeat" : 5
+        }
+    ]
+}
