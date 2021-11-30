@@ -2,7 +2,8 @@
 function Get-MtHGitDirectory {
     [CmdletBinding()]
     param ( 
-        [Parameter()][switch]$Error   
+        [Parameter()][switch]$ErrorSwitch
+          
     )
     try {
         $dir = (git rev-parse --git-dir)

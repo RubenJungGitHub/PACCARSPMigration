@@ -2,13 +2,13 @@
     "Validate": true,
     "FilePath": {
         "SettingsFile": "C:\\GITWorkSpace\\BuZa\\MtHPaccarShareGate\\Settings.json",
-        "Logging": "D:\\Beheer\\Data\\BuZa\\Logging",
+        "Logging": "C:\\Beheer\\Data\\Paccar\\Logging",
         "SGErrorReports": "D:\\Beheer\\ShareGateReports",
-        "MUInput": "D:\\Beheer\\Data\\BuZa",
-        "Script": "D:\\Beheer\\Data\\BuZa\\Scripts",
-        "TempDocs": "D:\\Beheer\\Data\\BuZa\\TempDocs",
-        "VerifyDocs": "D:\\Beheer\\Data\\BuZa\\Verify",
-        "Mappings": "D:\\Beheer\\Data\\BuZa\\Mappings",
+        "MUInput": "C:\\Beheer\\Data\\Paccar",
+        "Script": "C:\\Beheer\\Data\\Paccar\\Scripts",
+        "TempDocs": "C:\\Beheer\\Data\\Paccar\\TempDocs",
+        "VerifyDocs": "C:\\Beheer\\Data\\Paccar\\Verify",
+        "Mappings": "C:\\Beheer\\Data\\Paccar\\Mappings",
         "WordsFile": "C:\\GITWorkSpace\\BuZa\\MtHPaccarShareGate\\Tests\\Wordsfile.csv"
     },
     "SGErrorReports" : "SGErrorReport",
@@ -20,37 +20,37 @@
         {
             "Name": "O365",
             "Instance": ".\\SQLExpress",
-            "Database": "SQLO365",
+            "Database": "PACCARSQLO365",
             "DeleteDB": true
         },
         {
             "Name": "TestonO365",
             "Instance": ".\\SQLExpress",
-            "Database": "SQLTestO365",
+            "Database": "PACCARSQLTestO365",
             "DeleteDB":true
         },
         {
             "Name": "AEF",
             "Instance": ".\\SQLExpress",
-            "Database": "SQLAEF",
+            "Database": "PACCARSQLAEF",
             "DeleteDB": true
         },
         {
             "Name": "TestonAEF",
             "Instance": ".\\SQLExpress",
-            "Database": "SQLTestAEF",
+            "Database": "PACCARSQLTestAEF",
             "DeleteDB": true
         },
         {
             "Name": "AEF2",
             "Instance": "NLWBUZAAS98\\SQLExpress,1433",
-            "Database": "SQLAEF",
+            "Database": "PACCARSQLAEF",
             "DeleteDB": true
         },
         {
             "Name": "TestonAEF2",
             "Instance": "NLWBUZAAS98\\SQLExpress,1433",
-            "Database": "SQLTestAEF",
+            "Database": "PACCARSQLTestAEF",
             "DeleteDB": true
         },
         {
@@ -62,7 +62,7 @@
         {
             "Name": "TestonAccept",
             "Instance": "NLWBUZAAS98\\SQLExpress,1433",
-            "Database": "SQLTestAccept",
+            "Database": "PACCARSQLTestAccept",
             "DeleteDB": true
         },
         {
@@ -75,32 +75,31 @@
     "EnvironmentDetails": [
         {
             "Name": "o365",
-            "UserName": "admin@rubentesttenant.onmicrosoft.com",
+            "UserName": "ruben.jung@daftrucks.com",
             "LoginType": "Credentials",
             "SPVersion": "SharePointOnline",
             "MigrationURLS": [
                 {
                     "SourceTenantDomain": "rubentesttenant.sharepoint.com",
-                    "DestinationTenantDomain": "rubentesttenant.sharepoint.com",
+                    "DestinationTenantDomain": "paccar.sharepoint.com",
                     "ManagedPath": [
-                        "subject",
                         "sites"
                     ],
                     "SitePrefix": "M1-",
                     "DemoSite":[
-                     "/sites/TSBuzaDemoSource",
+                     "/sites/TSBuzaDemoSource"
                     ],
                     "DemoList": "Demo"
                 }
             ],
             "TimeZone": "Coordinated Universal Time",
             "Database": "O365",
-            "ExecuteTestOnDB": "TestonO365",
-            "DeleteNotFoundMUS": true,
-            "MUSourceItemsDeleteSync": true,
+            "ExecuteTestOnDB": "PaccarTestonO365",
+            "DeleteNotFoundMUS": false,
+            "MUSourceItemsDeleteSync": false,
             "ComputerNames": [
-                "DESKTOP-Q0P52LG"
-            ],
+                "DAFEHVLPP99246"
+            ]
         }
     ],
     "StartUp": {

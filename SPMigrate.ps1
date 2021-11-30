@@ -18,8 +18,8 @@ Write-Verbose "NodeID = $($settings.NodeId)"
 Write-Verbose "Used Database = $($settings.SQLDetails.Name),$($settings.SQLDetails.Database)"
 
 do {
-    $action = ('++++++++++++++++++++++++++++++++++++++++++++++++++++++', 'Create DataBase', 'Remove DataBase', 'Register All Sites and Lists', 'Detect Changes', 'Migrate Fake', 'Migrate Real', 
-        'Deactive All Test Lists', 'Activate CSV', 'Distribute Site collections over nodes', 'Run delete cycle', 'Quit') | Out-GridView -Title 'Choose Activity (Only working on dev and test env)' -PassThru
+    $action = ('++++++++++++++++++++++++++++++++++++++++++++++++++++++', 'Create DataBase', 'Remove DataBase', 'Register All Sites and Lists', 'Migrate Fake', 'Migrate Real', 
+        'Deactive All Test Lists', 'Activate CSV', 'Quit') | Out-GridView -Title 'Choose Activity (Only working on dev and test env)' -PassThru
     #Make sure the testprocedures only access Dev and test.
     switch ($action) {
         'Reinitialize' {
@@ -50,7 +50,8 @@ do {
             Write-Host 'Database Removed.....'
         }
         'Register All Sites and Lists' {
-            Register-MtHAllSitesLists 
+            Populate-RJMUsFromSourceFile
+            #Register-MtHAllSitesLists 
         }
         'Register Set of Sites and Lists' {
             #not included
