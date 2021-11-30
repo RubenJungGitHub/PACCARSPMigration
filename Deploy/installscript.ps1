@@ -219,7 +219,7 @@ function install-artifact {
     Write-Output 'Adding to Environment Path'
     Write-Output '--------------------------'
     # Module dirs toevoegen aan systeem environment variabele: PSModulePath
-    foreach ($dir in $ModulePathDirs) {
+    foreach ($dir in $RJ) {
         $CurrentValue = [Environment]::GetEnvironmentVariable('PSModulePath', 'Machine')
         if (Test-Path $dir) {
             if ($dir -notin $currentValue.split(';')) {
@@ -245,19 +245,19 @@ function install-artifact {
 }
 
 # ------------------ main -----------------------
-$RepoDir = 'C:\Beheer'
+$RepoDir = 'C:\GITWorkSpace\Paccar'
 
 $Artifacts = @{
     RepoDir        = $RepoDir
     dirs           = ('.\data', '.\data\buza', '.\Data\Buza\Logging', '.\Data\Buza\Mappings', '.\data\temp')
     packages       = ('vscode', 'git', 'sql-server-express', 'powerbi', 'sharegate-desktop')
-    repositories   = ('https://github.com/mthacken/PaccarShareGate.git', 'https://github.com/mthacken/PowerShell.git')
+    repositories   = ('https://github.com/RubenJungGitHub/PaccarSPMigration.git', 'https://github.com/RubenJungGitHub/MTHPowershellLib.git')
     modules        = ('pester', 'sqlserver', 'SharePointPnPPowerShell2013')
     extensions     = ( 'ms-vscode.powershell', 'alefragnani.project-manager')
     ModulePathDirs = ("$RepoDir\Powershell\Modules", "$RepoDir\PaccarShareGate\Modules")
     ScriptDirs     = ("$RepoDir\Powershell\scripts")
-    gitname        = 'mthacken'
-    gitemail       = 'martijn@tenhacken.nl'
+    gitname        = 'RubenJungGitHUb'
+    gitemail       = 'ruben.jung@hotmail.com'
     ServerOnline   = $false
 }
 install-artifact @Artifacts

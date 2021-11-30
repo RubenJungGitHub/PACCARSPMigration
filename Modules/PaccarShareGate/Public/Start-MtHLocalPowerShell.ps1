@@ -45,8 +45,9 @@ function Start-MtHLocalPowerShell {
         if ('LocalModules' -in $settings.startup.psobject.properties.name) {
             # re-import local module
             $settings.startup.LocalModules.split(',').Trim() | ForEach-Object {
-                Get-Module $_ | Remove-Module -Force
-                Import-Module -Name $_ -Force -Verbose:$false
+                $InitialScriptLoadFile =  -join($Settings.FilePath.LocalWorkSpaceModule, $_)
+                Get-Module $InitialScriptLoadFile | Remove-Module -Force
+                Import-Module -Name $InitialScriptLoadFile -Force -Verbose:$false
             }         
             Write-Verbose "Reloaded Modules: $($settings.startup.LocalModules)"
         }

@@ -2,7 +2,8 @@
 param()
 
 #initialize
-Start-MtHLocalPowerShell -settingfile "$(Get-MtHGitDirectory)\settings.json" -initsp -Verbose
+#Start-MtHLocalPowerShell -settingfile "$(Get-MtHGitDirectory)\settings.json" -initsp -Verbose
+Start-MtHLocalPowerShell -settingfile "$(Get-MtHGitDirectory)\settings.json" -Verbose
 # open the demo site and fill the Demo Library
 $TestMigrationURL = $Settings.Current.MigrationURLS | Select-Object -First 1
 $script:AbsDemoSiteUrl = ConvertTo-MtHHttpAbsPath -SourceURL $TestMigrationURL.SourceTenantDomain -path $TestMigrationURL.DemoSite[0]

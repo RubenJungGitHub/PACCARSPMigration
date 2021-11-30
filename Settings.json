@@ -2,6 +2,7 @@
     "Validate": true,
     "FilePath": {
         "SettingsFile": "C:\\GITWorkSpace\\BuZa\\MtHPaccarShareGate\\Settings.json",
+        "LocalWorkSpaceModule": "C:\\GITWorkSpace\\Paccar\\PACCARSPMigration\\Modules\\PaccarShareGate\\",
         "Logging": "C:\\Beheer\\Data\\Paccar\\Logging",
         "SGErrorReports": "D:\\Beheer\\ShareGateReports",
         "MUInput": "C:\\Beheer\\Data\\Paccar",
@@ -80,7 +81,7 @@
             "SPVersion": "SharePointOnline",
             "MigrationURLS": [
                 {
-                    "SourceTenantDomain": "rubentesttenant.sharepoint.com",
+                    "SourceTenantDomain": "paccar.sharepoint.com",
                     "DestinationTenantDomain": "paccar.sharepoint.com",
                     "ManagedPath": [
                         "sites"
