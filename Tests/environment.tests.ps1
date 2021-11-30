@@ -60,7 +60,7 @@ Describe 'Environment.tests.ps1: Validate the configuration' -Tag 'Integration' 
             "$(Get-MtHGitDirectory)\Modules" | Should -BeIn $ModulePath
         }
         It '3.5: Powershell Modules should be installed' {
-            $Modules = 'BuzaShareGate', 'Pester', 'ShareGate'
+            $Modules = 'PaccarShareGate', 'Pester', 'ShareGate'
             {
                 Import-Module -Name $Modules -Verbose:$false
             } | Should -Not -Throw

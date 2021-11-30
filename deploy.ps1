@@ -7,12 +7,12 @@ if ($env:COMPUTERNAME -in @('LAPTOP-RDDO0DAV', 'DESKTOP-Q0P52LG')) {
     $OutgoingGitRepo 
     switch ($env:COMPUTERNAME) {
         'LAPTOP-RDDO0DAV' {
-            $IncomingGitRepo = Get-ChildItem -Path 'D:\beheer\software\GitBundles\BuzaSharegateback*.bundle'
-            $OutgoingGitRepo = 'D:\beheer\software\GitBundles\BuzaSharegate.bundle'    
+            $IncomingGitRepo = Get-ChildItem -Path 'D:\beheer\software\GitBundles\PaccarShareGateback*.bundle'
+            $OutgoingGitRepo = 'D:\beheer\software\GitBundles\PaccarShareGate.bundle'    
         }
         'DESKTOP-Q0P52LG' {
-            $IncomingGitRepo = Get-ChildItem -Path 'C:\BuZa\Beheer\software\GitBundles\BuzaSharegateback*.bundle'
-            $OutgoingGitRepo = 'C:\BuZa\Beheer\software\GitBundles\BuzaSharegate.bundle'    
+            $IncomingGitRepo = Get-ChildItem -Path 'C:\BuZa\Beheer\software\GitBundles\PaccarShareGateback*.bundle'
+            $OutgoingGitRepo = 'C:\BuZa\Beheer\software\GitBundles\PaccarShareGate.bundle'    
         }
     }
     Set-Location -Path $(Get-MtHGitDirectory -Error)
@@ -47,8 +47,8 @@ if ($env:COMPUTERNAME -in @('LAPTOP-RDDO0DAV', 'DESKTOP-Q0P52LG')) {
 # push en pull van de Buza Servers
 if ($env:COMPUTERNAME -in @('NLWBUZAAS98', 'NLWBUZAAS96', 'NLWBUZPAS99','NLWBUZPAS95','NLWBUZPAS97')) {
     $extension = $env:COMPUTERNAME.Substring(7, 4)
-    $IncomingGitRepo = 'D:\software\gitbundles\BuzaSharegate.bundle'
-    $OutgoingGitRepo = "D:\software\gitbundles\BuzaSharegateback-$extension.bundle"
+    $IncomingGitRepo = 'D:\software\gitbundles\PaccarShareGate.bundle'
+    $OutgoingGitRepo = "D:\software\gitbundles\PaccarShareGateback-$extension.bundle"
 
     Set-Location -Path $(Get-MtHGitDirectory -Error)
 

@@ -1,13 +1,13 @@
 {
   "FilePath": {
-    "SettingFile": "D:\\Beheer\\BuZaShareGate\\Settings.json",
+    "SettingFile": "D:\\Beheer\\PaccarShareGate\\Settings.json",
     "Logging": "D:\\Beheer\\Data\\Buza\\Logging",
     "MUInput": "D:\\Beheer\\Data\\Buza",
-    "Script": "D:\\Beheer\\BuzaShareGate",
+    "Script": "D:\\Beheer\\PaccarShareGate",
     "TempDocs": "D:\\Beheer\\Data\\Temp",
     "VerifyDocs": "D:\\Beheer\\Data\\Verify",
     "Mappings": "D:\\Beheer\\Data\\Buza\\Mappings",
-    "WordsFile": "D:\\Beheer\\BuZaShareGate\\Tests\\wordsfile.csv"
+    "WordsFile": "D:\\Beheer\\PaccarShareGate\\Tests\\wordsfile.csv"
   },
   "SGErrorReports" : "SGErrorReport",
   "PopulateMUCreationItemCountThreshold" : 200,

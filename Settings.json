@@ -1,7 +1,7 @@
 ﻿{
     "Validate": true,
     "FilePath": {
-        "SettingsFile": "C:\\GITWorkSpace\\BuZa\\MtHBuZaShareGate\\Settings.json",
+        "SettingsFile": "C:\\GITWorkSpace\\BuZa\\MtHPaccarShareGate\\Settings.json",
         "Logging": "D:\\Beheer\\Data\\BuZa\\Logging",
         "SGErrorReports": "D:\\Beheer\\ShareGateReports",
         "MUInput": "D:\\Beheer\\Data\\BuZa",
@@ -9,7 +9,7 @@
         "TempDocs": "D:\\Beheer\\Data\\BuZa\\TempDocs",
         "VerifyDocs": "D:\\Beheer\\Data\\BuZa\\Verify",
         "Mappings": "D:\\Beheer\\Data\\BuZa\\Mappings",
-        "WordsFile": "C:\\GITWorkSpace\\BuZa\\MtHBuZaShareGate\\Tests\\Wordsfile.csv"
+        "WordsFile": "C:\\GITWorkSpace\\BuZa\\MtHPaccarShareGate\\Tests\\Wordsfile.csv"
     },
     "SGErrorReports" : "SGErrorReport",
     "PopulateMUCreationItemCountThreshold" : 10000,
@@ -89,10 +89,6 @@
                     "SitePrefix": "M1-",
                     "DemoSite":[
                      "/sites/TSBuzaDemoSource",
-                     "/sites/TSBuzaDemoSource2",
-                     "/sites/TSBuzaDemoSource3",
-                     "/sites/TSBuzaDemoSource4",
-                     "/sites/TestMySitesSource"
                     ],
                     "DemoList": "Demo"
                 }
@@ -105,11 +101,10 @@
             "ComputerNames": [
                 "DESKTOP-Q0P52LG"
             ],
-            "EncryptedPassword": "01000000d08c9ddf0115d1118c7a00c04fc297eb0100000069ca977c5d50fa4b9e52d4608db41127000000000200000000001066000000010000200000003d66629a5c0543eed35171310454b4fc68f8c2af44181fcd9ce4ac7d64b6ca47000000000e8000000002000020000000becaf88dbc25113511c56fe034c9045fee10633ddcbcc2bb8f42ef217e48151120000000a123134a549af1cd8f153ad6660c55ee789be8e6cc95b90fd12ae51aa4d5573840000000c67a57a2e416d185b4c202b029fe12baa1fd73007e1c43a69eb113e056cfbe6d2dc5f3267572dfe04436f306371d919c3059e6a67ebfe3a38a26a5ed88fc4c45"
         }
     ],
     "StartUp": {
-        "LocalModules": "BuzaSharegate",
+        "LocalModules": "PaccarShareGate",
         "SPModuleVersion": "SharePointPnPPowerShell2013",
         "Verbose": true,
         "RealMigration": true,

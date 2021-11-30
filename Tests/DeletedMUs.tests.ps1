@@ -13,8 +13,8 @@ BeforeAll {
 
  
     
-    (Get-Command -Module BuZaShareGate).name | ForEach-Object {
-        . "$dir\Modules\BuzaShareGate\Public\$_.ps1" 
+    (Get-Command -Module PaccarShareGate).name | ForEach-Object {
+        . "$dir\Modules\PaccarShareGate\Public\$_.ps1" 
     }
     #Determine Source URL's
     $script:DemoList = $Settings.Current.MigrationURLS[0].DemoList

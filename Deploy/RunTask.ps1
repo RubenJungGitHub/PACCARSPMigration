@@ -17,20 +17,20 @@ if ($Null -eq $NextAction -or '' -eq $NextAction) {
     $Nextaction = @('first', 'delta')
 }
 
-Import-Module -Name BuzaSharegate -Verbose:$false
+Import-Module -Name PaccarShareGate -Verbose:$false
 Start-MtHLocalPowerShell -settingfile "$(Get-MtHGitDirectory)\settings.json" -initsp -NodeId $NodeId
-#Start-MtHLocalPowerShell -settingfile 'D:\beheer\BuZaShareGate\settings.json' -initsp -NodeId $NodeId
+#Start-MtHLocalPowerShell -settingfile 'D:\beheer\PaccarShareGate\settings.json' -initsp -NodeId $NodeId
 
-# switch on verbose in the BuzaShareGate Module when a -v flag is given to this function
+# switch on verbose in the PaccarShareGate Module when a -v flag is given to this function
 if ($PSCmdlet.MyInvocation.BoundParameters['Verbose'].IsPresent) {
-    (Get-Module -Name 'BuzaShareGate').SessionState.PSVariable.Set('Global:VerbosePreference', 'Continue' )
+    (Get-Module -Name 'PaccarShareGate').SessionState.PSVariable.Set('Global:VerbosePreference', 'Continue' )
 }
 else {
-    (Get-Module -Name 'BuzaShareGate').SessionState.PSVariable.Set('Global:VerbosePreference', 'SilentlyContinue')
+    (Get-Module -Name 'PaccarShareGate').SessionState.PSVariable.Set('Global:VerbosePreference', 'SilentlyContinue')
 } 
 Write-Verbose 'Verbose is turned on'
 & {
-    # Start-MtHLocalPowerShell -settingfile 'D:\beheer\BuZaShareGate\settings.json' -initsp
+    # Start-MtHLocalPowerShell -settingfile 'D:\beheer\PaccarShareGate\settings.json' -initsp
     New-MtHSQLDatabase | Out-Null # does only create it if there is no database present
     Write-Verbose 'Verbose is still turned on'
     $result = Get-MtHSQLMigUnits -MigUnitId 1

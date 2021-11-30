@@ -45,7 +45,7 @@ $steppingstones = @(
 
 # define main paths
 $steppingstone = $steppingstones | Where-Object { $_.Computername -eq $env:computername }
-$swsource = -join ($MappedDrive, '\Beheer\Software\BuZaShareGate')
+$swsource = -join ($MappedDrive, '\Beheer\Software\PaccarShareGate')
 $gitsource = -join ($MappedDrive, '\Beheer\Software\GitBundles')
 $reportsource = -join ($MappedDrive, '\Beheer\ShareGateReports\', $steppingstone.name)
 $mappingsource = -join ($MappedDrive, '\Beheer\Data\Buza\Mappings')
@@ -64,11 +64,11 @@ Write-Host "ReportSource :'  $reportsource"
 if ($copyinstallationfiles) {
     foreach ($dest in $steppingstone.destinationservers) {
         # kopieer installatie files - houd deze in sync (vanaf Laptop naar Servers)
-        robocopy "$swsource\Nuget" "\\$dest\d$\Software\BuZaShareGate\Nuget" *.nupkg
-        robocopy $swsource "\\$dest\d$\Software\BuZaShareGate" *.exe
-        robocopy $swsource "\\$dest\d$\Software\BuZaShareGate" *.zip
-        robocopy $swsource "\\$dest\d$\Software\BuZaShareGate" *.msi
-        robocopy "$swsource\Extensions" "\\$dest\d$\Software\BuZaShareGate\Extensions" *.vsix
+        robocopy "$swsource\Nuget" "\\$dest\d$\Software\PaccarShareGate\Nuget" *.nupkg
+        robocopy $swsource "\\$dest\d$\Software\PaccarShareGate" *.exe
+        robocopy $swsource "\\$dest\d$\Software\PaccarShareGate" *.zip
+        robocopy $swsource "\\$dest\d$\Software\PaccarShareGate" *.msi
+        robocopy "$swsource\Extensions" "\\$dest\d$\Software\PaccarShareGate\Extensions" *.vsix
         # kopieer mapping files
         robocopy "$mappingsource" "\\$dest\d$\Beheer\Data\Buza\Mappings" *.sgum
     }
@@ -92,15 +92,15 @@ if ($copyreports) {
 foreach ($dest in $steppingstone.destinationservers) {
     # kopieer de git bundle (in en out)
     $extension = $dest.Substring(7, 4)
-    robocopy "\\$dest\d$\software\GitBundles" $gitsource  "buzasharegateback-$extension.bundle" /Move
-    robocopy $gitsource "\\$dest\d$\Software\GitBundles" 'buzasharegate.bundle'
+    robocopy "\\$dest\d$\software\GitBundles" $gitsource  "PaccarShareGateback-$extension.bundle" /Move
+    robocopy $gitsource "\\$dest\d$\Software\GitBundles" 'PaccarShareGate.bundle'
 }
 
 
 # remove de source bundle
-$TempPath = -join ($MappedDrive, '\beheer\software\gitbundles\buzasharegate.bundle')
+$TempPath = -join ($MappedDrive, '\beheer\software\gitbundles\PaccarShareGate.bundle')
 if ((Test-Path -Path $TempPath)) {
-    Write-Host "Source bundle 'buzasharegate.bundle' on $TempPath Deleted!"
+    Write-Host "Source bundle 'PaccarShareGate.bundle' on $TempPath Deleted!"
     Remove-Item -Path $TempPath
 }
 Pause

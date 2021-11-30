@@ -12,11 +12,11 @@ BeforeDiscovery {
 
 BeforeAll {
     Start-MtHLocalPowerShell -settingfile "$(Get-MtHGitDirectory)\Settings.json" -test
-    # load all buzasharegate commands in the local scope, so they can be mocked
-    Get-Module BuzaShareGate | Remove-Module -Force
+    # load all PaccarShareGate commands in the local scope, so they can be mocked
+    Get-Module PaccarShareGate | Remove-Module -Force
     $dir = Get-MtHGitDirectory
-    (Get-Command -Module BuZaShareGate).name | ForEach-Object {
-        . "$dir\Modules\BuzaShareGate\Public\$_.ps1" 
+    (Get-Command -Module PaccarShareGate).name | ForEach-Object {
+        . "$dir\Modules\PaccarShareGate\Public\$_.ps1" 
     } 
     $script:MUCprops = ([MigrationUnitClass]::new().PSObject.properties.name) -ne 'LastStartTime'
     $settings.current.MigrationURLS[0].ManagedPath[0] = 'sites' # this works only when managed path is sites.

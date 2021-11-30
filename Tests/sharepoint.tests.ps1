@@ -12,8 +12,8 @@ BeforeDiscovery {
 Describe 'SharePoint.tests.ps1: Testing the SharePoint Interface' -Tag 'Integration' {
     BeforeAll {
         # check all interactions with SharePoint, including uploading a file to the DemoList in settings.
-        # Get-Module BuzaShareGate | Remove-Module
-        # import-module BuzaShareGate # No mocking, so it can be loaded as a normal module.
+        # Get-Module PaccarShareGate | Remove-Module
+        # import-module PaccarShareGate # No mocking, so it can be loaded as a normal module.
         Start-MtHLocalPowerShell -settingfile "$(Get-MtHGitDirectory)\Settings.json" -test
         $script:skip = !$settings.SQLdetails -or !$settings.SQLdetails.DeleteDB
 

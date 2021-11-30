@@ -65,7 +65,7 @@ if ( Test-Path -Path $testresultdetailpath ) {
 }
 
 # run the unit tests
-$runitems = Get-ChildItem .\Modules\BuzaSharegate\Tests\*.tests.ps1
+$runitems = Get-ChildItem .\Modules\PaccarShareGate\Tests\*.tests.ps1
 if (!!$runitems) {
     #these are only the unit tests
     $resultunit = Invoke-Pester -Script $runitems.fullname -Output Detailed -Verbose:$VerboseSwitch -PassThru 

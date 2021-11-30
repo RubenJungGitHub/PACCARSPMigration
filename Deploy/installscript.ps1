@@ -13,15 +13,15 @@ function install-Local {
     # get the overview by running get-packageprovider.
     # this should be giving: Nuget, 3.0.0 and Powershellget 2.2.5
     # if nuget is not correct: download at: https://www.nuget.org/downloads
-    # get nugetpackagemanager is here: "D:\Beheer\Software\BuZaShareGate\Nuget\Microsoft.PackageManagement.NuGetProvider-2.8.5.208.dll"
+    # get nugetpackagemanager is here: "D:\Beheer\Software\PaccarShareGate\Nuget\Microsoft.PackageManagement.NuGetProvider-2.8.5.208.dll"
     # this should be copied the offline server in: C:\Program Files\PackageManagement\ProviderAssemblies
 
     # so run on offline server, with elevated rights(As Admin):
     new-item -Path "c:\program files\PackageManagement" -ItemType Directory
     new-item -Path "c:\program files\PackageManagement\ProviderAssemblies" -ItemType Directory
-    copy-item -Path "D:\Software\BuzaShareGate\Nuget\Microsoft.PackageManagement.NuGetProvider-2.8.5.208.dll" -Destination "c:\program files\PackageManagement\ProviderAssemblies"
-    Register-PackageSource -Name Nuget.org -Location "D:\Software\Buzasharegate\Nuget" - Providername Nuget
-    Register-PSRepository -Name "Local" -SourceLocation 'D:\Software\BuzaShareGate\Nuget' -InstallationPolicy Trusted
+    copy-item -Path "D:\Software\PaccarShareGate\Nuget\Microsoft.PackageManagement.NuGetProvider-2.8.5.208.dll" -Destination "c:\program files\PackageManagement\ProviderAssemblies"
+    Register-PackageSource -Name Nuget.org -Location "D:\Software\PaccarShareGate\Nuget" - Providername Nuget
+    Register-PSRepository -Name "Local" -SourceLocation 'D:\Software\PaccarShareGate\Nuget' -InstallationPolicy Trusted
     Set-psrepository -name "Local" -installationpolicy "Trusted"
     Install-Module PackageManagement -Force 
     Install-Module Powershellget -Force
@@ -251,10 +251,10 @@ $Artifacts = @{
     RepoDir        = $RepoDir
     dirs           = ('.\data', '.\data\buza', '.\Data\Buza\Logging', '.\Data\Buza\Mappings', '.\data\temp')
     packages       = ('vscode', 'git', 'sql-server-express', 'powerbi', 'sharegate-desktop')
-    repositories   = ('https://github.com/mthacken/BuZaShareGate.git', 'https://github.com/mthacken/PowerShell.git')
+    repositories   = ('https://github.com/mthacken/PaccarShareGate.git', 'https://github.com/mthacken/PowerShell.git')
     modules        = ('pester', 'sqlserver', 'SharePointPnPPowerShell2013')
     extensions     = ( 'ms-vscode.powershell', 'alefragnani.project-manager')
-    ModulePathDirs = ("$RepoDir\Powershell\Modules", "$RepoDir\BuzaShareGate\Modules")
+    ModulePathDirs = ("$RepoDir\Powershell\Modules", "$RepoDir\PaccarShareGate\Modules")
     ScriptDirs     = ("$RepoDir\Powershell\scripts")
     gitname        = 'mthacken'
     gitemail       = 'martijn@tenhacken.nl'
