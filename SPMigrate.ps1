@@ -51,7 +51,7 @@ do {
             Write-Host 'Database Removed.....'
         }
         'Register All Sites and Lists' {
-            Populate-RJMUsFromSourceFile
+            Invoke-RJMUsFromSourceFile
             #Register-MtHAllSitesLists 
         }
         'Register Set of Sites and Lists' {

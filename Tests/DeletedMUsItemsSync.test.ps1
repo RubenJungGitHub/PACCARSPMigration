@@ -28,7 +28,6 @@ BeforeAll {
     $script:RelTargetDemoListUrl = $RelSourceDemoListUrl -replace $SourceSiteName, $TargetSiteName
     $script:AbsTargetDemoListUrl = -Join ($script:AbsTargetDemoSiteUrl, '/', $DemoList)
     
-
     #Define boudaries
     $script:MinRandomFileCount = 10 
     $script:MaxRandomFileCount = 20

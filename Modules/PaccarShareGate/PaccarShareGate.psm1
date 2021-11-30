@@ -5,6 +5,7 @@ $Private = @( Get-ChildItem -Path $PSScriptRoot\Private\*.ps1 -ErrorAction Silen
 #Dot source the files
 Foreach ($import in @($Public + $Private)) {
     Try {
+          Write-Host "Import module : " $Import.Name 
         . $import.fullname
     }
     Catch {
