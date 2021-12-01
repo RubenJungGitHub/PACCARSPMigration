@@ -3,47 +3,50 @@ function Register-MtHAllSitesLists {
     [CmdletBinding()]
     param(
         [parameter(Mandatory = $false)][string]$filter, 
+        [parameter(Mandatory = $True)][MigrationUnitClass[]]$MUsINSP, 
         [parameter(Mandatory = $false)][String[]]$setofsites
     )
     $i = 0
 
+    $SiteCollections = $MUsINSP | Group-Object -Property DestinationURL | Select-Object -Property Name
+
+    #To do group by  TargetURL ???
     # get the sites where Admin rights are granted
     if (!$filter) {
         if (!$setofsites) {
-            $adminrightsites = Test-MtHAdminRightsAllSites
+            $adminrightsites = Test-MtHAdminRightsAllSites -SiteCollections $SiteCollections
         }
         else {
-            $adminrightsites = Test-MtHAdminRightsAllSites | Where-Object { $_ -in $setofsites }   
+            $adminrightsites = Test-MtHAdminRightsAllSites -SiteCollections $SiteCollections | Where-Object { $_ -in $setofsites }   
         }
     }
     else {
-        $adminrightsites = Test-MtHAdminRightsAllSites | Where-Object { $_ -like "*$filter" } 
+        $adminrightsites = Test-MtHAdminRightsAllSites -SiteCollections $SiteCollections | Where-Object { $_ -like "*$filter" } 
     }
-    
-    $totalsites = $adminrightsites.Count
-    Write-Verbose "Total amount of sites to register: $totalsites"
+    #Temp
+    $totalsites = $MUsINSP.Count
 
-    foreach ($SiteCollection in $adminrightsites) {
+
+   Write-Verbose "Total amount of sites to register: $totalsites"
+   $MUsINSP| ForEach-Object { $_.validate() }
+    foreach ($MUinSP in $MUsINSP) {
         Write-Progress -Activity 'Site Scan' -Status "$i of $totalsites Complete" -PercentComplete $($i * 100 / $totalsites)
         
         # Get all possible Migration Units of the SiteCollection and put them in a List
         try {
-            $MUsinSP = Get-MtHOneSPSiteLists -Url $siteCollection
-            $MUsinSP | ForEach-Object { $_.validate() }
+            #$MUsinSP = Get-MtHOneSPSiteLists -Url $siteCollection
             
             # Get all registered Migration Units of a sitecollection from the SQL database, MU List
-            $MUsinSQL = Get-MtHSQLMigUnits -Url $SiteCollection
+            $MUinSQL = Get-MtHSQLMigUnits -CompleteSourceUrl $MUinSP.CompleteSourceURL
             
             # is the MU in SharePoint new?
-            if ($MUsinSQL.Count -eq 0) {
-                foreach ($MU in $MUsinSP) {
-                    New-MtHSQLMigUnit -Item $MU
-                }
+            if ($MUinSQL.Count -eq 0) {
+                    New-MtHSQLMigUnit -Item $MUinSP
             }
             
             # no, are there any differences in site MUs?
             else {
-                $Differences = Compare-Object -ReferenceObject $MUsinSQL -DifferenceObject $MUsinSP -Property SourceUrl, ListUrl
+                $Differences = Compare-Object -ReferenceObject $MUinSQL -DifferenceObject $MUinSP -Property DestinationURL
                 foreach ($Diff in $Differences) {
                     
                     # add newly found objects in SP as MU in the database
@@ -69,28 +72,11 @@ function Register-MtHAllSitesLists {
                         Update-MtHSQLMigUnitStatus -Item $SQLObject
                     }
                 }
-
-                # are there any differences in list itemcount?
-                $DifferencesItemCount = Compare-Object -ReferenceObject $MUsinSQL -DifferenceObject $MUsinSP -Property SourceUrl, ListUrl, ItemCount
-                foreach ($Diff in $DifferencesItemCount) {
-                    if ($diff.SideIndicator -eq '=>' ) {
-
-                        #Only get the item from SQL where itemcount deviates 
-                        $MUinSQL = $MUsinSQL | Where-Object { ($_.SourceUrl -eq $diff.SourceUrl) -and ($_.ListUrl -eq $diff.ListUrl) -and ($_.ItemCount -ne $diff.ItemCount) }
-                        
-                        #Get the correct diffobject for update . This is required to prevent updates of itemcount for all newly added MUs in the section above
-                        $SPObject = $MUsinSP | Where-Object { ($_.SourceURL -eq $MUinSQL.SourceUrl) -and ($_.ListURL -eq $MUinSQL.ListUrl) } 
-                        if ($null -ne $SPObject) {
-                            $SPObject.MigUnitId = $MUinSQL.MigUnitId
-                            Update-MtHSQLMigUnitStatus -Item $SPObject -updateitemcount
-                        }
-                    }
-                }
             } 
         }
         catch {
             # this occurs when the sitecollection does not exist anymore ???
-            $ErrorMessage = $_ | Out-String
+            
             $ErrorMessage += 'Error occured on following object:'
             $ErrorMessage += $siteCollection
             Write-Error $ErrorMessage

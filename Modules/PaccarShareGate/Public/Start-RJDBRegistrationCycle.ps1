@@ -4,10 +4,18 @@ function Start-RJDBRegistrationCycle {
     [CmdletBinding()]
     $FileBrowser = New-Object System.Windows.Forms.OpenFileDialog -Property @{
         Multiselect      = $false # Multiple files can be chosen
-        Filter           = 'CSV (*.csv)|*.csv; XLS (*.XLSX)| *.xlsx' # Specified file types
+        Filter           = 'CSV (*.csv)|*.csv' # Specified file types
+        #Filter           = 'XLS (*.XLSX)| *.xlsx' # Specified file types
         InitialDirectory = $settings.FilePath.MUInput
     }
     [void]$FileBrowser.ShowDialog()
+        #$objExcel = new-object -comobject excel.application 
+        #$MUWorkBook = $objExcel.Workbooks.Open($FileBrowser.FileNames) 
+        #ForEach($MUWorkSheet in $MUWorkBook.Worksheets)
+        #{
+        #        Write-Host $MUWorkSheet
+
+        #}
 
     If ($FileBrowser.FileNames -like '*\*') {
         #Region construct form 
@@ -16,16 +24,17 @@ function Start-RJDBRegistrationCycle {
         #Group MigUnitIDSPerSourceURL and assign NodeID
         $LVItems = [System.Collections.ArrayList]@() 
         $CSVItems = Import-Csv -Path $FileBrowser.FileName -Delimiter ';' 
+        $CSVItems = Resolve-RJCSVItems $CSVItems
         $SQLAllItems = Get-MtHSQLMigUnits -all 
         $SQLItems = $SQLAllItems | Where-Object { $_.MigUnitID -in $CSVItems.MigUnitID } | Group-Object -Property SourceURL
         #Show Nodeselector form  for all grouped SourceURLS 
         $frmNodeSelector = New-Object system.Windows.Forms.Form
-        $btnActivate = New-Object System.Windows.Forms.Button
-        $btnActivate.Location = New-Object System.Drawing.Size(1000, 900)
-        $btnActivate.Size = New-Object System.Drawing.Size(120, 23)
-        $btnActivate.Text = 'Activate'
-        $btnActivate.DialogResult = [System.Windows.Forms.DialogResult]::OK
-        $frmNodeSelector.Controls.Add($btnActivate)
+        $btnProcess = New-Object System.Windows.Forms.Button
+        $btnProcess.Location = New-Object System.Drawing.Size(1000, 900)
+        $btnProcess.Size = New-Object System.Drawing.Size(120, 23)
+        $btnProcess.Text = 'Process'
+        $btnProcess.DialogResult = [System.Windows.Forms.DialogResult]::OK
+        $frmNodeSelector.Controls.Add($btnProcess)
         $btnCancel = New-Object System.Windows.Forms.Button
         $btnCancel.Location = New-Object System.Drawing.Size(1150, 900)
         $btnCancel.Size = New-Object System.Drawing.Size(120, 23)
@@ -57,17 +66,17 @@ function Start-RJDBRegistrationCycle {
         [void]$LVSource.Columns.Add('SourceURL')
         $LVSource.Columns[5].Width = 890
         foreach ($SQLItem in  $SQLItems) {
-            $MUToActivateItemCount = 0
+            $MUToProcessItemCount = 0
             $MUTotalItems = 0
             $MUTotalItemsActive = 0
             $LVi = New-Object System.Windows.Forms.ListViewItem($SQLItem.Group[0].NodeId)
-            $SQLItem.Group | ForEach-Object { $MUToActivateItemCount += $_.ItemCount }
+            $SQLItem.Group | ForEach-Object { $MUToProcessItemCount += $_.ItemCount }
             $SQLAllSourceURLItems = $SQLAllItems |  Where-Object { $_.sourceurl -in $SQLItem.Group[0].SourceUrl }
             $SQLAllActiveSourceUrlItems = $SQLAllSourceURLItems | Where-Object { $_.MUStatus -eq 'Active' }
             $SQLAllSourceURLItems | ForEach-Object { $MUTotalItems += $_.ItemCount }
             $SQLAllActiveSourceUrlItems | ForEach-Object { $MUTotalItemsActive += $_.ItemCount }
             $CSVItems | Where-Object {$_.MigUnitID -in $SQLAllSourceURLItems.MigUnitID -and $SQLAllSourceURLItems.SourceURL -eq  $SQLItem.Group[0].SourceUrl} | ForEach-Object { $_.NodeID = $SQLItem.Group[0].NodeId}
-            [void]$LVI.SubItems.Add($MUToActivateItemCount)
+            [void]$LVI.SubItems.Add($MUToProcessItemCount)
             [void]$LVI.SubItems.Add($MUTotalItemsActive)
             [void]$LVI.SubItems.Add($MUTotalItems)
             [void]$LVI.SubItems.Add($SQLItem.Count)

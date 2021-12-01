@@ -5,6 +5,7 @@ function Get-MtHSQLMigUnits {
     Param(
         
         [parameter(mandatory = $false)] [String] $Url,
+        [parameter(mandatory = $false)] [String] $CompleteSourceUrl,
         [parameter(mandatory = $false)] [int] $MigUnitId,
         [switch] $all
     )
@@ -12,23 +13,31 @@ function Get-MtHSQLMigUnits {
     if (!$All) {
         if ($MigUnitId) {
             $sql = @"
-    SELECT EnvironmentName, MigUnitId, SourceUrl, DestinationUrl, ListUrl, ListTitle, ListId, ListTemplate, ShareGateCopySettings, Scope, MUStatus, NodeId, ItemCount, NextAction
+    SELECT EnvironmentName, MigUnitId, SourceUrl, DestinationUrl, ListUrl, ListTitle, ListId,  ShareGateCopySettings, Scope, MUStatus, NodeId, NextAction
     FROM MigrationUnits
     WHERE MigUnitId = $MigUnitId;
 "@
         }
-        else {
+        elseif ($URL) {
             $sql = @"
-    SELECT EnvironmentName, MigUnitId, SourceUrl, DestinationUrl, ListUrl, ListTitle, ListId, ListTemplate, ShareGateCopySettings, Scope, MUStatus, NodeId, ItemCount, NextAction
+    SELECT EnvironmentName, MigUnitId, SourceUrl, DestinationUrl, ListUrl, ListTitle, ListId,  ShareGateCopySettings, Scope, MUStatus, NodeId, NextAction
     FROM MigrationUnits
     WHERE SourceUrl = '$Url'
+    ORDER BY MigUnitId;
+"@
+        }
+        elseif ($CompleteSourceURL) {
+            $sql = @"
+    SELECT EnvironmentName, MigUnitId, SourceUrl, DestinationUrl, ListUrl, ListTitle, ListId,  ShareGateCopySettings, Scope, MUStatus, NodeId, NextAction
+    FROM MigrationUnits
+    WHERE CompleteSourceURL= '$CompleteSourceUrl'
     ORDER BY MigUnitId;
 "@
         }
     }
     else {
         $sql = @'
-        SELECT EnvironmentName, MigUnitId, SourceUrl, DestinationUrl, ListUrl, ListTitle, ListId, ListTemplate, ShareGateCopySettings, Scope, MUStatus, NodeId, ItemCount, NextAction
+        SELECT EnvironmentName, MigUnitId, SourceUrl, DestinationUrl, ListUrl, ListTitle, ListId,  ShareGateCopySettings, Scope, MUStatus, NodeId, NextAction
         FROM MigrationUnits
         ORDER BY MigUnitId;
 '@

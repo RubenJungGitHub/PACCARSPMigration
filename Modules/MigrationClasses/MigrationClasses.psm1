@@ -1,10 +1,13 @@
 class MigrationUnitClass {
+    [string]$SourceSC
     [string]$EnvironmentName
+    [string]$CompleteSourceUrl
     [string]$SourceUrl
     [string]$DestinationUrl
     [string]$ListUrl = ''
     [string]$ListTitle = ''
     [string]$ListId
+    [bool]$UniquePermissions
     [int]$ListTemplate
     [int]$ItemCount
     [string]$ShareGateCopySettings = ''
@@ -19,16 +22,10 @@ class MigrationUnitClass {
     }
     # methods
     Validate() {
-        $this.DestinationUrl = ConvertTo-MtHDestinationUrl -SourceUrl $this.sourceUrl  
+        #$this.DestinationUrl = ConvertTo-MtHDestinationUrl -SourceUrl $this.sourceUrl  
         if ($this.Scope -notin ('list', 'site')) {
             throw 'Scope invalid'
         }
-        if ($this.Scope -eq 'list') {       
-            $this.ListUrl = ConvertTo-MtHHttpRelPath -SourceUrl $this.sourceurl -path $this.ListUrl -webapp -startingslash
-        }
-        if ($this.scope -eq 'site' -and $this.ListUrl) {
-            throw 'ListURl should be null or empty for a site MU'
-        }       
         if (!$this.MUStatus) {
             $this.MUStatus = 'new'
         }

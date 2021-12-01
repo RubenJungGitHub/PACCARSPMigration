@@ -1,22 +1,23 @@
 ﻿{
     "Validate": true,
     "FilePath": {
-        "SettingsFile": "C:\\GITWorkSpace\\BuZa\\MtHPaccarShareGate\\Settings.json",
-        "LocalWorkSpaceModule": "C:\\GITWorkSpace\\Paccar\\PACCARSPMigration\\Modules\\PaccarShareGate\\",
+        "SettingsFile": "C:\\GITWorkSpace\\Paccar\\PACCARSPMigration\\Settings.json",
         "Logging": "C:\\Beheer\\Data\\Paccar\\Logging",
         "SGErrorReports": "D:\\Beheer\\ShareGateReports",
-        "MUInput": "C:\\Beheer\\Data\\Paccar",
-        "Script": "C:\\Beheer\\Data\\Paccar\\Scripts",
-        "TempDocs": "C:\\Beheer\\Data\\Paccar\\TempDocs",
-        "VerifyDocs": "C:\\Beheer\\Data\\Paccar\\Verify",
-        "Mappings": "C:\\Beheer\\Data\\Paccar\\Mappings",
-        "WordsFile": "C:\\GITWorkSpace\\BuZa\\MtHPaccarShareGate\\Tests\\Wordsfile.csv"
+        "MUInput": "C:\\Beheer\\Data\\Paccar\\MUInput",
+        "Mappings": "C:\\Beheer\\Data\\Paccar\\Mappings"
     },
-    "SGErrorReports" : "SGErrorReport",
-    "PopulateMUCreationItemCountThreshold" : 10000,
+    "SGErrorReports": "SGErrorReport",
+    "PopulateMUCreationItemCountThreshold": 10000,
     "Environment": "o365",
     "NodeId": 1,
     "MaxNodeId": 3,
+    "SourceURLIgnoreSections": [
+            "Lists",
+            "Lijsten",
+            "Document libraries",
+            "Document bibliotheken"
+    ],
     "DatabaseDetails": [
         {
             "Name": "O365",
@@ -28,42 +29,6 @@
             "Name": "TestonO365",
             "Instance": ".\\SQLExpress",
             "Database": "PACCARSQLTestO365",
-            "DeleteDB":true
-        },
-        {
-            "Name": "AEF",
-            "Instance": ".\\SQLExpress",
-            "Database": "PACCARSQLAEF",
-            "DeleteDB": true
-        },
-        {
-            "Name": "TestonAEF",
-            "Instance": ".\\SQLExpress",
-            "Database": "PACCARSQLTestAEF",
-            "DeleteDB": true
-        },
-        {
-            "Name": "AEF2",
-            "Instance": "NLWBUZAAS98\\SQLExpress,1433",
-            "Database": "PACCARSQLAEF",
-            "DeleteDB": true
-        },
-        {
-            "Name": "TestonAEF2",
-            "Instance": "NLWBUZAAS98\\SQLExpress,1433",
-            "Database": "PACCARSQLTestAEF",
-            "DeleteDB": true
-        },
-        {
-            "Name": "Accept",
-            "Instance": "NLWBUZACN11\\SHAREPOINT,49002",
-            "Database": "SGABUZ_ShareGate_Migration",
-            "DeleteDB": false
-        },
-        {
-            "Name": "TestonAccept",
-            "Instance": "NLWBUZAAS98\\SQLExpress,1433",
-            "Database": "PACCARSQLTestAccept",
             "DeleteDB": true
         },
         {
@@ -87,8 +52,8 @@
                         "sites"
                     ],
                     "SitePrefix": "M1-",
-                    "DemoSite":[
-                     "/sites/TSBuzaDemoSource"
+                    "DemoSite": [
+                        "/sites/TSBuzaDemoSource"
                     ],
                     "DemoList": "Demo"
                 }
@@ -106,7 +71,7 @@
     "StartUp": {
         "LocalModules": "PaccarShareGate",
         "SPModuleVersion": "SharePointPnPPowerShell2013",
-        "Verbose": true,
+        "Verbose": false,
         "RealMigration": true,
         "PSVersion": "5.1",
         "PesterVersion": "5.2.2",

@@ -14,90 +14,90 @@ function Invoke-MtHSQLquery {
             # query D1 : Select all migration units to check last updated time ( Copy Detection cycle)
             # if never checked LastStartTime = $null
             $sql = @'
-            SELECT U.MigUnitId AS MigUnitId, EnvironmentName, SourceUrl, DestinationUrl, ListUrl, ListTitle, ListId, ListTempLate, ShareGateCopySettings, Scope, MUStatus, NodeId, NextAction, MAX(StartTime) AS LastStartTime
+            SELECT U.MigUnitId AS MigUnitId, EnvironmentName, CompleteSourceUrl, SourceUrl, DestinationUrl, ListUrl, ListTitle, ListId,  ShareGateCopySettings, Scope, MUStatus, NodeId, NextAction, MAX(StartTime) AS LastStartTime
             FROM MIgrationUnits AS U
             LEFT OUTER JOIN
             MigrationRuns AS R
             ON U.MigUnitId = R.MigUnitId
             WHERE (U.NextAction = 'none' AND (U.MUStatus = 'active' OR U.MUStatus = 'fake'))
-            GROUP BY U.MigUnitId, EnvironmentName, SourceUrl, DestinationUrl, ListUrl, ListTitle, ListId, ListTemplate, ShareGateCopySettings, Scope, MUStatus, NodeId, NextAction
+            GROUP BY U.MigUnitId, EnvironmentName, CompleteSourceUrl, SourceUrl, DestinationUrl, ListUrl, ListTitle, ListId,  ShareGateCopySettings, Scope, MUStatus, NodeId, NextAction
             ORDER BY SourceURL;
 '@
         }
         'E-ALLANDFAKE' {
             # Query E1 : Select all migrations to do
             $sql = @"
-            SELECT U.MigUnitId AS MigUnitId, EnvironmentName, SourceUrl, DestinationUrl, ListUrl, ListTitle, ListId, ListTemplate, ShareGateCopySettings, Scope, MUStatus, NodeId, NextAction, MAX(StartTime) AS LastStartTime
+            SELECT U.MigUnitId AS MigUnitId, EnvironmentName, CompleteSourceUrl, SourceUrl, DestinationUrl, ListUrl, ListTitle, ListId,  ShareGateCopySettings, Scope, MUStatus, NodeId, NextAction, MAX(StartTime) AS LastStartTime
             FROM MIgrationUnits AS U
             LEFT OUTER JOIN
             MigrationRuns AS R
             ON U.MigUnitId = R.MigUnitId
             WHERE (U.NextAction IN ('first','delta') AND U.NodeId = $($settings.NodeId) AND (U.MUStatus = 'Active' OR U.MUStatus = 'Fake') AND (R.Result <> 'started' OR  R.Result IS NULL))
-            GROUP BY U.MigUnitId, EnvironmentName, SourceUrl, DestinationUrl, ListUrl, ListTitle, ListId, ListTemplate, ShareGateCopySettings, Scope, MUStatus, NodeId, NextAction
+            GROUP BY U.MigUnitId, EnvironmentName, CompleteSourceUrl, SourceUrl, DestinationUrl, ListUrl, ListTitle, ListId,  ShareGateCopySettings, Scope, MUStatus, NodeId, NextAction
             ORDER BY SourceURL;
 "@
         }
         'E-ALL' {
             # Query E1 : Select all migrations to do
             $sql = @"
-            SELECT U.MigUnitId AS MigUnitId, EnvironmentName, SourceUrl, DestinationUrl, ListUrl, ListTitle, ListId, ListTemplate, ShareGateCopySettings, Scope, MUStatus, NodeId, NextAction, MAX(StartTime) AS LastStartTime
+            SELECT U.MigUnitId AS MigUnitId, EnvironmentName, CompleteSourceUrl, SourceUrl, DestinationUrl, ListUrl, ListTitle, ListId,  ShareGateCopySettings, Scope, MUStatus, NodeId, NextAction, MAX(StartTime) AS LastStartTime
             FROM MIgrationUnits AS U
             LEFT OUTER JOIN
             MigrationRuns AS R
             ON U.MigUnitId = R.MigUnitId
             WHERE (U.NextAction IN ('first','delta') AND U.NodeId = $($settings.NodeId) AND U.MUStatus = 'Active' AND (R.Result <> 'started' OR  R.Result IS NULL))
-            GROUP BY U.MigUnitId, EnvironmentName, SourceUrl, DestinationUrl, ListUrl, ListTitle, ListId, ListTemplate, ShareGateCopySettings, Scope, MUStatus, NodeId, NextAction
+            GROUP BY U.MigUnitId, EnvironmentName, CompleteSourceUrl, SourceUrl, DestinationUrl, ListUrl, ListTitle, ListId,  ShareGateCopySettings, Scope, MUStatus, NodeId, NextAction
             ORDER BY SourceURL;
 "@
         }
         'E-FAKE' {
             # Query E1 : Select all migrations to do
             $sql = @"
-            SELECT U.MigUnitId AS MigUnitId, EnvironmentName, SourceUrl, DestinationUrl, ListUrl, ListTitle, ListId, ListTemplate, ShareGateCopySettings, Scope, MUStatus, NodeId, NextAction, MAX(StartTime) AS LastStartTime
+            SELECT U.MigUnitId AS MigUnitId, EnvironmentName, CompleteSourceUrl, SourceUrl, DestinationUrl, ListUrl, ListTitle, ListId,  ShareGateCopySettings, Scope, MUStatus, NodeId, NextAction, MAX(StartTime) AS LastStartTime
             FROM MIgrationUnits AS U
             LEFT OUTER JOIN
             MigrationRuns AS R
             ON U.MigUnitId = R.MigUnitId
             WHERE (U.NextAction IN ('first','delta') AND U.NodeId = $($settings.NodeId) AND U.MUStatus = 'Fake' AND (R.Result <> 'started' OR  R.Result IS NULL))
-            GROUP BY U.MigUnitId, EnvironmentName, SourceUrl, DestinationUrl, ListUrl, ListTitle, ListId, ListTemplate, ShareGateCopySettings, Scope, MUStatus, NodeId, NextAction
+            GROUP BY U.MigUnitId, EnvironmentName, CompleteSourceUrl, SourceUrl, DestinationUrl, ListUrl, ListTitle, ListId,  ShareGateCopySettings, Scope, MUStatus, NodeId, NextAction
             ORDER BY SourceURL;
 "@
         }
         'R-ALL' {
             # Query R1 : Select all migration Units to be removed (LISTS ONLY)
             $sql = @'
-            SELECT U.MigUnitId AS MigUnitId, EnvironmentName, SourceUrl, DestinationUrl, ListUrl, ListTitle, ListId, ListTemplate, ShareGateCopySettings, Scope, MUStatus, NextAction, MAX(StartTime) AS LastStartTime
+            SELECT U.MigUnitId AS MigUnitId, EnvironmentName, CompleteSourceUrl, SourceUrl, DestinationUrl, ListUrl, ListTitle, ListId,  ShareGateCopySettings, Scope, MUStatus, NextAction, MAX(StartTime) AS LastStartTime
             FROM MIgrationUnits AS U
             LEFT OUTER JOIN
             MigrationRuns AS R
             ON U.MigUnitId = R.MigUnitId
             WHERE (U.Scope = 'list' AND U.NextAction = 'delete' AND U.MUStatus = 'notfound' AND ((R.Result <> 'started' AND  R.Result <> 'deleted') OR  R.Result IS NULL))
-            GROUP BY U.MigUnitId, EnvironmentName, SourceUrl, DestinationUrl, ListUrl, ListTitle, ListId, ListTemplate, ShareGateCopySettings, Scope, MUStatus, NextAction
+            GROUP BY U.MigUnitId, EnvironmentName, CompleteSourceUrl, SourceUrl, DestinationUrl, ListUrl, ListTitle, ListId,  ShareGateCopySettings, Scope, MUStatus, NextAction
             ORDER BY SourceURL;
 '@
         }
         'R-SINGLE' {
             # Query R2 : Select single migrationunit deletion run status (LISTS ONLY). This to prevent repeated deletions when new site registration run is executed: DOUBLE CHECK!!!!
             $sql = @"
-            SELECT U.MigUnitId AS MigUnitId, EnvironmentName, SourceUrl, DestinationUrl, ListUrl, ListTitle, ListId, ListTemplate, ShareGateCopySettings, Scope, MUStatus, NextAction, MAX(StartTime) AS LastStartTime, R.Result
+            SELECT U.MigUnitId AS MigUnitId, EnvironmentName, CompleteSourceUrl, SourceUrl, DestinationUrl, ListUrl, ListTitle, ListId,  ShareGateCopySettings, Scope, MUStatus, NextAction, MAX(StartTime) AS LastStartTime, R.Result
             FROM MIgrationUnits AS U
             LEFT OUTER JOIN
             MigrationRuns AS R
             ON U.MigUnitId = R.MigUnitId
             WHERE (U.Scope = 'list' AND U.MUStatus = 'notfound' AND U.MigUnitId = $ItemNr AND (R.Result = 'deleted'))
-            GROUP BY U.MigUnitId, EnvironmentName, SourceUrl, DestinationUrl, ListUrl, ListTitle, ListId, ListTemplate, ShareGateCopySettings, Scope, MUStatus, NextAction, R.Result;
+            GROUP BY U.MigUnitId, EnvironmentName, CompleteSourceUrl, SourceUrl, DestinationUrl, ListUrl, ListTitle, ListId,  ShareGateCopySettings, Scope, MUStatus, NextAction, R.Result;
 "@
         }
         'R-LISTITEMS' {
             # Query R3 : Get all active lirary MU's  for item level deletion where a Delta run has taken place (Last occurence)
             $sql = @"
-            SELECT TOP 1  U.MigUnitId, EnvironmentName, SourceUrl, DestinationUrl, ListUrl, ListTitle, ListId, ListTemplate, ShareGateCopySettings, Scope, MUStatus, NextAction, R.MigrationType, R.StartTime
+            SELECT TOP 1  U.MigUnitId, EnvironmentName, CompleteSourceUrl, SourceUrl, DestinationUrl, ListUrl, ListTitle, ListId,  ShareGateCopySettings, Scope, MUStatus, NextAction, R.MigrationType, R.StartTime
             FROM MIgrationUnits U
             LEFT OUTER JOIN
             MigrationRuns AS R
             ON U.MigUnitId = R.MigUnitId
             WHERE (Scope = 'list' AND MUStatus = 'active' AND NodeId = $($settings.NodeId) And R.MigrationType = 'delta')
-            ORDER BY SourceUrl, R.StartTime DESC;
+            ORDER BY CompleteSourceUrl, SourceUrl, R.StartTime DESC;
 "@
         }
         'DistributeNodes' {
@@ -129,7 +129,7 @@ function Invoke-MtHSQLquery {
             $NodeId = $settings.NodeId
             $sql = @"
             INSERT INTO MigrationUnits
-    (EnvironmentName, SourceUrl, DestinationUrl, ListUrl, ShareGateCopySettings, Scope, MUStatus, NodeId, NextAction, CreationTime)
+    (EnvironmentName, CompleteSourceUrl, SourceUrl, DestinationUrl, ListUrl, ShareGateCopySettings, Scope, MUStatus, NodeId, NextAction, CreationTime)
 VALUES
     ('o365', 'https://mock.sharepoint.com/sites/input1', 'https://mock.sharepoint.com/sites/M1-input1', '', '', 'site', 'new', 1, 'none', SYSDATETIME()),
     ('o365', 'https://mock.sharepoint.com/sites/input1', 'https://mock.sharepoint.com/sites/M1-input1', '/sites/input1/shared docs', '', 'list', 'notfound', $NodeId, 'none', SYSDATETIME()),

@@ -2,13 +2,15 @@ CREATE TABLE MigrationUnits
 (
     EnvironmentName VARCHAR(10) NOT NULL
         CHECK (EnvironmentName IN ('o365','aef','acceptance','production')),
+    SourceSC VARCHAR(400) NOT NULL,
+    CompleteSourceUrl VARCHAR(400) NOT NULL,
     SourceUrl VARCHAR(400) NOT NULL,
     DestinationUrl VARCHAR(400) NOT NULL,
     ListUrl VARCHAR(400) NULL,
     ListTitle NVARCHAR(400) NULL,
     ListID VARCHAR(400) NULL,
-    ListTemplate INT NULL,
-    ShareGateCopySettings VARCHAR(40) NOT NULL,
+    UniquePermissions BIT,
+    ShareGateCopySettings VARCHAR(400) NULL,
     Scope VARCHAR(10) NOT NULL
         CHECK (Scope IN ('list','site')),
     MUStatus VARCHAR(10) NOT NULL
@@ -17,7 +19,6 @@ CREATE TABLE MigrationUnits
         CHECK ( NextAction IN ('none','first','delta','delete')),
     NodeId INT NULL,
     CreationTime DATETIME2(0) NOT NULL,
-    ItemCount INT NULL,
     MigUnitId INT IDENTITY(1,1) NOT NULL PRIMARY KEY
 );
 
