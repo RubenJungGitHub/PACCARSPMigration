@@ -3,7 +3,8 @@ function Update-MtHSQLMigUnitStatus {
     Param(     
         [parameter(mandatory = $true)] [PSCustomObject] $Item,
         [switch]$updateitemcount,
-        [switch]$UpdateDestination
+        [switch]$UpdateDestination,
+        [switch]$updateListTitle
     )
     #query to update an entry in the MigrationUnits Table
     if ($updateitemcount) {
@@ -17,6 +18,13 @@ function Update-MtHSQLMigUnitStatus {
         $sql = @"
         UPDATE MigrationUnits
         SET DestinationUrl = '$($Item.DestinationUrl)'
+        WHERE MigUnitId = $($Item.MigUnitId);
+"@     
+    }
+    elseif ($updateListTitle) {
+        $sql = @"
+        UPDATE MigrationUnits
+        SET ListTitle = '$($Item.ListTitle)'
         WHERE MigUnitId = $($Item.MigUnitId);
 "@     
     }

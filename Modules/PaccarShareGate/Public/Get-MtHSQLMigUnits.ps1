@@ -13,7 +13,7 @@ function Get-MtHSQLMigUnits {
     if (!$All) {
         if ($MigUnitId) {
             $sql = @"
-    SELECT EnvironmentName, MigUnitId, SourceUrl, DestinationUrl, ListUrl, ListTitle, ListId,  ShareGateCopySettings, Scope, MUStatus, NodeId, NextAction
+    SELECT EnvironmentName, MigUnitId, SourceUrl, DestinationUrl, DuplicateTargetLibPrefix, ListUrl, ListTitle, ListId,  ShareGateCopySettings, Scope, MUStatus, NodeId, NextAction
     FROM MigrationUnits
     WHERE MigUnitId = $MigUnitId;
 "@

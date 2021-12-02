@@ -4,16 +4,28 @@ function Invoke-MtHSQLquery {
     [CmdletBinding()]
     Param(
         
-        [parameter(mandatory = $true)] [ValidateSet('D-ALL', 'D-FIRST', 'D-DELTA', 'E-ALLANDFAKE', 'E-ALL', 'E-FAKE', 'E-START', 'R-ALL', 'R-SINGLE', 'R-LISTITEMS', 'T-FillDBforTest', 'DistributeNodes', 'LogMigrationProgress')][String] $QueryName,
+        [parameter(mandatory = $true)] [ValidateSet('D-ALL', 'D-FIRST', 'D-DELTA', 'E-ALLANDFAKE', 'E-ALL', 'E-FAKE', 'E-START', 'R-ALL', 'R-SINGLE', 'R-LISTITEMS', 'T-FillDBforTest', 'DistributeNodes', 'LogMigrationProgress', 'C-MUSC','CHECKDUPLICATETARGET')][String] $QueryName,
         [parameter(mandatory = $false)] [int] $ItemNr,
         [parameter(mandatory = $false)] [PSObject] $SiteCollection,
         [switch]$NoResolveMUClass
     )
     Switch ($QueryName) {
+        'C-MUSC' {
+            # query C1 : Clear all MUs from MigrationUnits where TargetURL macthes (After reimport)
+            $sql = @"
+            Delete from MigrationUnits where DestinationURL = '$($SiteCollection)'
+"@
+        }
+        'CHECKDUPLICATETARGET' {
+            # query C1 : Clear all MUs from MigrationUnits where TargetURL macthes (After reimport)
+            $sql = @"
+            SELECT MigUnitId AS MigUnitId 
+"@
+        }
         'D-ALL' {
             # query D1 : Select all migration units to check last updated time ( Copy Detection cycle)
             # if never checked LastStartTime = $null
-            $sql = @'
+            $sql = @"
             SELECT U.MigUnitId AS MigUnitId, EnvironmentName, CompleteSourceUrl, SourceUrl, DestinationUrl, ListUrl, ListTitle, ListId,  ShareGateCopySettings, Scope, MUStatus, NodeId, NextAction, MAX(StartTime) AS LastStartTime
             FROM MIgrationUnits AS U
             LEFT OUTER JOIN
@@ -22,7 +34,7 @@ function Invoke-MtHSQLquery {
             WHERE (U.NextAction = 'none' AND (U.MUStatus = 'active' OR U.MUStatus = 'fake'))
             GROUP BY U.MigUnitId, EnvironmentName, CompleteSourceUrl, SourceUrl, DestinationUrl, ListUrl, ListTitle, ListId,  ShareGateCopySettings, Scope, MUStatus, NodeId, NextAction
             ORDER BY SourceURL;
-'@
+"@
         }
         'E-ALLANDFAKE' {
             # Query E1 : Select all migrations to do

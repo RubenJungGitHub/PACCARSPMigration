@@ -8,9 +8,9 @@ function New-MtHSQLMigUnit {
     #query to create a new entry in the MigrationUnits Table
     $sql = @"
         INSERT INTO MigrationUnits
-        (EnvironmentName, SourceSC, CompleteSourceURL ,SourceUrl, DestinationUrl, ListUrl, ListTitle, ShareGateCopySettings, UniquePermissions, Scope, MUStatus, NextAction, NodeId, CreationTime)
+        (EnvironmentName, SourceSC, CompleteSourceURL ,SourceUrl, DestinationUrl, DuplicateTargetLibPrefix, ListUrl, ListTitle, ShareGateCopySettings, UniquePermissions, Scope, MUStatus, NextAction, NodeId, CreationTime)
         VALUES
-        ('$($Item.EnvironmentName)','$($Item.SourceSC)','$($Item.CompleteSourceURL)', '$($Item.SourceUrl.replace("`'","`'`'"))','$($Item.DestinationUrl.replace("`'","`'`'"))','$($Item.ListUrl.replace("`'","`'`'"))', N'$($Item.ListTitle.replace("`'","`'`'"))', '$($Item.ShareGateCopySettings)','$($Item.UniquePermissions)','$($Item.Scope)','$($Item.MUStatus)','$($Item.NextAction)', 1,  SYSDATETIME());        
+        ('$($Item.EnvironmentName)','$($Item.SourceSC)','$($Item.CompleteSourceURL)', '$($Item.SourceUrl.replace("`'","`'`'"))','$($Item.DestinationUrl.replace("`'","`'`'"))','$($Item.DuplicateTargetLibPrefix)','$($Item.ListUrl.replace("`'","`'`'"))', N'$($Item.ListTitle.replace("`'","`'`'"))', '$($Item.ShareGateCopySettings)','$($Item.UniquePermissions)','$($Item.Scope)','$($Item.MUStatus)','$($Item.NextAction)', 1,  SYSDATETIME());        
 "@
     # $item | Write-SqlTableData -ServerInstance $Settings.SQLDetails.Instance -DatabaseName $Settings.SQLDetails.Database -SchemaName "dbo" -TableName MigrationUnits
     # and return the Migration Units

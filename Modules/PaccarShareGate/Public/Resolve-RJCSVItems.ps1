@@ -23,49 +23,43 @@ function Resolve-RJCSVItems {
         {
             $MU = New-Object MigrationUnitClass 
             $MU.SourceSC = $TSMU."Bron Site Collectie"
-            $MU.EnvironmentName = $Settings.Environment
             $MU.DestinationURL = $TSMU."Target Site 1"
             $MU.CompleteSourceURL = $TSMU.'Source 1 MUS'
-            $MUSourceURL, $MUListURL = ExtractFrom-RJSourceURL -sourceurl $TSMU.'Source 1 MUS'
-            $MU.SourceURL  = $MUSourceURL
-            $Mu.ListUrl = $MUListURL
+            $MU.SourceURL, $MU.ListURL = ExtractFrom-RJSourceURL -sourceurl $TSMU.'Source 1 MUS'
             $Mu.UniquePermissions = !!$TSMU."UP 1"
             $Mu.Scope = $TSMU."Scope 1"
-            $Mu.NodeID = $Settings.NodeID
-            $MU.ListTitle = $MU.ListUrl.Split('/')[$MU.ListUrl.Split('/').Length-1]
             $returnlist.Add($MU)
         }
         ForEach($TSMU in $TargetSite2Sources)
         {
             $MU = New-Object MigrationUnitClass 
             $MU.SourceSC = $TSMU."Bron Site Collectie"
-            $MU.EnvironmentName = $Settings.Environment
             $MU.DestinationURL = $TSMU."Target Site 2"
             $MU.CompleteSourceURL = $TSMU.'Source 2 MUS'
-            $MUSourceURL, $MUListURL = ExtractFrom-RJSourceURL -sourceurl $TSMU.'Source 2 MUS'
-            $MU.SourceURL  = $MUSourceURL
-            $Mu.ListUrl = $MUListURL
+            $MU.SourceURL, $MU.ListURL = ExtractFrom-RJSourceURL -sourceurl $TSMU.'Source 2 MUS'
             $Mu.UniquePermissions = !!$TSMU."UP 2"
             $Mu.Scope = $TSMU."Scope 2"
-            $Mu.NodeID = $Settings.NodeID
-            $MU.ListTitle = $MU.ListUrl.Split('/')[$MU.ListUrl.Split('/').Length-1]
             $returnlist.Add($MU)
         }
         ForEach($TSMU in $TargetSite3Sources)
         {
             $MU = New-Object MigrationUnitClass 
             $MU.SourceSC = $TSMU."Bron Site Collectie"
-            $MU.EnvironmentName = $Settings.Environment
             $MU.DestinationURL = $TSMU."Target Site 3"
             $MU.CompleteSourceURL = $TSMU.'Source 3 MUS'
-            $MUSourceURL, $MUListURL = ExtractFrom-RJSourceURL -sourceurl $TSMU.'Source 3 MUS'
-            $MU.SourceURL  = $MUSourceURL
-            $Mu.ListUrl = $MUListURL
+            $MU.SourceURL, $MU.ListURL = ExtractFrom-RJSourceURL -sourceurl $TSMU.'Source 3 MUS'
             $Mu.UniquePermissions =!!$TSMU."UP 3"
             $Mu.Scope = $TSMU."Scope 3"
-            $Mu.NodeID = $Settings.NodeID
-            $MU.ListTitle = $MU.ListUrl.Split('/')[$MU.ListUrl.Split('/').Length-1]
             $returnlist.Add($MU)
+        }
+        #Double check duplicate targetlib entries
+        foreach ($MU in $Returnlist)
+        {
+            $MU.EnvironmentName = $Settings.Environment
+            $MU.DuplicateTargetLibPrefix = $MU.ListURL -replace($MU.ListTitle,"") -Replace("/","") -Replace("-","") -Replace(" ", "") 
+            $MU.ListTitle = $MU.ListUrl.Split('/')[$MU.ListUrl.Split('/').Length-1]
+            $Mu.NodeID = $Settings.NodeID
+            #Check if targetlib in destination exists 
         }
         return $returnlist  
     }

@@ -6,6 +6,7 @@ CREATE TABLE MigrationUnits
     CompleteSourceUrl VARCHAR(400) NOT NULL,
     SourceUrl VARCHAR(400) NOT NULL,
     DestinationUrl VARCHAR(400) NOT NULL,
+    DuplicateTargetLibPrefix VARCHAR(400) NOT NULL,
     ListUrl VARCHAR(400) NULL,
     ListTitle NVARCHAR(400) NULL,
     ListID VARCHAR(400) NULL,
@@ -25,7 +26,8 @@ CREATE TABLE MigrationUnits
 CREATE TABLE MigrationRuns
 (
     MigUnitId INT NOT NULL
-        REFERENCES MigrationUnits,
+        REFERENCES MigrationUnits
+        ON DELETE CASCADE,
     StartTime DATETIME2(0) NOT NULL,
     Processed BIT NOT NULL,
     Result VARCHAR(20) NOT NULL
