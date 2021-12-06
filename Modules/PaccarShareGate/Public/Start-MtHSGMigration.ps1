@@ -45,7 +45,7 @@ function Start-MtHSGMigration {
     #different Site, List and Library options executed
     #reporting to adapt ....???
 
-    $SourceConnectStart= Get-Date  
+    $SourceConnectStart = Get-Date  
     if ($MigrationItems[0].SourceURL.length -gt 5) {
         if ($settings.current.LoginType -eq 'Credentials') {
             $srcSite = Connect-Site -Url $MigrationItems[0].SourceURL -Credential $cred
@@ -57,7 +57,7 @@ function Start-MtHSGMigration {
     $TSConnectSource = New-TimeSpan -Start $SourceConnectStart -End (Get-Date)
     Write-Verbose "Connected to SOURCE Site Collection $($MigrationItems[0].SourceURL) Successfully!"
 
-    $TargetConnectStart= Get-Date  
+    $TargetConnectStart = Get-Date  
     if ($MigrationItems[0].DestinationURL.length -gt 5) {
         if ($settings.current.LoginType -eq 'Credentials') {
             $dstSite = Connect-Site -Url $MigrationItems[0].DestinationURL -Credential $cred
@@ -84,7 +84,7 @@ function Start-MtHSGMigration {
         $MigrationParameters.Remove('NoContent')
     }
     
-    $ActualMigrationStart  = Get-Date
+    $ActualMigrationStart = Get-Date
     switch ($MigrationItems[0].Scope) {
         'site' { 
             Write-Verbose 'Initiate site copy......' 
@@ -100,6 +100,15 @@ function Start-MtHSGMigration {
             #$toCopy = Get-List -Site $srcSite | Where-Object { $_.id -in $MigrationItems.ListID } 
             $toCopy = Get-List -Site $srcSite | Where-Object { $_.Title -in $MigrationItems.ListTitle } 
             $result = Copy-List -List $toCopy @MigrationParameters 
+            #If Uinuque permissions also copy these 
+            ForEach ($MigrationItem in $MigrationItems) {
+                if ($MigrationItem.UniquePermissions) {
+                    $SourceList = Get-List -Site $SrcSite -Name $MigrationItem.ListTitle
+                    $DestinationList = Get-List -Site $dstSite -Name $MigrationItem.ListTitle
+                    Copy-ObjectPermissions -Source $SourceList -Destination $DestinationList     
+                }
+            }
+            #To do rename if duplicate 
         }
     }
 
@@ -109,7 +118,7 @@ function Start-MtHSGMigration {
     
     $MigrationEnd = Get-Date
     if ($LogPerformanceTests.IsPresent) {
-        If ($Null -eq $Result) {$Result = 'test'}
+        If ($Null -eq $Result) { $Result = 'test' }
         Register-RJPerformanceTestResults -MigrationUnit $MigrationItems[0] -MigrationStart  $MigrationStart -MigrationEnd $MigrationEnd -MigrationResult $Result -TSLoadMappings $TSLoadMappings -TSConnectSource $TSConnectSource -TSConnectTarget $TSConnectTarget -TSMigration $TSMigration
     } 
     return $result
