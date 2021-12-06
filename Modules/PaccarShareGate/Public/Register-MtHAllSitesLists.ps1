@@ -44,7 +44,7 @@ function Register-MtHAllSitesLists {
             
             # is the MU in SharePoint new?
             if ($MUinSQL.Count -eq 0) {
-                    New-MtHSQLMigUnit -Item $MUinSP
+                    New-MtHSQLMigUnit -Item $MUinSP -Activate -NextAction 'First'
             }
             
             # no, are there any differences in site MUs?

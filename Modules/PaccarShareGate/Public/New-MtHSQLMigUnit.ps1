@@ -2,9 +2,17 @@
 function New-MtHSQLMigUnit {
     [CmdletBinding()]
     Param(
-        
-        [parameter(mandatory = $true)] [PSCustomObject] $Item
+        [parameter(mandatory = $true)] [PSCustomObject] $Item,
+        [Parameter(Mandatory = $false)][String][ValidateSet(“first”,”delta”)]$NextAction,
+        [switch]$Activate
     )
+    if($Activate)
+    {
+        $Item.MUStatus = 'Active'
+        If (!$NextAction)
+        {$Item.NextAction = 'none'}{ $Item.NextAction = $NextAction}
+    }
+
     #query to create a new entry in the MigrationUnits Table
     $sql = @"
         INSERT INTO MigrationUnits
