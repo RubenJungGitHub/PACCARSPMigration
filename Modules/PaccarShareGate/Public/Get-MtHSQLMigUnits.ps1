@@ -20,7 +20,7 @@ function Get-MtHSQLMigUnits {
         }
         elseif ($URL) {
             $sql = @"
-    SELECT EnvironmentName, MigUnitId, SourceUrl, DestinationUrl, ListUrl, ListTitle, ListId,  ShareGateCopySettings, Scope, MUStatus, NodeId, NextAction
+    SELECT EnvironmentName, MigUnitId, SourceUrl, DestinationUrl, DuplicateTargetLibPrefix, ListUrl, ListTitle, ListId,  ShareGateCopySettings, Scope, MUStatus, NodeId, NextAction
     FROM MigrationUnits
     WHERE SourceUrl = '$Url'
     ORDER BY MigUnitId;
@@ -28,7 +28,7 @@ function Get-MtHSQLMigUnits {
         }
         elseif ($CompleteSourceURL) {
             $sql = @"
-    SELECT EnvironmentName, MigUnitId, SourceUrl, DestinationUrl, ListUrl, ListTitle, ListId,  ShareGateCopySettings, Scope, MUStatus, NodeId, NextAction
+    SELECT EnvironmentName, MigUnitId, SourceUrl, DestinationUrl,DuplicateTargetLibPrefix, ListUrl, ListTitle, ListId,  ShareGateCopySettings, Scope, MUStatus, NodeId, NextAction
     FROM MigrationUnits
     WHERE CompleteSourceURL= '$CompleteSourceUrl'
     ORDER BY MigUnitId;
@@ -37,7 +37,7 @@ function Get-MtHSQLMigUnits {
     }
     else {
         $sql = @'
-        SELECT EnvironmentName, MigUnitId, SourceUrl, DestinationUrl, ListUrl, ListTitle, ListId,  ShareGateCopySettings, Scope, MUStatus, NodeId, NextAction
+        SELECT EnvironmentName, MigUnitId, SourceUrl, DestinationUrl, DuplicateTargetLibPrefix, ListUrl, ListTitle, ListId,  ShareGateCopySettings, Scope, MUStatus, NodeId, NextAction
         FROM MigrationUnits
         ORDER BY MigUnitId;
 '@

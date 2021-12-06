@@ -86,7 +86,7 @@ function Register-MtHAllSitesLists {
         }
         $i++
     }
-    #Update TargetNa,es if duplicate
+    #Update Targets if duplicate
     $Duplicates = Get-MtHSQLMigUnits -all | Group-Object -Property DestinationURL, ListTitle | Where-Object {$_.Count -gt 1}
     foreach($DPLTarget in $Duplicates.Group)
     {
