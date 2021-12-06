@@ -9,8 +9,8 @@ function New-MtHSQLMigUnit {
     if($Activate)
     {
         $Item.MUStatus = 'Active'
-        If (!$NextAction)
-        {$Item.NextAction = 'none'}{ $Item.NextAction = $NextAction}
+        If ($NextAction)
+        {$Item.NextAction = $NextAction}
     }
 
     #query to create a new entry in the MigrationUnits Table

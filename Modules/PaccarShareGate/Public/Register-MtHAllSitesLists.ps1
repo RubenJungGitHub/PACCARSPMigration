@@ -4,6 +4,7 @@ function Register-MtHAllSitesLists {
     param(
         [parameter(Mandatory = $false)][string]$filter, 
         [parameter(Mandatory = $True)][MigrationUnitClass[]]$MUsINSP, 
+        [parameter(Mandatory = $True)][String]$NextAction, 
         [parameter(Mandatory = $false)][String[]]$setofsites
     )
     $i = 0
@@ -44,7 +45,7 @@ function Register-MtHAllSitesLists {
             
             # is the MU in SharePoint new?
             if ($MUinSQL.Count -eq 0) {
-                    New-MtHSQLMigUnit -Item $MUinSP -Activate -NextAction 'First'
+                    New-MtHSQLMigUnit -Item $MUinSP -Activate -NextAction:$NextAction
             }
             
             # no, are there any differences in site MUs?

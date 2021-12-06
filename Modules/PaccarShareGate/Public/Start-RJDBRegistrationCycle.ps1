@@ -2,6 +2,10 @@ Add-Type -AssemblyName System.Windows.Forms
 
 function Start-RJDBRegistrationCycle {
     [CmdletBinding()]
+    param(
+        [parameter(Mandatory = $false)][string]$NextAction 
+    )
+    
     $FileBrowser = New-Object System.Windows.Forms.OpenFileDialog -Property @{
         Multiselect      = $false # Multiple files can be chosen
         Filter           = 'CSV (*.csv)|*.csv' # Specified file types
@@ -25,8 +29,6 @@ function Start-RJDBRegistrationCycle {
         $LVItems = [System.Collections.ArrayList]@() 
         $CSVItems = Import-Csv -Path $FileBrowser.FileName -Delimiter ';' 
         $CSVItems = Resolve-RJCSVItems $CSVItems
-        $SQLAllItems = Get-MtHSQLMigUnits -all 
-        $SQLItems = $SQLAllItems | Where-Object { $_.MigUnitID -in $CSVItems.MigUnitID } | Group-Object -Property SourceURL
         #Show Nodeselector form  for all grouped SourceURLS 
         $frmNodeSelector = New-Object system.Windows.Forms.Form
         $btnProcess = New-Object System.Windows.Forms.Button
@@ -52,37 +54,21 @@ function Start-RJDBRegistrationCycle {
         #$LVSource.FullRowSelect = $true
         $LVSource.Location = New-Object System.Drawing.Point(80, 60) 
         $LVSource.Size = New-Object System.Drawing.Size(1200, 800) 
-        [void]$LVSource.Columns.Add('NodeID')
-        #$LVSource.LabelEdit = $true
-        $LVSource.Columns[0].Width = 50
-        [void]$LVSource.Columns.Add('Add. items')
-        $LVSource.Columns[1].Width = 80
-        [void]$LVSource.Columns.Add('Active items')
-        $LVSource.Columns[2].Width = 80
-        [void]$LVSource.Columns.Add('Total Items')
-        $LVSource.Columns[3].Width = 80
-        [void]$LVSource.Columns.Add('# MUs added')
-        $LVSource.Columns[4].Width = 80
         [void]$LVSource.Columns.Add('SourceURL')
-        $LVSource.Columns[5].Width = 890
-        foreach ($SQLItem in  $SQLItems) {
-            $MUToProcessItemCount = 0
-            $MUTotalItems = 0
-            $MUTotalItemsActive = 0
-            $LVi = New-Object System.Windows.Forms.ListViewItem($SQLItem.Group[0].NodeId)
-            $SQLItem.Group | ForEach-Object { $MUToProcessItemCount += $_.ItemCount }
-            $SQLAllSourceURLItems = $SQLAllItems |  Where-Object { $_.sourceurl -in $SQLItem.Group[0].SourceUrl }
-            $SQLAllActiveSourceUrlItems = $SQLAllSourceURLItems | Where-Object { $_.MUStatus -eq 'Active' }
-            $SQLAllSourceURLItems | ForEach-Object { $MUTotalItems += $_.ItemCount }
-            $SQLAllActiveSourceUrlItems | ForEach-Object { $MUTotalItemsActive += $_.ItemCount }
-            $CSVItems | Where-Object {$_.MigUnitID -in $SQLAllSourceURLItems.MigUnitID -and $SQLAllSourceURLItems.SourceURL -eq  $SQLItem.Group[0].SourceUrl} | ForEach-Object { $_.NodeID = $SQLItem.Group[0].NodeId}
-            [void]$LVI.SubItems.Add($MUToProcessItemCount)
-            [void]$LVI.SubItems.Add($MUTotalItemsActive)
-            [void]$LVI.SubItems.Add($MUTotalItems)
-            [void]$LVI.SubItems.Add($SQLItem.Count)
-            [void]$LVI.SubItems.Add($SQLItem.Name) 
-            [void]$LVItems.Add($LVi)
-            # All nodes on one url should be identical
+        #$LVSource.LabelEdit = $true
+        $LVSource.Columns[0].Width = 500
+        [void]$LVSource.Columns.Add('TargetURL')
+        $LVSource.Columns[2].Width = 500
+        [void]$LVSource.Columns.Add('Occurence')
+        $LVSource.Columns[3].Width = 20
+        [void]$LVSource.Columns.Add('Action')
+        $LVSource.Columns[3].Width = 50
+        $CSVItemsGrouped = $CSVItems | Group-Object -Property CompleteSourceURL
+        foreach ($CSVItemGroup in $CSVItemsGrouped.Group) {
+            $LVi = New-Object System.Windows.Forms.ListViewItem($CSVItemGroup.CompleteSourceURL)
+            [void]$LVI.SubItems.Add($CSVItemGroup.DestinationURL)
+            [void]$LVI.SubItems.Add($CSVItemGroup.Count)
+            [void]$LVI.SubItems.Add($NextAction)
             [void]$LVSource.Items.Add($LVI)
         }
         $frmNodeSelector.Controls.Add($LVSource)

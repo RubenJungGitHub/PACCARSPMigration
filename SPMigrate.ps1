@@ -20,7 +20,7 @@ Write-Verbose "Used Database = $($settings.SQLDetails.Name),$($settings.SQLDetai
 $ModulePath =  -Join($Settings.FilePath.LocalWorkSpaceModule,'Public')
 #Set-Location -Path $ModulePath
 do {
-    $action = ('++++++++++++++++++++++++++++++++++++++++++++++++++++++', 'Create DataBase', 'Remove DataBase', 'Register Set of Sites and Lists', 'Migrate Fake', 'Migrate Real', 
+    $action = ('++++++++++++++++++++++++++++++++++++++++++++++++++++++', 'Create DataBase', 'Remove DataBase', 'Register Set of Sites and Lists for first migration', 'Register Set of Sites and Lists for delta migration', 'Migrate Fake', 'Migrate Real', 
         'Deactive All Test Lists', 'Activate CSV', 'Quit') | Out-GridView -Title 'Choose Activity (Only working on dev and test env)' -PassThru
     #Make sure the testprocedures only access Dev and test.
     switch ($action) {
@@ -55,12 +55,19 @@ do {
             Start-RJDBRegistrationCycle
             Register-MtHAllSitesLists 
         }
-        'Register Set of Sites and Lists' {
+        'Register Set of Sites and Lists for first migration' {
             #not included
             #$setofsites = @('https://247.plaza.buzaservices.nl/subject/AB1156858')
             #Register-MtHAllSitesLists -setofsites $setofsites
             $Items = Start-RJDBRegistrationCycle
-            If($Null -ne $Items) {Register-MtHAllSitesLists -MUsINSP $Items}
+            If($Null -ne $Items) {Register-MtHAllSitesLists -MUsINSP $Items -NextAction "First"}
+        }
+        'Register Set of Sites and Lists for delta migration' {
+            #not included
+            #$setofsites = @('https://247.plaza.buzaservices.nl/subject/AB1156858')
+            #Register-MtHAllSitesLists -setofsites $setofsites
+            $Items = Start-RJDBRegistrationCycle
+            If($Null -ne $Items) {Register-MtHAllSitesLists -MUsINSP $Items -NextAction "Delta"}
         }
         'Detect Changes' {
             Start-MtHDetectionCycle | Out-Null
