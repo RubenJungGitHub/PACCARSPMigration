@@ -3,7 +3,7 @@ param()
 
 #initialize
 #Start-MtHLocalPowerShell -settingfile "$(Get-MtHGitDirectory)\settings.json" -initsp -Verbose
-Start-MtHLocalPowerShell -settingfile "$(Get-MtHGitDirectory)\settings.json" -Verbose
+Start-MtHLocalPowerShell -settingfile "$(Get-MtHGitDirectory)\settings.json" -Verbose -initsp
 # open the demo site and fill the Demo Library
 $TestMigrationURL = $Settings.Current.MigrationURLS | Select-Object -First 1
 $script:AbsDemoSiteUrl = ConvertTo-MtHHttpAbsPath -SourceURL $TestMigrationURL.SourceTenantDomain -path $TestMigrationURL.DemoSite[0]
@@ -20,7 +20,7 @@ Write-Verbose "Used Database = $($settings.SQLDetails.Name),$($settings.SQLDetai
 $ModulePath = -Join ($Settings.FilePath.LocalWorkSpaceModule, 'Public')
 #Set-Location -Path $ModulePath
 do {
-    $action = ('++++++++++++++++++++++++++++++++++++++++++++++++++++++', 'Create DataBase', 'Remove DataBase', 'Register Set of Sites and Lists for first migration', 'Register Set of Sites and Lists for delta migration', 'Register DEMO Sites and Lists for first migration','Register DEMO Sites and Lists for first migration','Migrate Real', 
+    $action = ('++++++++++++++++++++++++++++++++++++++++++++++++++++++', 'Create DataBase', 'Remove DataBase', 'Register Set of Sites and Lists for first migration', 'Register Set of Sites and Lists for delta migration','Migrate Real', 
         'Deactive All Test Lists', 'Activate CSV', 'Quit') | Out-GridView -Title 'Choose Activity (Only working on dev and test env)' -PassThru
     #Make sure the testprocedures only access Dev and test.
     switch ($action) {
@@ -69,25 +69,11 @@ do {
             $Items = Start-RJDBRegistrationCycle  -NextAction "Delta"
             If ($Null -ne $Items) { Register-MtHAllSitesLists -MUsINSP $Items -NextAction "Delta" }
         }
-        'Register DEMO Sites and Lists for first migration' {
-            #not included
-            #$setofsites = @('https://247.plaza.buzaservices.nl/subject/AB1156858')
-            #Register-MtHAllSitesLists -setofsites $setofsites
-            $Items = Start-RJDBRegistrationCycle -NextAction "First" -DemoTenant
-            If ($Null -ne $Items) { Register-MtHAllSitesLists -MUsINSP $Items -NextAction "First" }
-        }
-        'Register DEMO Sites and Lists for delta migration' {
-            #not included
-            #$setofsites = @('https://247.plaza.buzaservices.nl/subject/AB1156858')
-            #Register-MtHAllSitesLists -setofsites $setofsites
-            $Items = Start-RJDBRegistrationCycle  -NextAction "Delta" -DemoTenant
-            If ($Null -ne $Items) { Register-MtHAllSitesLists -MUsINSP $Items -NextAction "Delta" }
-        }
-
         'Migrate Fake' {
             Start-MtHExecutionCycle -Fake    
         }
         'Migrate Real' {
+            #Connect-MtHSharePoint
             Start-MtHExecutionCycle 
         }
         'Deactive All Test Lists' {

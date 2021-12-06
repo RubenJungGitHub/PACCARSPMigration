@@ -19,7 +19,7 @@ function Initialize-MtHSharePoint {
             $global:cred = Get-Credential -UserName $settings.current.UserName -Message "Enter your Credentials for the user: $($settings.current.UserName)"
             $encryptedPassword = $cred.Password | ConvertFrom-SecureString
             $settings.current | Add-Member -NotePropertyName EncryptedPassword -NotePropertyValue $encryptedPassword
-            $Settings | Select-Object -Property * -ExcludeProperty current, timezone, SQLdetails | ConvertTo-Json -Depth 5 | Set-Content $settings.FilePath.SettingFile
+            $Settings | Select-Object -Property * -ExcludeProperty current, timezone, SQLdetails | ConvertTo-Json -Depth 5 | Set-Content $settings.FilePath.SettingsFile
         }
     }
 

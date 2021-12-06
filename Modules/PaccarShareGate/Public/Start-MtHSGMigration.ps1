@@ -98,7 +98,7 @@ function Start-MtHSGMigration {
             Write-Verbose "Paramaters:  $ParamInfo"
             write-Verbose "Migrating $($migrationItems.count) Lists: $($MigrationItems.ListTitle -join ', ')"
             #$toCopy = Get-List -Site $srcSite | Where-Object { $_.id -in $MigrationItems.ListID } 
-            $toCopy = Get-List -Site $srcSite | Where-Object { $_.ListTitle -in $MigrationItems.ListTitle } 
+            $toCopy = Get-List -Site $srcSite | Where-Object { $_.Title -in $MigrationItems.ListTitle } 
             $result = Copy-List -List $toCopy @MigrationParameters 
         }
     }

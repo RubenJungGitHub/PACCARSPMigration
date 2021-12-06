@@ -1,86 +1,87 @@
-﻿{
-    "Validate": true,
-    "FilePath": {
-        "SettingsFile": "C:\\GITWorkSpace\\Paccar\\PACCARSPMigration\\Settings.json",
-        "Logging": "C:\\Beheer\\Data\\Paccar\\Logging",
-        "SGErrorReports": "D:\\Beheer\\ShareGateReports",
-        "MUInput": "C:\\Beheer\\Data\\Paccar\\MUInput",
-        "Mappings": "C:\\Beheer\\Data\\Paccar\\Mappings"
-    },
-    "SGErrorReports": "SGErrorReport",
-    "PopulateMUCreationItemCountThreshold": 10000,
-    "Environment": "o365",
-    "NodeId": 1,
-    "MaxNodeId": 3,
-    "SourceURLIgnoreSections": [
-        "Lists",
-        "Lijsten"
-    ],
-    "DatabaseDetails": [
-        {
-            "Name": "O365",
-            "Instance": ".\\SQLExpress",
-            "Database": "PACCARSQLO365",
-            "DeleteDB": true
-        },
-        {
-            "Name": "TestonO365",
-            "Instance": ".\\SQLExpress",
-            "Database": "PACCARSQLTestO365",
-            "DeleteDB": true
-        },
-        {
-            "Name": "Production",
-            "Instance": "???",
-            "Database": "SGPBUZ_ShareGate_Migration",
-            "DeleteDB": false
-        }
-    ],
-    "EnvironmentDetails": [
-        {
-            "Name": "o365",
-            "UserName": "ruben.jung@daftrucks.com",
-            "LoginType": "Credentials",
-            "SPVersion": "SharePointOnline",
-            "MigrationURLS": [
-                {
-                    "SourceTenantDomain": "paccar.sharepoint.com",
-                    "DestinationTenantDomain": "paccar.sharepoint.com",
-                    "ManagedPath": [
-                        "sites"
-                    ],
-                    "SitePrefix": "M1-",
-                    "DemoSite": [
-                        "/sites/TSBuzaDemoSource"
-                    ],
-                    "DemoList": "Demo"
-                }
-            ],
-            "TimeZone": "Coordinated Universal Time",
-            "Database": "O365",
-            "ExecuteTestOnDB": "PaccarTestonO365",
-            "DeleteNotFoundMUS": false,
-            "MUSourceItemsDeleteSync": false,
-            "ComputerNames": [
-                "DAFEHVLPP99246"
-            ]
-        }
-    ],
-    "StartUp": {
-        "LocalModules": "PaccarShareGate",
-        "SPModuleVersion": "SharePointPnPPowerShell2013",
-        "Verbose": false,
-        "RealMigration": true,
-        "PSVersion": "5.1",
-        "PesterVersion": "5.2.2",
-        "Needs64bit": true,
-        "Elevated": false
-    },
-    "Sharegate": {
-        "UserMap": false,
-        "TemplateMap": false,
-        "PermissionsMap": false,
-        "PropertyMap": false,
-        "MigrationMode": "Insane"
-    }
+{
+    "Validate":  true,
+    "FilePath":  {
+                     "SettingsFile":  "C:\\GITWorkSpace\\Paccar\\PACCARSPMigration\\Settings.json",
+                     "Logging":  "C:\\Beheer\\Data\\Paccar\\Logging",
+                     "SGErrorReports":  "D:\\Beheer\\ShareGateReports",
+                     "MUInput":  "C:\\Beheer\\Data\\Paccar\\MUInput",
+                     "Mappings":  "C:\\Beheer\\Data\\Paccar\\Mappings"
+                 },
+    "SGErrorReports":  "SGErrorReport",
+    "PopulateMUCreationItemCountThreshold":  10000,
+    "Environment":  "o365",
+    "NodeId":  1,
+    "MaxNodeId":  3,
+    "SourceURLIgnoreSections":  [
+                                    "Lists",
+                                    "Lijsten"
+                                ],
+    "DatabaseDetails":  [
+                            {
+                                "Name":  "O365",
+                                "Instance":  ".\\SQLExpress",
+                                "Database":  "PACCARSQLO365",
+                                "DeleteDB":  true
+                            },
+                            {
+                                "Name":  "TestonO365",
+                                "Instance":  ".\\SQLExpress",
+                                "Database":  "PACCARSQLTestO365",
+                                "DeleteDB":  true
+                            },
+                            {
+                                "Name":  "Production",
+                                "Instance":  "???",
+                                "Database":  "SGPBUZ_ShareGate_Migration",
+                                "DeleteDB":  false
+                            }
+                        ],
+    "EnvironmentDetails":  [
+                               {
+                                   "Name":  "o365",
+                                   "UserName":  "admin@rubentesttenant.onmicrosoft.com",
+                                   "LoginType":  "Credentials",
+                                   "SPVersion":  "SharePointOnline",
+                                   "MigrationURLS":  [
+                                                         {
+                                                             "SourceTenantDomain":  "rubentesttenant.sharepoint.com",
+                                                             "DestinationTenantDomain":  "rubentesttenant.sharepoint.com",
+                                                             "ManagedPath":  [
+                                                                                 "sites"
+                                                                             ],
+                                                             "SitePrefix":  "M1-",
+                                                             "DemoSite":  [
+                                                                              "/sites/TSBuzaDemoSource"
+                                                                          ],
+                                                             "DemoList":  "Demo"
+                                                         }
+                                                     ],
+                                   "TimeZone":  "Coordinated Universal Time",
+                                   "Database":  "O365",
+                                   "ExecuteTestOnDB":  "PaccarTestonO365",
+                                   "DeleteNotFoundMUS":  false,
+                                   "MUSourceItemsDeleteSync":  false,
+                                   "ComputerNames":  [
+                                                         "DAFEHVLPP99246"
+                                                     ],
+                                   "EncryptedPassword":  "01000000d08c9ddf0115d1118c7a00c04fc297eb010000000807dc7f5ea6c34da19a712c06863075000000000200000000001066000000010000200000006c4bec5427ade815c76aa29e8d5221ff61a6b5113f85c10cfe7af4ca26d59f05000000000e800000000200002000000055c9b10fdaf30dfdf19d6298af59092aec290609f6e940a21f3a25c953d4ca7f20000000b80055c48a2c88d5dd178775d7e74742ce8580df0535825b7e7a81e0df8c46494000000015c1282f2a4ace7bea8871a63d9b297ccad29ecfea0f80723491d0386f565b8a21c6a97ceb58a9f3b3118f10263abba30b785a39199254fc52ec68f431bf298f"
+                               }
+                           ],
+    "StartUp":  {
+                    "LocalModules":  "PaccarShareGate",
+                    "SPModuleVersion":  "SharePointPnPPowerShell2013",
+                    "Verbose":  false,
+                    "RealMigration":  true,
+                    "PSVersion":  "5.1",
+                    "PesterVersion":  "5.2.2",
+                    "Needs64bit":  true,
+                    "Elevated":  false
+                },
+    "Sharegate":  {
+                      "UserMap":  false,
+                      "TemplateMap":  false,
+                      "PermissionsMap":  false,
+                      "PropertyMap":  false,
+                      "MigrationMode":  "Insane"
+                  }
 }

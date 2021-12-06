@@ -16,7 +16,7 @@ function Start-MtHExecutionCycle {
     #NOT WORKING. Sometimes you can add items, sometimes not
     #$items = Invoke-MtHSQLquery -QueryName 'E-ALL' | Where-Object { $_.NextAction -in $NextAction }
     #$items += Invoke-MtHSQLquery -QueryName 'E-Fake' | Where-Object { $_.NextAction -in $NextAction }
-    $items += Invoke-MtHSQLquery -QueryName 'E-ALLANDFAKE' | Where-Object { $_.NextAction -in $NextAction }
+    $items = Invoke-MtHSQLquery -QueryName 'E-ALLANDFAKE' | Where-Object { $_.NextAction -in $NextAction }
 
     $totalitems = $items.Count
     $i = 0
