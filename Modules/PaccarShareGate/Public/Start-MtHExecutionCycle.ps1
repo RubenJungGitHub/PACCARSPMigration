@@ -20,7 +20,7 @@ function Start-MtHExecutionCycle {
 
     $totalitems = $items.Count
     $i = 0
-    $siteparts = $items | Group-Object -Property SourceUrl, NextAction, ShareGateCopySettings, MUStatus
+    $siteparts = $items | Group-Object -Property SourceURL,  DestinationURL, NextAction, ShareGateCopySettings, MUStatus
     $Activity = 'Processing execution cycle : '
     foreach ($part in $siteparts) {
         #start process

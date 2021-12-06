@@ -27,7 +27,7 @@ function Register-MtHAllSitesLists {
     #Temp
     $totalsites = $MUsINSP.Count
     #First remove old entries 
-    $SiteCollections | ForEach-Object {Invoke-MtHSQLquery -QueryName C-MUSC -SiteCollection $_.Name}
+    $SiteCollections | ForEach-Object {Invoke-MtHSQLquery -QueryName C-MUSC -DestinationURL $_.Name}
 
 
 

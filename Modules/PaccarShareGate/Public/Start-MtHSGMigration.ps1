@@ -97,7 +97,8 @@ function Start-MtHSGMigration {
             $ParamInfo = ($MigrationParameters | convertTo-Json -Depth 5) -replace '\s' -replace '"'
             Write-Verbose "Paramaters:  $ParamInfo"
             write-Verbose "Migrating $($migrationItems.count) Lists: $($MigrationItems.ListTitle -join ', ')"
-            $toCopy = Get-List -Site $srcSite | Where-Object { $_.id -in $MigrationItems.ListID } 
+            #$toCopy = Get-List -Site $srcSite | Where-Object { $_.id -in $MigrationItems.ListID } 
+            $toCopy = Get-List -Site $srcSite | Where-Object { $_.ListTitle -in $MigrationItems.ListTitle } 
             $result = Copy-List -List $toCopy @MigrationParameters 
         }
     }

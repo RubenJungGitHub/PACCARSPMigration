@@ -13,10 +13,8 @@
     "NodeId": 1,
     "MaxNodeId": 3,
     "SourceURLIgnoreSections": [
-            "Lists",
-            "Lijsten",
-            "Document libraries",
-            "Document bibliotheken"
+        "Lists",
+        "Lijsten"
     ],
     "DatabaseDetails": [
         {

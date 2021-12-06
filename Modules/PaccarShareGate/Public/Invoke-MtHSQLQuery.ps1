@@ -6,14 +6,14 @@ function Invoke-MtHSQLquery {
         
         [parameter(mandatory = $true)] [ValidateSet('D-ALL', 'D-FIRST', 'D-DELTA', 'E-ALLANDFAKE', 'E-ALL', 'E-FAKE', 'E-START', 'R-ALL', 'R-SINGLE', 'R-LISTITEMS', 'T-FillDBforTest', 'DistributeNodes', 'LogMigrationProgress', 'C-MUSC','CHECKDUPLICATETARGET')][String] $QueryName,
         [parameter(mandatory = $false)] [int] $ItemNr,
-        [parameter(mandatory = $false)] [PSObject] $SiteCollection,
+        [parameter(mandatory = $false)] [PSObject] $DestinationURL,
         [switch]$NoResolveMUClass
     )
     Switch ($QueryName) {
         'C-MUSC' {
             # query C1 : Clear all MUs from MigrationUnits where TargetURL macthes (After reimport)
             $sql = @"
-            Delete from MigrationUnits where DestinationURL = '$($SiteCollection)'
+            Delete from MigrationUnits where DestinationURL = '$($DestinationURL)'
 "@
         }
         'CHECKDUPLICATETARGET' {
