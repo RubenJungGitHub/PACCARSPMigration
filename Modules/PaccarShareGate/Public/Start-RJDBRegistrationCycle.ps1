@@ -3,8 +3,7 @@ Add-Type -AssemblyName System.Windows.Forms
 function Start-RJDBRegistrationCycle {
     [CmdletBinding()]
     param(
-        [parameter(Mandatory = $false)][string]$NextAction,
-        [switch]$DemoTenant
+        [parameter(Mandatory = $false)][string]$NextAction
     )
     
     $FileBrowser = New-Object System.Windows.Forms.OpenFileDialog -Property @{
@@ -16,19 +15,9 @@ function Start-RJDBRegistrationCycle {
     If ($FileBrowser.FileNames -like '*\*') {
         #Region construct form 
         #  csv should have Headers 'MigUnitId', 'CurrentMUStatus', 'NewMUStatus', 'NodeId'
-        #return Import-Csv -Path $FileBrowser.FileName -Delimiter ';' 
-        #Group MigUnitIDSPerSourceURL and assign NodeID
-        #$LVItems = [System.Collections.ArrayList]@() 
-        $CSVItems = Import-Csv -Path $FileBrowser.FileName -Delimiter ';' | Sort-Object -Property TargetURL, SourceURL 
+        $CSVItems = Import-Csv -Path $FileBrowser.FileName -Delimiter ';' | Sort-Object -Property TargetURL, SourceURL
         $CSVItems = Resolve-RJCSVItems $CSVItems
         #For demo purposes only because sourceURL alters when ending on Sites
-        if ($DemoTenant) {
-            ForEach ($CSVItem in $CSVItems) {
-                If ($CSVItem.SourceURL -match '/sites$')
-                {  #$CSVItem.SourceURL = $CSVItem.SourceURL.Replace('/sites', '')
-             }
-            }
-        }
     
         #Oneliner Not working 
         #{$CSVItems | Where-Object { $_.SourceURL  -match '/sites$'} | ForEach-Object {$_.SourceURL.Replace("/sites","")}}
@@ -62,27 +51,11 @@ function Start-RJDBRegistrationCycle {
         $LVSource.Columns[0].Width = 40
         [void]$LVSource.Columns.Add('SourceURL')
         #$LVSource.LabelEdit = $true
-        $LVSource.Columns[1].Width = 500
+        $LVSource.Columns[1].Width = 450
         [void]$LVSource.Columns.Add('TargetURL')
-        $LVSource.Columns[2].Width = 500
+        $LVSource.Columns[2].Width = 450
         [void]$LVSource.Columns.Add('Action')
-        $LVSource.Columns[3].Width = 100
-        #        [void]$LVSource.Columns.Add('Occurence')
-        #        $LVSource.Columns[3].Width = 100
-
-        <#        $CSVItemsGroupedSource = $CSVItems |  Group-Object -Property CompleteSourceURL
-        $CSVItemsGrouped = $CSVItems |  Group-Object -Property TargetURL
-        For ($i = 0; $i -le $CSVItemsGrouped.Count ; $i++) {
-            foreach ($CSVItemGroup in $CSVItemsGrouped[$i].Group) {
-                $LVi = New-Object System.Windows.Forms.ListViewItem($CSVItemGroup.CompleteSourceURL)
-                [void]$LVI.SubItems.Add($CSVItemGroup.DestinationURL)
-                [void]$LVI.SubItems.Add($NextAction)
-                [void]$LVI.SubItems.Add($CSVItemsGrouped[$i].Group.Count)
-                [void]$LVSource.Items.Add($LVI)
-            }
-        }
-        #>
-
+        $LVSource.Columns[3].Width = 80
         $CSVItemsGrouped = $CSVItems |  Group-Object -Property CompleteSourceURL
         foreach ($CSVItemGroup in $CSVItemsGrouped) {
             $i++
@@ -97,7 +70,8 @@ function Start-RJDBRegistrationCycle {
         # Display the form
         $Result = $frmNodeSelector.ShowDialog()
         if ($Result -eq 'OK') {
-            return $CSVItems
+            $ReturnCSVSorted  = $CSVItems  | Sort-Object {$_.SourceURL, $_.ListTitle}
+            return $ReturnCSVSorted 
         }
     }
     return $null

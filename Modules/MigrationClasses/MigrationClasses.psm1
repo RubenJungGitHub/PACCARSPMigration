@@ -8,6 +8,7 @@ class MigrationUnitClass {
     [string]$ListTitle = ''
     [string]$ListId
     [bool]$UniquePermissions
+    [bool]$MergeMUS
     [int]$ListTemplate
     [int]$ItemCount
     [string]$ShareGateCopySettings = ''

@@ -27,12 +27,12 @@ function Register-MtHAllSitesLists {
     #Temp
     $totalsites = $MUsINSP.Count
     #First remove old entries 
-    $SiteCollections | ForEach-Object {Invoke-MtHSQLquery -QueryName C-MUSC -DestinationURL $_.Name}
+    $SiteCollections | ForEach-Object { Invoke-MtHSQLquery -QueryName C-MUSC -DestinationURL $_.Name }
 
 
 
-   Write-Verbose "Total amount of sites to register: $totalsites"
-   $MUsINSP| ForEach-Object { $_.validate() }
+    Write-Verbose "Total amount of sites to register: $totalsites"
+    $MUsINSP | ForEach-Object { $_.validate() }
     foreach ($MUinSP in $MUsINSP) {
         Write-Progress -Activity 'Site Scan' -Status "$i of $totalsites Complete" -PercentComplete $($i * 100 / $totalsites)
         
@@ -45,7 +45,7 @@ function Register-MtHAllSitesLists {
             
             # is the MU in SharePoint new?
             if ($MUinSQL.Count -eq 0) {
-                    New-MtHSQLMigUnit -Item $MUinSP -Activate -NextAction:$NextAction
+                New-MtHSQLMigUnit -Item $MUinSP -Activate -NextAction:$NextAction
             }
             
             # no, are there any differences in site MUs?
@@ -88,11 +88,22 @@ function Register-MtHAllSitesLists {
         $i++
     }
     #Update Targets if duplicate
-    $Duplicates = Get-MtHSQLMigUnits -all | Group-Object -Property DestinationURL, ListTitle | Where-Object {$_.Count -gt 1}
+    <#   $Duplicates = Get-MtHSQLMigUnits -all | Group-Object -Property DestinationURL, ListTitle | Where-Object {$_.Count -gt 1}
     foreach($DPLTarget in $Duplicates.Group)
     {
         $DPLTarget.ListTitle = -Join($DPLTarget.DuplicateTargetLibPrefix,$DPLTarget.ListTitle)
-        Update-MtHSQLMigUnitStatus -Item $DPLTarget -UpdateListTitle
+      #  Update-MtHSQLMigUnitStatus -Item $DPLTarget -UpdateListTitle
+    }
+    #$Duplicates.Group | ForEach-Object ($_.ListTitle = -Join($_.TargetPrefix, $_.ListTitle))
+    #>
+   
+    $MergeMUGroups = Get-MtHSQLMigUnits -all | Where-Object { $_.TargetURL -in $MUsINSP.TargetURL -and $_.MergeMUS -eq $True } |  Group-Object -Property DestinationURL, ListTitle 
+    foreach ($MergeMUS  in $MergeMUGroups) {
+        for ($i = 1; $i -lt $MergeMUS.Count ; $i++) {
+            $ChangeItem = $MergeMUS.Group[$i]
+            $ChangeItem.NextAction = 'Delta'
+            Update-MtHSQLMigUnitStatus -Item $ChangeItem
+        }
     }
     #$Duplicates.Group | ForEach-Object ($_.ListTitle = -Join($_.TargetPrefix, $_.ListTitle))
     Write-Progress -Activity 'Site Scan' -Status 'Ready' -Completed

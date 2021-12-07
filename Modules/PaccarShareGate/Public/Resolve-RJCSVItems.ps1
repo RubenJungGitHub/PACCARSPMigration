@@ -27,6 +27,7 @@ function Resolve-RJCSVItems {
             $MU.CompleteSourceURL = $TSMU.'Source 1 MUS'
             $MU.SourceURL, $MU.ListURL , $MU.ListTitle= ExtractFrom-RJSourceURL -sourceurl $TSMU.'Source 1 MUS'
             $Mu.UniquePermissions = !!$TSMU."UP 1"
+            $MU.MergeMUS = !!$TSMU."Merge 1"
             $Mu.Scope = $TSMU."Scope 1"
             $returnlist.Add($MU)
         }
@@ -38,6 +39,7 @@ function Resolve-RJCSVItems {
             $MU.CompleteSourceURL = $TSMU.'Source 2 MUS'
             $MU.SourceURL, $MU.ListURL, $MU.ListTitle = ExtractFrom-RJSourceURL -sourceurl $TSMU.'Source 2 MUS'
             $Mu.UniquePermissions = !!$TSMU."UP 2"
+            $MU.MergeMUS = !!$TSMU."Merge 2"
             $Mu.Scope = $TSMU."Scope 2"
             $returnlist.Add($MU)
         }
@@ -49,6 +51,7 @@ function Resolve-RJCSVItems {
             $MU.CompleteSourceURL = $TSMU.'Source 3 MUS'
             $MU.SourceURL, $MU.ListURL, $MU.ListTitle = ExtractFrom-RJSourceURL -sourceurl $TSMU.'Source 3 MUS'
             $Mu.UniquePermissions =!!$TSMU."UP 3"
+            $MU.MergeMUS = !!$TSMU."Merge 3"
             $Mu.Scope = $TSMU."Scope 3"
             $returnlist.Add($MU)
         }

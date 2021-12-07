@@ -31,6 +31,7 @@ function Start-MtHSGMigration {
         Import-PropertyMapping -Path $SitePropertyMappingsPath -MappingSettings $MappingSettings | Out-Null
     }
 
+    
     #load specific settings, for example incremental update of a site
     if ($MigrationItems[0].NextAction -eq 'Delta') {
         $CopySettings = New-CopySettings -OnContentItemExists IncrementalUpdate
@@ -38,6 +39,7 @@ function Start-MtHSGMigration {
     else {
         $CopySettings = New-CopySettings -OnContentItemExists Overwrite
     }
+
     $TSLoadMappings = New-TimeSpan -Start $MigrationStart -End (Get-Date)
     Write-Verbose 'Completed mappings and copy settings load' 
     
@@ -105,7 +107,7 @@ function Start-MtHSGMigration {
                 if ($MigrationItem.UniquePermissions) {
                     $SourceList = Get-List -Site $SrcSite -Name $MigrationItem.ListTitle
                     $DestinationList = Get-List -Site $dstSite -Name $MigrationItem.ListTitle
-                    Copy-ObjectPermissions -Source $SourceList -Destination $DestinationList     
+                    $resultPermissions =  Copy-ObjectPermissions -Source $SourceList -Destination $DestinationList     
                 }
             }
             #To do rename if duplicate 

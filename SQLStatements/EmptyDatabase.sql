@@ -11,6 +11,7 @@ CREATE TABLE MigrationUnits
     ListTitle NVARCHAR(400) NULL,
     ListID VARCHAR(400) NULL,
     UniquePermissions BIT,
+    MergeMUS BIT,
     ShareGateCopySettings VARCHAR(400) NULL,
     Scope VARCHAR(10) NOT NULL
         CHECK (Scope IN ('list','site')),
