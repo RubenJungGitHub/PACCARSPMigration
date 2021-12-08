@@ -4,7 +4,7 @@ function Invoke-MtHSQLquery {
     [CmdletBinding()]
     Param(
         
-        [parameter(mandatory = $true)] [ValidateSet('D-ALL', 'D-FIRST', 'D-DELTA', 'E-ALLANDFAKE', 'E-ALL', 'E-FAKE', 'E-START', 'R-ALL', 'R-SINGLE', 'R-LISTITEMS', 'T-FillDBforTest', 'DistributeNodes', 'LogMigrationProgress', 'C-MUSC','CHECKDUPLICATETARGET')][String] $QueryName,
+        [parameter(mandatory = $true)] [ValidateSet('D-ALL', 'D-FIRST', 'D-DELTA', 'E-ALLANDFAKE', 'E-ALL', 'E-FAKE', 'E-START', 'T-FillDBforTest', 'DistributeNodes', 'C-MUSC')][String] $QueryName,
         [parameter(mandatory = $false)] [int] $ItemNr,
         [parameter(mandatory = $false)] [PSObject] $DestinationURL,
         [switch]$NoResolveMUClass
@@ -14,12 +14,6 @@ function Invoke-MtHSQLquery {
             # query C1 : Clear all MUs from MigrationUnits where TargetURL macthes (After reimport)
             $sql = @"
             Delete from MigrationUnits where DestinationURL = '$($DestinationURL)'
-"@
-        }
-        'CHECKDUPLICATETARGET' {
-            # query C1 : Clear all MUs from MigrationUnits where TargetURL macthes (After reimport)
-            $sql = @"
-            SELECT MigUnitId AS MigUnitId 
 "@
         }
         'D-ALL' {
@@ -73,43 +67,6 @@ function Invoke-MtHSQLquery {
             WHERE (U.NextAction IN ('first','delta') AND U.NodeId = $($settings.NodeId) AND U.MUStatus = 'Fake' AND (R.Result <> 'started' OR  R.Result IS NULL))
             GROUP BY U.MigUnitId, EnvironmentName, CompleteSourceUrl, SourceUrl, DestinationUrl, ListUrl, ListTitle, ListId,  ShareGateCopySettings, Scope, MUStatus, NodeId, NextAction
             ORDER BY SourceURL;
-"@
-        }
-        'R-ALL' {
-            # Query R1 : Select all migration Units to be removed (LISTS ONLY)
-            $sql = @'
-            SELECT U.MigUnitId AS MigUnitId, EnvironmentName, CompleteSourceUrl, SourceUrl, DestinationUrl, ListUrl, ListTitle, ListId,  ShareGateCopySettings, Scope, MUStatus, NextAction, MAX(StartTime) AS LastStartTime
-            FROM MIgrationUnits AS U
-            LEFT OUTER JOIN
-            MigrationRuns AS R
-            ON U.MigUnitId = R.MigUnitId
-            WHERE (U.Scope = 'list' AND U.NextAction = 'delete' AND U.MUStatus = 'notfound' AND ((R.Result <> 'started' AND  R.Result <> 'deleted') OR  R.Result IS NULL))
-            GROUP BY U.MigUnitId, EnvironmentName, CompleteSourceUrl, SourceUrl, DestinationUrl, ListUrl, ListTitle, ListId,  ShareGateCopySettings, Scope, MUStatus, NextAction
-            ORDER BY SourceURL;
-'@
-        }
-        'R-SINGLE' {
-            # Query R2 : Select single migrationunit deletion run status (LISTS ONLY). This to prevent repeated deletions when new site registration run is executed: DOUBLE CHECK!!!!
-            $sql = @"
-            SELECT U.MigUnitId AS MigUnitId, EnvironmentName, CompleteSourceUrl, SourceUrl, DestinationUrl, ListUrl, ListTitle, ListId,  ShareGateCopySettings, Scope, MUStatus, NextAction, MAX(StartTime) AS LastStartTime, R.Result
-            FROM MIgrationUnits AS U
-            LEFT OUTER JOIN
-            MigrationRuns AS R
-            ON U.MigUnitId = R.MigUnitId
-            WHERE (U.Scope = 'list' AND U.MUStatus = 'notfound' AND U.MigUnitId = $ItemNr AND (R.Result = 'deleted'))
-            GROUP BY U.MigUnitId, EnvironmentName, CompleteSourceUrl, SourceUrl, DestinationUrl, ListUrl, ListTitle, ListId,  ShareGateCopySettings, Scope, MUStatus, NextAction, R.Result;
-"@
-        }
-        'R-LISTITEMS' {
-            # Query R3 : Get all active lirary MU's  for item level deletion where a Delta run has taken place (Last occurence)
-            $sql = @"
-            SELECT TOP 1  U.MigUnitId, EnvironmentName, CompleteSourceUrl, SourceUrl, DestinationUrl, ListUrl, ListTitle, ListId,  ShareGateCopySettings, Scope, MUStatus, NextAction, R.MigrationType, R.StartTime
-            FROM MIgrationUnits U
-            LEFT OUTER JOIN
-            MigrationRuns AS R
-            ON U.MigUnitId = R.MigUnitId
-            WHERE (Scope = 'list' AND MUStatus = 'active' AND NodeId = $($settings.NodeId) And R.MigrationType = 'delta')
-            ORDER BY CompleteSourceUrl, SourceUrl, R.StartTime DESC;
 "@
         }
         'DistributeNodes' {
