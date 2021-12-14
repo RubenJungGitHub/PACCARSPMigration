@@ -2,7 +2,8 @@
 function Connect-MtHSharePoint {
     [CmdletBinding()]
     Param(
-        [parameter(Mandatory = $true)] [string] $URL
+        [parameter(Mandatory = $true)] [string] $URL,
+        [switch]$returnconnection
     )
     [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072
     $Params = @{
@@ -34,9 +35,16 @@ function Connect-MtHSharePoint {
         throw "Error found for the environment: $($settings.Environment)"
     }
     try {
-        $connection = $false
-        Connect-PnPOnline @Params -ErrorAction Stop
-        $connection = $true
+        $Connection
+        #$connection = $false
+        if ($returnconnection) {
+            $connection = Connect-PnPOnline @Params -ErrorAction Stop -ReturnConnection
+        }
+        else {
+            $connection = $false
+            Connect-PnPOnline @Params -ErrorAction Stop -ReturnConnection
+            $connection = $true
+        }
     }
     catch [System.SystemException] {
         $ErrorMessage += $_.Exception.Message + 'on the following  URL:'

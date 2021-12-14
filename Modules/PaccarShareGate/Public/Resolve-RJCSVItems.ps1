@@ -24,6 +24,7 @@ function Resolve-RJCSVItems {
             $MU.SourceSC = $TSMU."Bron Site Collectie"
             $MU.DestinationURL = $TSMU."Target Site 1"
             $MU.CompleteSourceURL = $TSMU.'Source 1 MUS'
+            $MU.TargetLibPrefixGiven= $TSMU.'MU Prefix 1'
             $MU.DuplicateTargetLibPrefix = $TSMU.'MU Prefix 1'
             $MU.SourceURL, $MU.ListURL , $MU.ListTitle = ExtractFrom-RJSourceURL -sourceurl $TSMU.'Source 1 MUS'
             $Mu.UniquePermissions = !!$TSMU."UP 1"
@@ -36,6 +37,7 @@ function Resolve-RJCSVItems {
             $MU.SourceSC = $TSMU."Bron Site Collectie"
             $MU.DestinationURL = $TSMU."Target Site 2"
             $MU.CompleteSourceURL = $TSMU.'Source 2 MUS'
+            $MU.TargetLibPrefixGiven= $TSMU.'MU Prefix 2'
             $MU.DuplicateTargetLibPrefix = $TSMU.'MU Prefix 2'
             $MU.SourceURL, $MU.ListURL, $MU.ListTitle = ExtractFrom-RJSourceURL -sourceurl $TSMU.'Source 2 MUS'
             $Mu.UniquePermissions = !!$TSMU."UP 2"
@@ -48,6 +50,7 @@ function Resolve-RJCSVItems {
             $MU.SourceSC = $TSMU."Bron Site Collectie"
             $MU.DestinationURL = $TSMU."Target Site 3"
             $MU.CompleteSourceURL = $TSMU.'Source 3 MUS'
+            $MU.TargetLibPrefixGiven= $TSMU.'MU Prefix 3'
             $MU.DuplicateTargetLibPrefix = $TSMU.'MU Prefix 3'
             $MU.SourceURL, $MU.ListURL, $MU.ListTitle = ExtractFrom-RJSourceURL -sourceurl $TSMU.'Source 3 MUS'
             $Mu.UniquePermissions = !!$TSMU."UP 3"
@@ -59,7 +62,11 @@ function Resolve-RJCSVItems {
         $DuplicatePrefixes = $returnList | Group-object -Property DestinationURL, ListTitle, DuplicateTargetLibPrefix | Where-Object { $_.Count -gt 1 }
         ForEach ($DuplicatePrefixMU in $DuplicatePrefixes) {
             ForEach ($DuplicatePrefix in $DuplicatePrefixMU.Group) {
-                $DuplicatePrefix.DuplicateTargetLibPrefix = -Join ($DuplicatePrefix.DuplicateTargetLibPrefix , (New-Guid))
+                #Limit on 50 chares for renaming lists using ShareGatePowershell GUID TOO LARGE
+                #DuplicatePrefix.DuplicateTargetLibPrefix = -Join ($DuplicatePrefix.DuplicateTargetLibPrefix , (New-Guid))
+                #WorkAround
+                $DuplicatePrefix.DuplicateTargetLibPrefix = -Join ($DuplicatePrefix.DuplicateTargetLibPrefix , ( Get-Random -Minimum 0 -Maximum 10000000 ).ToString('00000000'))
+
             }
         }
 

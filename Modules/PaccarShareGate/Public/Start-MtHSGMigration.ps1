@@ -99,15 +99,28 @@ function Start-MtHSGMigration {
             $ParamInfo = ($MigrationParameters | convertTo-Json -Depth 5) -replace '\s' -replace '"'
             Write-Verbose "Paramaters:  $ParamInfo"
             write-Verbose "Migrating $($migrationItems.count) Lists: $($MigrationItems.ListTitle -join ', ')"
-            #$toCopy = Get-List -Site $srcSite | Where-Object { $_.id -in $MigrationItems.ListID } 
-            $toCopy = Get-List -Site $srcSite | Where-Object { $_.Title -in $MigrationItems.ListTitle } 
-            $result = Copy-List -List $toCopy @MigrationParameters 
+            $ToCopy = Get-List -Site $srcSite | Where-Object { $_.Title -in $MigrationItems.ListTitle } 
+            $renamedLists = Rename-RJListsTitlePrefix -Lists $ToCopy -MUS $MigrationItems -dstSite $dstSite.Address
+            foreach ($List in $RenamedLists) {
+                if ($List.MergeMUS) { $ListTitleWithPrefix = -Join ($List.ListTitle, $List.TargetLibPrefixGiven) }
+                else {
+                    $ListTitleWithPrefix = -Join ($List.ListTitle, $List.DuplicateTargetLibPrefix)                    
+                }
+
+                $result = Copy-List  -SourceSite $srcSite  -Name $List.ListTitle  -ListTitleUrlSegment $ListTitleWithPrefix -ListTitle $ListTitleWithPrefix  @MigrationParameters
+            }
+            $BatchWiseLists = $MigrationItems | Where-Object { $_.ListTitle -NotIn $renamedLists.ListTitle }
+            if ($BatchWiseLists -and ($Result.Errors -eq 0 -or $null -eq $result)) {
+                $toCopyBatch = Get-List -Site $srcSite | Where-Object { $_.Title -in $BatchWiseLists.ListTitle } 
+                $result = Copy-List -List $toCopyBatch @MigrationParameters 
+            }
+
             #If Uinuque permissions also copy these 
             ForEach ($MigrationItem in $MigrationItems) {
                 if ($MigrationItem.UniquePermissions) {
                     $SourceList = Get-List -Site $SrcSite -Name $MigrationItem.ListTitle
                     $DestinationList = Get-List -Site $dstSite -Name $MigrationItem.ListTitle
-                    $resultPermissions =  Copy-ObjectPermissions -Source $SourceList -Destination $DestinationList     
+                    $resultPermissions = Copy-ObjectPermissions -Source $SourceList -Destination $DestinationList     
                 }
             }
             #To do rename if duplicate 

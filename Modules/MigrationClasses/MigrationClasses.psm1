@@ -17,6 +17,7 @@ class MigrationUnitClass {
     [int]$NodeId
     [String]$NextAction = 'none'
     [String]$DuplicateTargetLibPrefix = ''
+    [String]$TargetLibPrefixGiven = ''
     [int]$MigUnitId = 0
     [dateTime]$LastStartTime
     # constructors
