@@ -109,7 +109,8 @@ function Start-MtHSGMigration {
                 }
                 #Find original source list Title and copy MU
                 $SourceSiteList = $ToCopy | where-Object { $_.RootFolder.SubString(0, $_.RootFolder.Length - 1) -eq $List.ListURL }
-                #$result = Copy-List  -SourceSite $srcSite  -Name $SourceSiteList.Title  -ListTitleUrlSegment $ListTitleWithPrefix -ListTitle $ListTitleWithPrefix  @MigrationParameters
+                
+                $result = Copy-List  -SourceSite $srcSite  -Name $SourceSiteList.Title  -ListTitleUrlSegment $ListTitleWithPrefix -ListTitle $ListTitleWithPrefix  @MigrationParameters
                 Write-Progress "Check custom permissions required for renamed item "
                 if ($List.UniquePermissions) {
                     $DestinationList = Get-List -Site $dstSite -Name $ListTitleWithPrefix
