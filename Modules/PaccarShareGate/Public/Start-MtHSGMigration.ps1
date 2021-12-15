@@ -99,31 +99,36 @@ function Start-MtHSGMigration {
             $ParamInfo = ($MigrationParameters | convertTo-Json -Depth 5) -replace '\s' -replace '"'
             Write-Verbose "Paramaters:  $ParamInfo"
             write-Verbose "Migrating $($migrationItems.count) Lists: $($MigrationItems.ListTitle -join ', ')"
-            $ToCopy = Get-List -Site $srcSite | Where-Object { $_.Title -in $MigrationItems.ListTitle -or $_.Title -in $MigrationItems.ListTitle.trim()} 
+            $ToCopy = Get-List -Site $srcSite | Where-Object { $_.Title -in $MigrationItems.ListTitle -or $_.Title.replace(' ', '' ) -in $MigrationItems.ListTitle } 
             $renamedLists = Rename-RJListsTitlePrefix -Lists $ToCopy -MUS $MigrationItems -dstSite $dstSite.Address
+            $ListTitleWithPrefix
             foreach ($List in $RenamedLists) {
                 if ($List.MergeMUS) { $ListTitleWithPrefix = -Join ($List.ListTitle, $List.TargetLibPrefixGiven) }
                 else {
                     $ListTitleWithPrefix = -Join ($List.ListTitle, $List.DuplicateTargetLibPrefix)                    
                 }
-
-                $result = Copy-List  -SourceSite $srcSite  -Name $List.ListTitle  -ListTitleUrlSegment $ListTitleWithPrefix -ListTitle $ListTitleWithPrefix  @MigrationParameters
+                #Find original source list Title and copy MU
+                $SourceSiteList = $ToCopy | where-Object { $_.RootFolder.SubString(0, $_.RootFolder.Length - 1) -eq $List.ListURL }
+                #$result = Copy-List  -SourceSite $srcSite  -Name $SourceSiteList.Title  -ListTitleUrlSegment $ListTitleWithPrefix -ListTitle $ListTitleWithPrefix  @MigrationParameters
+                Write-Progress "Check custom permissions required for renamed item "
+                if ($List.UniquePermissions) {
+                    $DestinationList = Get-List -Site $dstSite -Name $ListTitleWithPrefix
+                    $result = Copy-ObjectPermissions -Source $SourceSiteList -Destination $DestinationList
+                }
             }
             $BatchWiseLists = $MigrationItems | Where-Object { $_.ListTitle -NotIn $renamedLists.ListTitle }
             if ($BatchWiseLists -and ($Result.Errors -eq 0 -or $null -eq $result)) {
-                $toCopyBatch = Get-List -Site $srcSite | Where-Object { $_.Title -in $BatchWiseLists.ListTitle -or $_.Title -in $MigrationItems.ListTitle.trim()} 
+                $toCopyBatch = Get-List -Site $srcSite | Where-Object { $_.Title -in $BatchWiseLists.ListTitle -or $_.Title -in $MigrationItems.ListTitle.replace(' ', '' ) } 
                 $result = Copy-List -List $toCopyBatch @MigrationParameters 
-            }
-
-            #If Uinuque permissions also copy these 
-            ForEach ($MigrationItem in $MigrationItems) {
-                if ($MigrationItem.UniquePermissions) {
-                    $SourceList = Get-List -Site $SrcSite -Name $MigrationItem.ListTitle
-                    $DestinationList = Get-List -Site $dstSite -Name $MigrationItem.ListTitle
-                    $resultPermissions = Copy-ObjectPermissions -Source $SourceList -Destination $DestinationList     
+                Write-Progress "Check custom permissions required for batch item "
+                ForEach ($MigrationItem in $BatchWiseLists) {
+                    if ($MigrationItem.UniquePermissions) {
+                        $SourceList = Get-List -Site $SrcSite -Name $MigrationItem.ListTitle
+                        $DestinationList = Get-List -Site $dstSite -Name $MigrationItem.ListTitle
+                        $resultPermissions = Copy-ObjectPermissions -Source $SourceList -Destination $DestinationList     
+                    }
                 }
             }
-            #To do rename if duplicate 
         }
     }
 

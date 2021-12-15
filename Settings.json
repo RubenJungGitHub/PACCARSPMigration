@@ -3,7 +3,7 @@
     "FilePath":  {
                      "SettingsFile":  "C:\\GITWorkSpace\\PACCARSPMigration\\Settings.json",
                      "Logging":  "C:\\Beheer\\Data\\Paccar\\Logging",
-                     "SGErrorReports":  "D:\\Beheer\\ShareGateReports",
+                     "SGErrorReports":  "C:\\Beheer\\Data\\Paccar\\ShareGateReports",
                      "MUInput":  "C:\\Beheer\\Data\\Paccar\\MUInput",
                      "Mappings":  "C:\\Beheer\\Data\\Paccar\\Mappings"
                  },
@@ -83,6 +83,6 @@
                       "TemplateMap":  false,
                       "PermissionsMap":  false,
                       "PropertyMap":  false,
-                      "MigrationMode":  "Normal"
+                      "MigrationMode":  "Insane"
                   }
 }

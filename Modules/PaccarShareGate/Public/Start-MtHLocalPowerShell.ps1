@@ -130,6 +130,7 @@ function Start-MtHLocalPowerShell {
                 Write-Warning 'Computername range is empty'
             }
         }
+        $Script:SGErrorReports =  $Settings.FilePath.SGErrorReports
         Write-Verbose "SQL.DatabaseName: $($settings.SQLDetails.Name),$($settings.SQLDetails.Database)"
         Write-Verbose "SQL Database may be deleted: $($settings.SQLDetails.DeleteDB)"
     }

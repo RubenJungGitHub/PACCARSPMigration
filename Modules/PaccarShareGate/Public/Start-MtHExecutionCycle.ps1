@@ -55,7 +55,7 @@ function Start-MtHExecutionCycle {
             else {
                 # Migration went wrong
                 #Export Error Report
-                $SGErrorReports = -join ($script:SGErrorReports, $Result.SessionID, '_Node_', $Settings.NodeId, '.xlsx')
+                $SGErrorReports = -join ($script:SGErrorReports,'\SharegateErrorReport_', $Result.SessionID, '.xlsx')
                 Export-Report $result -Path $SGErrorReports 
                 Register-MtHSQLMigRunResults -MigRunId $NewMigRunId -Result 'failed' -SGSessionId "$($env:COMPUTERNAME.Substring(7, 4))-$($result.SessionId)" -RunTimeInSec $timediff.TotalSeconds
             }
