@@ -56,10 +56,12 @@ function Initialize-MtHSharePoint {
     # if we connect to online we need to connect to the admin URL first
     if ($settings.current.SPVersion -eq 'SharePointOnline') {
         #Initially connect to the first URL from the array of sitecollections in the settingsfile
-        $URL = "https://" + $settings.current.MigrationURLS[0].SourceTenantDomain
-        $adminURL = "$($URL.Substring(0, $URL.IndexOf('.sharepoint.com')))-admin.sharepoint.com"
-        Connect-MtHSharePoint -URL $adminURL -ErrorAction Stop
-        Connect-MtHSharePoint -URL $URL -ErrorAction Stop
+        $CONNECTURL = -Join("https://",$settings.current.MigrationURLS[0].SourceTenantDomain,'/',$settings.current.MigrationURLS[0].ManagedPath[0],$settings.current.MigrationURLS[0].ConnectURL)
+        #$URL = "https://" + $settings.current.MigrationURLS[0].SourceTenantDomain
+        #$adminURL = "$($URL.Substring(0, $URL.IndexOf('.sharepoint.com')))-admin.sharepoint.com"
+       # Connect-MtHSharePoint -URL $adminURL -ErrorAction Stop
+        #Connect-MtHSharePoint -URL $URL -ErrorAction Stop
+        Connect-MtHSharePoint -URL $CONNECTURL -ErrorAction Stop
     }
     else {
         #Connect to the source site collection should go well

@@ -30,13 +30,13 @@
     },
     {
       "Name": "AEF",
-      "Instance": "NLWBUZAAS98\\SQLExpress,1433",
+      "Instance": "SERVERAS98\\SQLExpress,1433",
       "Database": "SQLAEF",
       "DeleteDB": true
     },
     {
       "Name": "TestonAEF",
-      "Instance": "NLWBUZAAS98\\SQLExpress,1433",
+      "Instance": "SERVERAS98\\SQLExpress,1433",
       "Database": "SQLTestAEF",
       "DeleteDB": true
     },
@@ -48,7 +48,7 @@
     },
     {
       "Name": "TestonAccept",
-      "Instance": "NLWBUZAAS98\\SQLExpress,1433",
+      "Instance": "SERVERAS98\\SQLExpress,1433",
       "Database": "SQLTestAccept",
       "DeleteDB": true
     },
@@ -127,7 +127,7 @@
       ],
       "TimeZone": "Local",
       "ComputerNames": [
-        "NLWBUZAAS98"
+        "SERVERAS98"
       ],
       "SharePointComputerName": "NLWBUZDWS03",
       "SPScheduledTaskAccountName": "ACC-MBZHS\\svc-SPd-SchedTask",

@@ -99,7 +99,7 @@ function Start-MtHSGMigration {
             $ParamInfo = ($MigrationParameters | convertTo-Json -Depth 5) -replace '\s' -replace '"'
             Write-Verbose "Paramaters:  $ParamInfo"
             write-Verbose "Migrating $($migrationItems.count) Lists: $($MigrationItems.ListTitle -join ', ')"
-            $ToCopy = Get-List -Site $srcSite | Where-Object { $_.Title -in $MigrationItems.ListTitle } 
+            $ToCopy = Get-List -Site $srcSite | Where-Object { $_.Title -in $MigrationItems.ListTitle -or $_.Title -in $MigrationItems.ListTitle.trim()} 
             $renamedLists = Rename-RJListsTitlePrefix -Lists $ToCopy -MUS $MigrationItems -dstSite $dstSite.Address
             foreach ($List in $RenamedLists) {
                 if ($List.MergeMUS) { $ListTitleWithPrefix = -Join ($List.ListTitle, $List.TargetLibPrefixGiven) }
@@ -111,7 +111,7 @@ function Start-MtHSGMigration {
             }
             $BatchWiseLists = $MigrationItems | Where-Object { $_.ListTitle -NotIn $renamedLists.ListTitle }
             if ($BatchWiseLists -and ($Result.Errors -eq 0 -or $null -eq $result)) {
-                $toCopyBatch = Get-List -Site $srcSite | Where-Object { $_.Title -in $BatchWiseLists.ListTitle } 
+                $toCopyBatch = Get-List -Site $srcSite | Where-Object { $_.Title -in $BatchWiseLists.ListTitle -or $_.Title -in $MigrationItems.ListTitle.trim()} 
                 $result = Copy-List -List $toCopyBatch @MigrationParameters 
             }
 

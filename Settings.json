@@ -1,7 +1,7 @@
 {
     "Validate":  true,
     "FilePath":  {
-                     "SettingsFile":  "C:\\GITWorkSpace\\Paccar\\PACCARSPMigration\\Settings.json",
+                     "SettingsFile":  "C:\\GITWorkSpace\\PACCARSPMigration\\Settings.json",
                      "Logging":  "C:\\Beheer\\Data\\Paccar\\Logging",
                      "SGErrorReports":  "D:\\Beheer\\ShareGateReports",
                      "MUInput":  "C:\\Beheer\\Data\\Paccar\\MUInput",
@@ -19,13 +19,13 @@
     "DatabaseDetails":  [
                             {
                                 "Name":  "O365",
-                                "Instance":  ".\\SQLExpress",
+                                "Instance":  "DAFEHVLPP99246",
                                 "Database":  "PACCARSQLO365",
                                 "DeleteDB":  true
                             },
                             {
                                 "Name":  "TestonO365",
-                                "Instance":  ".\\SQLExpress",
+                                "Instance":  "DAFEHVLPP99246",
                                 "Database":  "PACCARSQLTestO365",
                                 "DeleteDB":  true
                             },
@@ -39,19 +39,20 @@
     "EnvironmentDetails":  [
                                {
                                    "Name":  "o365",
-                                   "UserName":  "admin@rubentesttenant.onmicrosoft.com",
-                                   "LoginType":  "Credentials",
+                                   "UserName":  "ruben.jung@paccar.onmicrosoft.com",
+                                   "LoginType":  "UseWebLogin",
                                    "SPVersion":  "SharePointOnline",
                                    "MigrationURLS":  [
                                                          {
-                                                             "SourceTenantDomain":  "rubentesttenant.sharepoint.com",
-                                                             "DestinationTenantDomain":  "rubentesttenant.sharepoint.com",
+                                                             "SourceTenantDomain":  "paccar.sharepoint.com",
+                                                             "DestinationTenantDomain":  "paccar.sharepoint.com",
                                                              "ManagedPath":  [
                                                                                  "sites"
                                                                              ],
+                                                             "ConnectURL":  "/DAF-OPS-Site",
                                                              "SitePrefix":  "M1-",
                                                              "DemoSite":  [
-                                                                              "/sites/TSBuzaDemoSource"
+                                                                              ""
                                                                           ],
                                                              "DemoList":  "Demo"
                                                          }
@@ -64,7 +65,7 @@
                                    "ComputerNames":  [
                                                          "DAFEHVLPP99246"
                                                      ],
-                                   "EncryptedPassword":  "01000000d08c9ddf0115d1118c7a00c04fc297eb010000000807dc7f5ea6c34da19a712c06863075000000000200000000001066000000010000200000006c4bec5427ade815c76aa29e8d5221ff61a6b5113f85c10cfe7af4ca26d59f05000000000e800000000200002000000055c9b10fdaf30dfdf19d6298af59092aec290609f6e940a21f3a25c953d4ca7f20000000b80055c48a2c88d5dd178775d7e74742ce8580df0535825b7e7a81e0df8c46494000000015c1282f2a4ace7bea8871a63d9b297ccad29ecfea0f80723491d0386f565b8a21c6a97ceb58a9f3b3118f10263abba30b785a39199254fc52ec68f431bf298f"
+                                   "EncryptedPassword":  "01000000d08c9ddf0115d1118c7a00c04fc297eb0100000092a460a5a1a50541ad4143fce22205e40000000002000000000003660000c0000000100000002790c7c4935fe7163bab420c29378edf0000000004800000a000000010000000cd1b20e2ff86b983cc8a9db41145c2632000000023754f6e84de120d56b5744dfaf8c8c31b47f9af1d956b8ee8b610aa159fb1fe14000000c54aa7f8f32db118e6add160cb47ee85b345e4f8"
                                }
                            ],
     "StartUp":  {
@@ -78,10 +79,10 @@
                     "Elevated":  false
                 },
     "Sharegate":  {
-                      "UserMap":  false,
+                      "UserMap":  true,
                       "TemplateMap":  false,
                       "PermissionsMap":  false,
                       "PropertyMap":  false,
-                      "MigrationMode":  "Insane"
+                      "MigrationMode":  "Normal"
                   }
 }

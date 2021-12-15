@@ -16,7 +16,13 @@ function Start-RJDBRegistrationCycle {
         #Region construct form 
         #  csv should have Headers 'MigUnitId', 'CurrentMUStatus', 'NewMUStatus', 'NodeId'
         $CSVItems = Import-Csv -Path $FileBrowser.FileName -Delimiter ';' | Sort-Object -Property TargetURL, SourceURL
+
         $CSVItems = Resolve-RJCSVItems $CSVItems
+
+        
+
+        $CSVItemsGrouped = $CSVItems |  Group-Object -Property CompleteSourceURL
+        
         #For demo purposes only because sourceURL alters when ending on Sites
     
         #Oneliner Not working 
@@ -24,29 +30,32 @@ function Start-RJDBRegistrationCycle {
 
         #Show Nodeselector form  for all grouped SourceURLS 
         $frmNodeSelector = New-Object system.Windows.Forms.Form
-        $btnProcess = New-Object System.Windows.Forms.Button
-        $btnProcess.Location = New-Object System.Drawing.Size(1000, 900)
-        $btnProcess.Size = New-Object System.Drawing.Size(120, 23)
-        $btnProcess.Text = 'Process'
-        $btnProcess.DialogResult = [System.Windows.Forms.DialogResult]::OK
-        $frmNodeSelector.Controls.Add($btnProcess)
-        $btnCancel = New-Object System.Windows.Forms.Button
-        $btnCancel.Location = New-Object System.Drawing.Size(1150, 900)
-        $btnCancel.Size = New-Object System.Drawing.Size(120, 23)
-        $btnCancel.Text = 'Cancel'
-        $btnCancel.DialogResult = [System.Windows.Forms.DialogResult]::Cancel
-        $frmNodeSelector.Controls.Add($btnCancel)
-        $frmNodeSelector.ClientSize = '1400,1000'
-        #$frmNodeSelector.WindowState = 'Maximized'
+
+        $frmNodeSelector.ClientSize = '1400,600'
         $frmNodeSelector.text = 'Migration unit sourceurl group node selector'
         $frmNodeSelector.BackColor = '#ffffff'
         $frmNodeSelector.StartPosition = 'CenterScreen'
         $frmNodeSelector.FormBorderStyle = [System.Windows.Forms.FormBorderStyle]::FixedDialog
+
+        $btnProcess = New-Object System.Windows.Forms.Button
+        $btnProcess.Location = New-Object System.Drawing.Size(1000, 550)
+        $btnProcess.Size = New-Object System.Drawing.Size(120, 23)
+        $btnProcess.Text = 'Process'
+        $btnProcess.DialogResult = [System.Windows.Forms.DialogResult]::OK
+        $frmNodeSelector.Controls.Add($btnProcess)
+
+        $btnCancel = New-Object System.Windows.Forms.Button
+        $btnCancel.Location = New-Object System.Drawing.Size(1150, 550)
+        $btnCancel.Size = New-Object System.Drawing.Size(120, 23)
+        $btnCancel.Text = 'Cancel'
+        $btnCancel.DialogResult = [System.Windows.Forms.DialogResult]::Cancel
+        $frmNodeSelector.Controls.Add($btnCancel)
+
         $LVSource = New-Object System.Windows.Forms.ListView 
         $LVSource.View = 'Details'
         #$LVSource.FullRowSelect = $true
         $LVSource.Location = New-Object System.Drawing.Point(80, 60) 
-        $LVSource.Size = New-Object System.Drawing.Size(1200, 800) 
+        $LVSource.Size = New-Object System.Drawing.Size(1200, 400) 
         [void]$LVSource.Columns.Add('#')
         $LVSource.Columns[0].Width = 40
         [void]$LVSource.Columns.Add('SourceURL')
@@ -56,7 +65,7 @@ function Start-RJDBRegistrationCycle {
         $LVSource.Columns[2].Width = 450
         [void]$LVSource.Columns.Add('Action')
         $LVSource.Columns[3].Width = 80
-        $CSVItemsGrouped = $CSVItems |  Group-Object -Property CompleteSourceURL
+
         foreach ($CSVItemGroup in $CSVItemsGrouped) {
             $i++
             $LVi = New-Object System.Windows.Forms.ListViewItem($i)

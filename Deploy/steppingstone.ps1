@@ -34,7 +34,7 @@ $steppingstones = @(
     [PSCustomObject]@{
         Name               = 'Acceptance'
         Computername       = 'NLWBUZST04'
-        destinationservers = @('nlwbuzaaS98', 'nlwbuzaaS96')
+        destinationservers = @('SERVERaS98', 'SERVERaS96')
     },
     [PSCustomObject]@{
         Name               = 'Production'

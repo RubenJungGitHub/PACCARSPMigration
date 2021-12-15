@@ -45,7 +45,7 @@ if ($env:COMPUTERNAME -in @('LAPTOP-RDDO0DAV', 'DESKTOP-Q0P52LG')) {
 }
 
 # push en pull van de Buza Servers
-if ($env:COMPUTERNAME -in @('NLWBUZAAS98', 'NLWBUZAAS96', 'NLWBUZPAS99','NLWBUZPAS95','NLWBUZPAS97')) {
+if ($env:COMPUTERNAME -in @('SERVERAS98', 'SERVERAS96', 'NLWBUZPAS99','NLWBUZPAS95','NLWBUZPAS97')) {
     $extension = $env:COMPUTERNAME.Substring(7, 4)
     $IncomingGitRepo = 'D:\software\gitbundles\PaccarShareGate.bundle'
     $OutgoingGitRepo = "D:\software\gitbundles\PaccarShareGateback-$extension.bundle"

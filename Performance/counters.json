@@ -1,72 +1,72 @@
 ﻿{
     "servers": [
         {
-            "old": "\\\\NLWBUZAAS96\\",
+            "old": "\\\\SERVERAS96\\",
             "new": "",
             "name" : "ShareGate server 1"
         },
         {
-            "old": "\\\\NLWBUZAAS98\\",
+            "old": "\\\\SERVERAS98\\",
             "new": "",
             "name" : "ShareGate server 2"
         },
         {
-            "old": "\\\\NLWBUZAWS50\\",
+            "old": "\\\\SERVERWS50\\",
             "new": "",
             "name" : "SP2019 Front-End server 1"
         },
         {
-            "old": "\\\\NLWBUZAWS52\\",
+            "old": "\\\\SERVERWS52\\",
             "new": "",
             "name" : "SP2019 Front-End server 2"
         },
         {
-            "old": "\\\\NLWBUZAWS54\\",
+            "old": "\\\\SERVERWS54\\",
             "new": "",
             "name" : "SP2019 Back-End server 1"
         },
         {
-            "old": "\\\\NLWBUZAWS56\\",
+            "old": "\\\\SERVERWS56\\",
             "new": "",
             "name" : "SP2019 Back-End server 2"
         },
         {
-            "old": "\\\\NLWBUZAWS02\\",
+            "old": "\\\\SERVERWS02\\",
             "new": "",
             "name" : "SP2013 Front-End server 1"
         },
         {
-            "old": "\\\\NLWBUZAWS04\\",
+            "old": "\\\\SERVERWS04\\",
             "new": "",
             "name" : "SP2013 Front-End server 2"
         },
         {
-            "old": "\\\\NLWBUZAWS10\\",
+            "old": "\\\\SERVERWS10\\",
             "new": "",
             "name" : "SP2013 Back-End server 1"
         },
         {
-            "old": "\\\\NLWBUZAWS12\\",
+            "old": "\\\\SERVERWS12\\",
             "new": "",
             "name" : "SP2013 Back-End server 2"
         },
         {
-            "old": "\\\\NLWBUZACN02\\",
+            "old": "\\\\SERVERCN02\\",
             "new": "",
             "name" : "SP2013 SQL Cluster Node 1"
         },
         {
-            "old": "\\\\NLWBUZACN04\\",
+            "old": "\\\\SERVERCN04\\",
             "new": "",
             "name" : "SP2013 SQL Cluster Node 2"
         },
         {
-            "old": "\\\\NLWBUZACN12\\",
+            "old": "\\\\SERVERCN12\\",
             "new": "",
             "name" : "SP2019 SQL Cluster Node 1"
         },
         {
-            "old": "\\\\NLWBUZACN14\\",
+            "old": "\\\\SERVERCN14\\",
             "new": "",
             "name" : "SP2019 SQL Cluster Node 2"
         }

@@ -6,7 +6,7 @@ Using Module MigrationClasses
 BeforeDiscovery {
     Start-MtHLocalPowerShell -settingfile "$(Get-MtHGitDirectory)\Settings.json" -test
     $script:skip = !$settings.SQLdetails -or !$settings.SQLdetails.DeleteDB
-    $script:skipsitecheck = $env:Computername -in @('nlwbuzpaS97','nlwbuzpaS95','nlwbuzaaS98')
+    $script:skipsitecheck = $env:Computername -in @('nlwbuzpaS97','nlwbuzpaS95','SERVERaS98')
 }
 
 Describe 'SharePoint.tests.ps1: Testing the SharePoint Interface' -Tag 'Integration' {
