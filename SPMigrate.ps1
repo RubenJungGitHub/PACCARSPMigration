@@ -3,7 +3,8 @@ param()
 
 #initialize
 #Start-MtHLocalPowerShell -settingfile "$(Get-MtHGitDirectory)\settings.json" -initsp -Verbose
-Start-MtHLocalPowerShell -settingfile "$(Get-MtHGitDirectory)\settings.json" -Verbose -initsp
+#start-MtHLocalPowerShell -settingfile "$(Get-MtHGitDirectory)\settings.json" -Verbose -initsp
+start-MtHLocalPowerShell -settingfile "$(Get-MtHGitDirectory)\settings.json" -Verbose 
 # open the demo site and fill the Demo Library
 
 # Create testdata : check if the SP demo library (locally stored) is already filled, if not fill it
