@@ -45,7 +45,7 @@
                                    "MigrationURLS":  [
                                                          {
                                                              "SourceTenantDomain":  "paccar.sharepoint.com",
-                                                             "DestinationTenantDomain":  "paccar.sharepoint.com",
+                                                             "DestinationTenantDomain":"paccar.sharepoint.com",
                                                              "ManagedPath":  [
                                                                                  "sites"
                                                                              ],

@@ -66,6 +66,7 @@ function Start-MtHSGMigration {
         }
         else {
             $dstSite = Connect-Site -Url $MigrationItems[0].DestinationURL
+            $dstSite = Connect-Site -Url $MigrationItems[0].DestinationURL -Browser -DisableSSO
         }
     }
     $TSConnectTarget = New-TimeSpan -Start $TargetConnectStart -End (Get-Date)
