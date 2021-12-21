@@ -20,7 +20,7 @@ function Start-MtHExecutionCycle {
 
     $totalitems = $items.Count
     $i = 0
-    $siteparts = $items | Group-Object -Property NextAction, SourceURL,  DestinationURL, NextAction, ShareGateCopySettings, MUStatus | Sort-Object {$_.SourceURL, $_.ListTitle}
+    $siteparts = $items | Group-Object -Property NextAction, SourceURL, DestinationURL, NextAction, ShareGateCopySettings, MUStatus | Sort-Object { $_.SourceURL, $_.ListTitle }
     $siteparts = $siteparts | Sort-Object  $_.$NextAction -Descending
     $Activity = 'Processing execution cycle : '
     foreach ($part in $siteparts) {
@@ -29,7 +29,7 @@ function Start-MtHExecutionCycle {
         $MigrunIds = [System.Collections.Generic.List[int]]::new()
         foreach ($item in $part.group) {
             $Fake = ($Item.MUStatus -eq 'fake')
-            $Activity += If($Fake){'Execute fake Migration'}else{'Execute real Migration'}
+            $Activity += If ($Fake) { 'Execute fake Migration' }else { 'Execute real Migration' }
             Write-Progress -Activity $activity -Status "$i of $totalitems Complete" -PercentComplete $($i++ * 100 / $totalitems)
             #put started into SQL database
             $NewMigRunId = New-MtHSQLMigRun -MigrationType $item.NextAction -ItemNr $item.MigUnitId -Fake:$fake
@@ -55,9 +55,10 @@ function Start-MtHExecutionCycle {
             else {
                 # Migration went wrong
                 #Export Error Report
-                $SGErrorReports = -join ($script:SGErrorReports,'\SharegateErrorReport_', $Result.SessionID, '.xlsx')
-                #??? Export goes wrong. Unclear why
-                #Export-Report $result -Path $SGErrorReports 
+                $SGErrorReports = -join ($script:SGErrorReports, '\SharegateErrorReport_', $Result.SessionID, '.xlsx')
+                if(!(Test-Path -path C:\Beheer\Data\Paccar\ShareGateReports\Test1.txt)) {               
+                    Export-Report -SessionId $result.SessionID -Path $SGErrorReports -overwrite
+                }
                 Register-MtHSQLMigRunResults -MigRunId $NewMigRunId -Result 'failed' -SGSessionId "$($env:COMPUTERNAME.Substring(7, 4))-$($result.SessionId)" -RunTimeInSec $timediff.TotalSeconds
             }
         }
