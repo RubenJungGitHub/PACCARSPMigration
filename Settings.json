@@ -41,6 +41,7 @@
                                    "Name":  "o365",
                                    "UserName":  "ruben.jung@paccar.onmicrosoft.com",
                                    "LoginType":  "UseWebLogin",
+                                   "DIsableSSO":  false,
                                    "SPVersion":  "SharePointOnline",
                                    "MigrationURLS":  [
                                                          {
@@ -64,9 +65,8 @@
                                    "MUSourceItemsDeleteSync":  false,
                                    "ComputerNames":  [
                                                          "DAFEHVLPP99304"
-                                                     ],
-                                   "EncryptedPassword":  "01000000d08c9ddf0115d1118c7a00c04fc297eb0100000092a460a5a1a50541ad4143fce22205e40000000002000000000003660000c0000000100000002790c7c4935fe7163bab420c29378edf0000000004800000a000000010000000cd1b20e2ff86b983cc8a9db41145c2632000000023754f6e84de120d56b5744dfaf8c8c31b47f9af1d956b8ee8b610aa159fb1fe14000000c54aa7f8f32db118e6add160cb47ee85b345e4f8"
-                               }
+                                                     ]
+                                 }
                            ],
     "StartUp":  {
                     "LocalModules":  "PaccarShareGate",

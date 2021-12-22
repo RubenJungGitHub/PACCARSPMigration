@@ -17,6 +17,7 @@ function Start-MtHExecutionCycle {
     #$items = Invoke-MtHSQLquery -QueryName 'E-ALL' | Where-Object { $_.NextAction -in $NextAction }
     #$items += Invoke-MtHSQLquery -QueryName 'E-Fake' | Where-Object { $_.NextAction -in $NextAction }
     $items = Invoke-MtHSQLquery -QueryName 'E-ALLANDFAKE' | Where-Object { $_.NextAction -in $NextAction }
+    $totalitems = $items.Count
     $SiteCollectionPermissionsProcesed = [System.Collections.Generic.List[string]]::new()
     #$totalitems = $items.Count
     $i = 0
@@ -24,32 +25,43 @@ function Start-MtHExecutionCycle {
     $siteparts = $siteparts | Sort-Object  $_.$NextAction -Descending
     $Activity = 'Processing execution cycle : '
     foreach ($part in $siteparts) {
-        #start process
-        $StePermissionsSource = ($Part.Group | Where-Object { $_.SitePermissionsSource -ne '' } | Select-Object -first 1).SitePermissionsSource
-        if ($StePermissionsSource -ne '') {
-            $MIgrateSitePermissions = ($StePermissionsSource -ne '' -and $Part.Name -Notin $SiteCollectionPermissionsProcesed)
-            $SiteCollectionPermissionsProcesed.Add($Part.Name)
-        }
         $StartTime = Get-Date
-        $MigrunIds = [System.Collections.Generic.List[int]]::new()
-        $result = Start-MtHSGMigration  -MigrationItems ($part.group | Resolve-MtHMUClass)  -LogPerformanceTests:$LogPerformanceTests  -MigrateSitePermissions:$MigrateSitePermissions
-
+        $MigrunIDS = [System.Collections.Generic.List[PSCustomObject]]::new()
+        $StePermissionsSource = ($Part.Group | Where-Object { $null -ne $_.SitePermissionsSource } | Select-Object -first 1).SitePermissionsSource
+        $MIgrateSitePermissions = ($null -ne $StePermissionsSource -and $Part.Group[0].DestinationUrl -Notin $SiteCollectionPermissionsProcesed)
+        $SiteCollectionPermissionsProcesed.Add($Part.Group[0].DestinationUrl)
+        foreach ($item in $part.group) {
+            $fake = ($Item.MuStatus -eq 'fake')
+            Write-Progress -Activity $activity -Status "$i of $totalitems Complete" -PercentComplete $($i++ * 100 / $totalitems)
+            #put started into SQL database
+            $NewMigRunId = New-MtHSQLMigRun -MigrationType $item.NextAction -ItemNr $item.MigUnitId -Fake:$fake
+            $MigRunID = [PSCustomObject]@{
+                MigRunID  = $NewMigRunId
+                MigUnitID = $Item.MigUnitID            
+            }
+            $MigrunIds.Add($MigRunID)
+ 
+            #Run the Fake migration if appropriate
+        }
+        $migresults = Start-MtHSGMigration  -MigrationItems ($part.group | Resolve-MtHMUClass)  -LogPerformanceTests:$LogPerformanceTests  -MigrateSitePermissions:$MigrateSitePermissions -DisableSSO:$Settings.Current.DisableSSO
+        $results = $migresults | Where-object {$null -ne  $_.Result}
         $EndTime = Get-Date
         $timediff = New-TimeSpan -Start $startTime -End $EndTime
-        foreach ($NewMigRunId in $MigrunIds) {
+        foreach ($result in $results) {
+            $MigRunResults =  $MigRunIDS | Where-object {$_.MigUnitID -in $Result.MigUNitIDs}
             #put result back into SQL database
-            if ($result.Errors -eq 0) {
+            if ($result.result.Errors -eq 0) {
                 # Migration went well
-                Register-MtHSQLMigRunResults -MigRunId $NewMigRunId -Result 'success' -SGSessionId "$($env:COMPUTERNAME.Substring(7, 4))-$($result.SessionId)" -RunTimeInSec $timediff.TotalSeconds
+                $MigRunResults | ForEach-Object { Register-MtHSQLMigRunResults -MigRunId $_.MigRunID -Result 'success' -SGSessionId "$($env:COMPUTERNAME.Substring(7, 4))-$($result.Result.SessionId)" -RunTimeInSec $timediff.TotalSeconds }
             }
             else {
                 # Migration went wrong
                 #Export Error Report
-                $SGErrorReports = -join ($script:SGErrorReports, '\SharegateErrorReport_', $Result.SessionID, '.xlsx')
+                $SGErrorReports = -join ($script:SGErrorReports, '\SharegateErrorReport_', $result.result.SessionID, '.xlsx')
                 if (!(Test-Path -path SGErrorReports)) {               
-                    Export-Report -SessionId $result.SessionID -Path $SGErrorReports -overwrite
+                    Export-Report -SessionId $result.result.SessionID -Path $SGErrorReports -overwrite
                 }
-                Register-MtHSQLMigRunResults -MigRunId $NewMigRunId -Result 'failed' -SGSessionId "$($env:COMPUTERNAME.Substring(7, 4))-$($result.SessionId)" -RunTimeInSec $timediff.TotalSeconds
+                $MigRunResults | ForEach-Object { Register-MtHSQLMigRunResults -MigRunId $_.MigRunID -Result 'failed' -SGSessionId "$($env:COMPUTERNAME.Substring(7, 4))-$($result.Result.SessionId)" -RunTimeInSec $timediff.TotalSeconds }
             }
         }
     }

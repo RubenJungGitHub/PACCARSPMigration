@@ -4,10 +4,11 @@ function Start-MtHSGMigration {
     Param(
         [parameter(Mandatory = $true)] [MigrationUnitClass[]]$MigrationItems,
         [switch]$LogPerformanceTests,
-        [switch]$MigrateSitePermissions
+        [switch]$MigrateSitePermissions,
+        [switch]$DisableSSO
     )
     $MigrationStart = Get-Date
-    
+    $Results = [System.Collections.Generic.List[PSCustomObject]]::new()
     # $MigrationItems = @($MigrationItem)
     Write-Verbose "Initiate Load mappings and copy settings"
     $MappingSettings = New-MappingSettings
@@ -50,10 +51,10 @@ function Start-MtHSGMigration {
     $SourceConnectStart = Get-Date  
     if ($MigrationItems[0].SourceURL.length -gt 5) {
         if ($settings.current.LoginType -eq 'Credentials') {
-            $srcSite = Connect-Site -Url $MigrationItems[0].SourceURL -Credential $cred -AllowConnectionFallback
+            $srcSite = Connect-Site -Url $MigrationItems[0].SourceURL -Credential $cred 
         }
         else {
-            $srcSite = Connect-Site -Url $MigrationItems[0].SourceURL -AllowConnectionFallback
+            $srcSite = Connect-Site -Url $MigrationItems[0].SourceURL 
         }
     }
     $TSConnectSource = New-TimeSpan -Start $SourceConnectStart -End (Get-Date)
@@ -62,10 +63,10 @@ function Start-MtHSGMigration {
     $TargetConnectStart = Get-Date  
     if ($MigrationItems[0].DestinationURL.length -gt 5) {
         if ($settings.current.LoginType -eq 'Credentials') {
-            $dstSite = Connect-Site -Url $MigrationItems[0].DestinationURL -Credential $cred -AllowConnectionFallback
+            $dstSite = Connect-Site -Url $MigrationItems[0].DestinationURL -Credential $cred 
         }
         else {
-            $dstSite = Connect-Site -Url $MigrationItems[0].DestinationURL -AllowConnectionFallback
+            $dstSite = Connect-Site -Url $MigrationItems[0].DestinationURL -Browser -DisableSSO:$DisableSSO
         }
     }
     $TSConnectTarget = New-TimeSpan -Start $TargetConnectStart -End (Get-Date)
@@ -88,7 +89,7 @@ function Start-MtHSGMigration {
     
     $ActualMigrationStart = Get-Date
     if ($MigrateSitePermissions) {
-        Copy-ObjectPermissions -Source $srcSite -Destination $dstSite
+       Copy-ObjectPermissions -Source $srcSite -Destination $dstSite | out-null
     }
 
 
@@ -114,24 +115,43 @@ function Start-MtHSGMigration {
                 }
                 #Find original source list Title and copy MU
                 $SourceSiteList = $ToCopy | where-Object { $_.RootFolder.SubString(0, $_.RootFolder.Length - 1) -eq $List.ListURL }
-                
-                $result = Copy-List  -SourceSite $srcSite  -Name $SourceSiteList.Title  -ListTitleUrlSegment $ListTitleWithPrefix -ListTitle $ListTitleWithPrefix  -NoWorkflows -NoWebParts -NoNintexWorkflowHistory -ForceNewListExperience -NoCustomizedListForms -WaitForImportCompletion  @MigrationParameters
+                $result = Copy-List  -SourceSite $srcSite  -Name $SourceSiteList.Title  -ListTitleUrlSegment $ListTitleWithPrefix -ListTitle $ListTitleWithPrefix -NoWorkflows -NoWebParts -NoNintexWorkflowHistory -ForceNewListExperience -NoCustomizedListForms -WaitForImportCompletion  @MigrationParameters
+                $MigrationresultItem = [PSCustomObject]@{
+                    Result     = $result
+                    MigUnitIDs = $List.MigUNitID
+                }
+                $Results.Add($MigrationresultItem)
                 Write-Progress "Check custom permissions required for renamed item "
                 if ($List.UniquePermissions) {
                     $DestinationList = Get-List -Site $dstSite -Name $ListTitleWithPrefix
                     $result = Copy-ObjectPermissions -Source $SourceSiteList -Destination $DestinationList
+                    $MigrationresultItem = [PSCustomObject]@{
+                        Result     = $result
+                        MigUnitIDs = $List.MigUNitID
+                    }
+                    $Results.Add($MigrationresultItem)
                 }
             }
             $BatchWiseLists = $MigrationItems | Where-Object { $_.ListTitle -NotIn $renamedLists.ListTitle }
-            if ($BatchWiseLists -and ($Result.Errors -eq 0 -or $null -eq $result)) {
+            if ($BatchWiseLists ) {
                 $toCopyBatch = Get-List -Site $srcSite | Where-Object { $_.Title -in $BatchWiseLists.ListTitle -or $_.Title -in $MigrationItems.ListTitle.replace(' ', '' ) } 
-                $result = Copy-List -List $toCopyBatch -NoWorkflows -NoWebParts -NoNintexWorkflowHistory -ForceNewListExperience -NoCustomizedListForms  -WaitForImportCompletion @MigrationParameters
+                $result = Copy-List -List $toCopyBatch  -NoWorkflows -NoWebParts -NoNintexWorkflowHistory -ForceNewListExperience -NoCustomizedListForms  -WaitForImportCompletion @MigrationParameters
+                $MigrationresultItem = [PSCustomObject]@{
+                    Result     = $result
+                    MigUnitIDs = $MigrationItems.MigUNitID
+                }
+                $Results.Add($MigrationresultItem)
                 Write-Progress "Check custom permissions required for batch item "
                 ForEach ($MigrationItem in $BatchWiseLists) {
                     if ($MigrationItem.UniquePermissions) {
                         $SourceList = Get-List -Site $SrcSite -Name $MigrationItem.ListTitle
                         $DestinationList = Get-List -Site $dstSite -Name $MigrationItem.ListTitle
-                        $resultPermissions = Copy-ObjectPermissions -Source $SourceList -Destination $DestinationList     
+                        $result = Copy-ObjectPermissions -Source $SourceList -Destination $DestinationList 
+                        $MigrationresultItem = [PSCustomObject]@{
+                            Result     = $result
+                            MigUnitIDs = $MigrationItems.MigUNitID
+                        }
+                        $Results.Add($ReMigrationresultItemsult)
                     }
                 }
             }
@@ -147,5 +167,5 @@ function Start-MtHSGMigration {
         If ($Null -eq $Result) { $Result = 'test' }
         Register-RJPerformanceTestResults -MigrationUnit $MigrationItems[0] -MigrationStart  $MigrationStart -MigrationEnd $MigrationEnd -MigrationResult $Result -TSLoadMappings $TSLoadMappings -TSConnectSource $TSConnectSource -TSConnectTarget $TSConnectTarget -TSMigration $TSMigration
     } 
-    return $result
+    return $results
 }
