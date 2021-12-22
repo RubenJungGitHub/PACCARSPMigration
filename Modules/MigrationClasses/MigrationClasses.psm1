@@ -2,6 +2,7 @@ class MigrationUnitClass {
     [string]$SourceSC
     [string]$EnvironmentName
     [string]$CompleteSourceUrl
+    [string]$SitePermissionsSource
     [string]$SourceUrl
     [string]$DestinationUrl
     [string]$ListUrl = ''

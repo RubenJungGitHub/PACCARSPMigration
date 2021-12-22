@@ -15,13 +15,13 @@ function Start-RJDBRegistrationCycle {
     If ($FileBrowser.FileNames -like '*\*') {
         #Region construct form 
         #  csv should have Headers 'MigUnitId', 'CurrentMUStatus', 'NewMUStatus', 'NodeId'
-        $CSVItems = Import-Csv -Path $FileBrowser.FileName -Delimiter ';' | Sort-Object -Property TargetURL, SourceURL
+        $CSVItems = Import-Csv -Path $FileBrowser.FileName -Delimiter ';' 
 
-        $CSVItems = Resolve-RJCSVItems $CSVItems
+        $CSVItems = Resolve-RJCSVItems $CSVItems | Sort-Object CompleteSourceURL
 
         
 
-        $CSVItemsGrouped = $CSVItems |  Group-Object -Property CompleteSourceURL
+        $CSVItemsGrouped = $CSVItems |  Group-Object -Property CompleteSourceURL | Sort-Object CompleteSourceURL
         
         #For demo purposes only because sourceURL alters when ending on Sites
     
@@ -59,7 +59,6 @@ function Start-RJDBRegistrationCycle {
         [void]$LVSource.Columns.Add('#')
         $LVSource.Columns[0].Width = 40
         [void]$LVSource.Columns.Add('SourceURL')
-        #$LVSource.LabelEdit = $true
         $LVSource.Columns[1].Width = 450
         [void]$LVSource.Columns.Add('TargetURL')
         $LVSource.Columns[2].Width = 450

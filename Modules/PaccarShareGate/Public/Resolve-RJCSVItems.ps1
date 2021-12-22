@@ -7,6 +7,7 @@ function Resolve-RJCSVItems {
     )
     process {
         $returnlist = [System.Collections.Generic.List[MigrationUnitClass]]::new()
+        $SitePermissions =  $Items | Where-Object { $_."SitePermissionsSource" -ne "" } |  Select-Object -Property "SitePermissionsSource"
         $TargetSite1 = $Items | Where-Object { $_."Target site 1" -ne "" } |  Select-Object -Property "Target site 1"
         $TargetSite2 = $Items | Where-Object { $_."Target site 2" -ne "" } |  Select-Object -Property "Target site 2"
         $TargetSite3 = $Items | Where-Object { $_."Target site 3" -ne "" } |  Select-Object -Property "Target site 3"
@@ -43,6 +44,7 @@ function Resolve-RJCSVItems {
             $MU.SourceSC = $TSMU."Bron Site Collectie"
             $MU.DestinationURL = $TargetSite2.'Target Site 2'
             $MU.CompleteSourceURL = $TSMU.'Source 2 MUS'
+            $MU.SitePermissionsSource = $SitePermissions.SitePermissionsSource
             $MU.TargetLibPrefixGiven = $TSMU.'MU Prefix 2'
             $MU.DuplicateTargetLibPrefix = $TSMU.'MU Prefix 2'
             $MU.SourceURL, $MU.ListURL, $MU.ListTitle = ExtractFrom-RJSourceURL -sourceurl $TSMU.'Source 2 MUS'
@@ -57,6 +59,7 @@ function Resolve-RJCSVItems {
             $MU.SourceSC = $TSMU."Bron Site Collectie"
             $MU.DestinationURL = $TargetSite3.'Target Site 3'
             $MU.CompleteSourceURL = $TSMU.'Source 3 MUS'
+            $MU.SitePermissionsSource = $SitePermissions.SitePermissionsSource
             $MU.TargetLibPrefixGiven = $TSMU.'MU Prefix 3'
             $MU.DuplicateTargetLibPrefix = $TSMU.'MU Prefix 3'
             $MU.SourceURL, $MU.ListURL, $MU.ListTitle = ExtractFrom-RJSourceURL -sourceurl $TSMU.'Source 3 MUS'

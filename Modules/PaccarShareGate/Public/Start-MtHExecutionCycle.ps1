@@ -17,33 +17,23 @@ function Start-MtHExecutionCycle {
     #$items = Invoke-MtHSQLquery -QueryName 'E-ALL' | Where-Object { $_.NextAction -in $NextAction }
     #$items += Invoke-MtHSQLquery -QueryName 'E-Fake' | Where-Object { $_.NextAction -in $NextAction }
     $items = Invoke-MtHSQLquery -QueryName 'E-ALLANDFAKE' | Where-Object { $_.NextAction -in $NextAction }
-
-    $totalitems = $items.Count
+    $SiteCollectionPermissionsProcesed = [System.Collections.Generic.List[string]]::new()
+    #$totalitems = $items.Count
     $i = 0
-    $siteparts = $items | Group-Object -Property NextAction, SourceURL, DestinationURL, NextAction, ShareGateCopySettings, MUStatus | Sort-Object { $_.SourceURL, $_.ListTitle }
+    $siteparts = $items | Group-Object -Property NextAction, SourceURL, DestinationURL, NextAction, MUStatus | Sort-Object { $_.SourceURL, $_.ListTitle }
     $siteparts = $siteparts | Sort-Object  $_.$NextAction -Descending
     $Activity = 'Processing execution cycle : '
     foreach ($part in $siteparts) {
         #start process
+        $StePermissionsSource = ($Part.Group | Where-Object { $_.SitePermissionsSource -ne '' } | Select-Object -first 1).SitePermissionsSource
+        if ($StePermissionsSource -ne '') {
+            $MIgrateSitePermissions = ($StePermissionsSource -ne '' -and $Part.Name -Notin $SiteCollectionPermissionsProcesed)
+            $SiteCollectionPermissionsProcesed.Add($Part.Name)
+        }
         $StartTime = Get-Date
         $MigrunIds = [System.Collections.Generic.List[int]]::new()
-        foreach ($item in $part.group) {
-            $Fake = ($Item.MUStatus -eq 'fake')
-            $Activity += If ($Fake) { 'Execute fake Migration' }else { 'Execute real Migration' }
-            Write-Progress -Activity $activity -Status "$i of $totalitems Complete" -PercentComplete $($i++ * 100 / $totalitems)
-            #put started into SQL database
-            $NewMigRunId = New-MtHSQLMigRun -MigrationType $item.NextAction -ItemNr $item.MigUnitId -Fake:$fake
-            $MigrunIds.Add($NewMigRunId)
-            #run the migration itself
-            if ($Fake) {
-                # fake the run, to fill the run database
-                $Script:result = Start-MtHFakeMigration -MigrationItem $item
-            }   
-        }
-        # real process
-        if (!$Fake) {
-            $result = Start-MtHSGMigration  -MigrationItems ($part.group | Resolve-MtHMUClass)  -LogPerformanceTests:$LogPerformanceTests
-        }
+        $result = Start-MtHSGMigration  -MigrationItems ($part.group | Resolve-MtHMUClass)  -LogPerformanceTests:$LogPerformanceTests  -MigrateSitePermissions:$MigrateSitePermissions
+
         $EndTime = Get-Date
         $timediff = New-TimeSpan -Start $startTime -End $EndTime
         foreach ($NewMigRunId in $MigrunIds) {
@@ -56,7 +46,7 @@ function Start-MtHExecutionCycle {
                 # Migration went wrong
                 #Export Error Report
                 $SGErrorReports = -join ($script:SGErrorReports, '\SharegateErrorReport_', $Result.SessionID, '.xlsx')
-                if(!(Test-Path -path C:\Beheer\Data\Paccar\ShareGateReports\Test1.txt)) {               
+                if (!(Test-Path -path SGErrorReports)) {               
                     Export-Report -SessionId $result.SessionID -Path $SGErrorReports -overwrite
                 }
                 Register-MtHSQLMigRunResults -MigRunId $NewMigRunId -Result 'failed' -SGSessionId "$($env:COMPUTERNAME.Substring(7, 4))-$($result.SessionId)" -RunTimeInSec $timediff.TotalSeconds

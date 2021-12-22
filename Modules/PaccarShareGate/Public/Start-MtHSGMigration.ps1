@@ -3,7 +3,8 @@ function Start-MtHSGMigration {
     [CmdletBinding()]
     Param(
         [parameter(Mandatory = $true)] [MigrationUnitClass[]]$MigrationItems,
-        [switch]$LogPerformanceTests
+        [switch]$LogPerformanceTests,
+        [switch]$MigrateSitePermissions
     )
     $MigrationStart = Get-Date
     
@@ -30,7 +31,6 @@ function Start-MtHSGMigration {
         $SitePropertyMappingsPath = $settings.FilePath.Mappings + '\PropertyMappings.sgpm'
         Import-PropertyMapping -Path $SitePropertyMappingsPath -MappingSettings $MappingSettings | Out-Null
     }
-
     
     #load specific settings, for example incremental update of a site
     if ($MigrationItems[0].NextAction -eq 'Delta') {
@@ -50,10 +50,10 @@ function Start-MtHSGMigration {
     $SourceConnectStart = Get-Date  
     if ($MigrationItems[0].SourceURL.length -gt 5) {
         if ($settings.current.LoginType -eq 'Credentials') {
-            $srcSite = Connect-Site -Url $MigrationItems[0].SourceURL -Credential $cred
+            $srcSite = Connect-Site -Url $MigrationItems[0].SourceURL -Credential $cred -AllowConnectionFallback
         }
         else {
-            $srcSite = Connect-Site -Url $MigrationItems[0].SourceURL
+            $srcSite = Connect-Site -Url $MigrationItems[0].SourceURL -AllowConnectionFallback
         }
     }
     $TSConnectSource = New-TimeSpan -Start $SourceConnectStart -End (Get-Date)
@@ -62,11 +62,10 @@ function Start-MtHSGMigration {
     $TargetConnectStart = Get-Date  
     if ($MigrationItems[0].DestinationURL.length -gt 5) {
         if ($settings.current.LoginType -eq 'Credentials') {
-            $dstSite = Connect-Site -Url $MigrationItems[0].DestinationURL -Credential $cred
+            $dstSite = Connect-Site -Url $MigrationItems[0].DestinationURL -Credential $cred -AllowConnectionFallback
         }
         else {
-            $dstSite = Connect-Site -Url $MigrationItems[0].DestinationURL
-            $dstSite = Connect-Site -Url $MigrationItems[0].DestinationURL -Browser -DisableSSO
+            $dstSite = Connect-Site -Url $MigrationItems[0].DestinationURL -AllowConnectionFallback
         }
     }
     $TSConnectTarget = New-TimeSpan -Start $TargetConnectStart -End (Get-Date)
@@ -88,6 +87,11 @@ function Start-MtHSGMigration {
     }
     
     $ActualMigrationStart = Get-Date
+    if ($MigrateSitePermissions) {
+        Copy-ObjectPermissions -Source $srcSite -Destination $dstSite
+    }
+
+
     switch ($MigrationItems[0].Scope) {
         'site' { 
             Write-Verbose 'Initiate site copy......' 
@@ -111,7 +115,7 @@ function Start-MtHSGMigration {
                 #Find original source list Title and copy MU
                 $SourceSiteList = $ToCopy | where-Object { $_.RootFolder.SubString(0, $_.RootFolder.Length - 1) -eq $List.ListURL }
                 
-                $result = Copy-List  -SourceSite $srcSite  -Name $SourceSiteList.Title  -ListTitleUrlSegment $ListTitleWithPrefix -ListTitle $ListTitleWithPrefix  @MigrationParameters
+                $result = Copy-List  -SourceSite $srcSite  -Name $SourceSiteList.Title  -ListTitleUrlSegment $ListTitleWithPrefix -ListTitle $ListTitleWithPrefix  -NoWorkflows -NoWebParts -NoNintexWorkflowHistory -ForceNewListExperience -NoCustomizedListForms -WaitForImportCompletion  @MigrationParameters
                 Write-Progress "Check custom permissions required for renamed item "
                 if ($List.UniquePermissions) {
                     $DestinationList = Get-List -Site $dstSite -Name $ListTitleWithPrefix
@@ -121,7 +125,7 @@ function Start-MtHSGMigration {
             $BatchWiseLists = $MigrationItems | Where-Object { $_.ListTitle -NotIn $renamedLists.ListTitle }
             if ($BatchWiseLists -and ($Result.Errors -eq 0 -or $null -eq $result)) {
                 $toCopyBatch = Get-List -Site $srcSite | Where-Object { $_.Title -in $BatchWiseLists.ListTitle -or $_.Title -in $MigrationItems.ListTitle.replace(' ', '' ) } 
-                $result = Copy-List -List $toCopyBatch @MigrationParameters 
+                $result = Copy-List -List $toCopyBatch -NoWorkflows -NoWebParts -NoNintexWorkflowHistory -ForceNewListExperience -NoCustomizedListForms  -WaitForImportCompletion @MigrationParameters
                 Write-Progress "Check custom permissions required for batch item "
                 ForEach ($MigrationItem in $BatchWiseLists) {
                     if ($MigrationItem.UniquePermissions) {
