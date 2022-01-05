@@ -37,9 +37,6 @@ function Resolve-RJCSVItems {
         }
         ForEach ($TSG in $TargetSite2SourcesGrouped) {
             $TSMU = $TSG.Group[0]
-            If ($TSMU.'Source 2 MUS' -eq 'http://dafshare-org.eu.paccar.com/organization/ops-qua/QMS/Lists/Procedurenummergenerator/') {
-                $a = 1
-            }
             $MU = New-Object MigrationUnitClass 
             $MU.SourceSC = $TSMU."Bron Site Collectie"
             $MU.DestinationURL = $TargetSite2.'Target Site 2'

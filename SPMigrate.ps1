@@ -4,7 +4,7 @@ param()
 #initialize
 #Start-MtHLocalPowerShell -settingfile "$(Get-MtHGitDirectory)\settings.json" -initsp -Verbose
 #start-MtHLocalPowerShell -settingfile "$(Get-MtHGitDirectory)\settings.json" -Verbose -initsp
-start-MtHLocalPowerShell -settingfile "$(Get-MtHGitDirectory)\settings.json" -Verbose -InitSP
+start-MtHLocalPowerShell -settingfile "$(Get-MtHGitDirectory)\settings.json" -Verbose  -InitSP
 # open the demo site and fill the Demo Library
 
 # Create testdata : check if the SP demo library (locally stored) is already filled, if not fill it
@@ -19,7 +19,7 @@ Write-Verbose "Used Database = $($settings.SQLDetails.Name),$($settings.SQLDetai
 #Set-Location -Path $ModulePath
 do {
     $action = ('++++++++++++++++++++++++++++++++++++++++++++++++++++++', 'Create DataBase', 'Remove DataBase', 'Register Set of Sites and Lists for first migration', 'Register Set of Sites and Lists for delta migration','Migrate Real', 
-        'Deactive All Test Lists', 'Activate CSV','Create MenuItem',  'Quit') | Out-GridView -Title 'Choose Activity (Only working on dev and test env)' -PassThru
+        'Delete MU-s from target','Create MenuItem',  'Quit') | Out-GridView -Title 'Choose Activity (Only working on dev and test env)' -PassThru
     #Make sure the testprocedures only access Dev and test.
     switch ($action) {
         'Create DataBase' {
@@ -53,6 +53,11 @@ do {
             #Connect-MtHSharePoint
             Start-MtHExecutionCycle 
         }
+        'Delete MU-s from target'
+        {
+            $MUsForDeletion = Select-RJMusForDeletion
+            If($MUsForDeletion){Start-RJDeletionCycle $MUsForDeletion}
+        }
         'Deactive All Test Lists' {
             $TestSourceURLS = [System.Collections.Generic.List[PSCustomObject]]::new()
             foreach ($MigUnitURL in $Settings.Current.MigrationURLS) {
@@ -75,8 +80,6 @@ do {
         }
         'Create menuItem' {
             $URL = "https://paccar.sharepoint.com/sites/DAF-MS-ASCOM-Site"
-            Connect-MtHSharePoint -Url $URL
-            Add-PnPNavigationNode -Title "Test menu from PwS" -Url "http://nu.nl" -Location QuickLaunch
         }
     }
 } while (($action -ne 'Quit') -and ($null -ne $action))

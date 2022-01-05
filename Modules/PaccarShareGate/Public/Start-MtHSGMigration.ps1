@@ -43,19 +43,24 @@ function Start-MtHSGMigration {
 
     $TSLoadMappings = New-TimeSpan -Start $MigrationStart -End (Get-Date)
     Write-Verbose 'Completed mappings and copy settings load' 
-    
+
 
     #different Site, List and Library options executed
     #reporting to adapt ....???
-
+    $securePwd = $settings.current.EncryptedPassword | ConvertTo-SecureString
+    $cred = New-Object System.Management.Automation.PSCredential -ArgumentList $settings.current.UserName, $securePwd
     $SourceConnectStart = Get-Date  
     if ($MigrationItems[0].SourceURL.length -gt 5) {
         if ($settings.current.LoginType -eq 'Credentials') {
             $srcSite = Connect-Site -Url $MigrationItems[0].SourceURL -Credential $cred 
         }
         else {
-            $srcSite = Connect-Site -Url $MigrationItems[0].SourceURL 
-        }
+            #For Paccar SP2010 
+            #$srcSite = Connect-Site -Url $MigrationItems[0].SourceURL 
+
+            #For Demo (Office365 Source)
+            $srcSite = Connect-Site -Url $MigrationItems[0].SourceURL -Browser -DisableSSO:$DisableSSO
+         }
     }
     $TSConnectSource = New-TimeSpan -Start $SourceConnectStart -End (Get-Date)
     Write-Verbose "Connected to SOURCE Site Collection $($MigrationItems[0].SourceURL) Successfully!"
@@ -89,7 +94,7 @@ function Start-MtHSGMigration {
     
     $ActualMigrationStart = Get-Date
     if ($MigrateSitePermissions) {
-       Copy-ObjectPermissions -Source $srcSite -Destination $dstSite | out-null
+        Copy-ObjectPermissions -Source $srcSite -Destination $dstSite | out-null
     }
 
 

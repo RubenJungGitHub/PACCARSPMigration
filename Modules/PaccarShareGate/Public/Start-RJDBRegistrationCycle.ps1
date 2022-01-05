@@ -29,27 +29,27 @@ function Start-RJDBRegistrationCycle {
         #{$CSVItems | Where-Object { $_.SourceURL  -match '/sites$'} | ForEach-Object {$_.SourceURL.Replace("/sites","")}}
 
         #Show Nodeselector form  for all grouped SourceURLS 
-        $frmNodeSelector = New-Object system.Windows.Forms.Form
+        $frmMUImportSelector = New-Object system.Windows.Forms.Form
 
-        $frmNodeSelector.ClientSize = '1400,600'
-        $frmNodeSelector.text = 'Migration unit sourceurl group node selector'
-        $frmNodeSelector.BackColor = '#ffffff'
-        $frmNodeSelector.StartPosition = 'CenterScreen'
-        $frmNodeSelector.FormBorderStyle = [System.Windows.Forms.FormBorderStyle]::FixedDialog
+        $frmMUImportSelector.ClientSize = '1400,600'
+        $frmMUImportSelector.text = 'Migration unit sourceurl group node selector'
+        $frmMUImportSelector.BackColor = '#ffffff'
+        $frmMUImportSelector.StartPosition = 'CenterScreen'
+        $frmMUImportSelector.FormBorderStyle = [System.Windows.Forms.FormBorderStyle]::FixedDialog
 
         $btnProcess = New-Object System.Windows.Forms.Button
         $btnProcess.Location = New-Object System.Drawing.Size(1000, 550)
         $btnProcess.Size = New-Object System.Drawing.Size(120, 23)
         $btnProcess.Text = 'Process'
         $btnProcess.DialogResult = [System.Windows.Forms.DialogResult]::OK
-        $frmNodeSelector.Controls.Add($btnProcess)
+        $frmMUImportSelector.Controls.Add($btnProcess)
 
         $btnCancel = New-Object System.Windows.Forms.Button
         $btnCancel.Location = New-Object System.Drawing.Size(1150, 550)
         $btnCancel.Size = New-Object System.Drawing.Size(120, 23)
         $btnCancel.Text = 'Cancel'
         $btnCancel.DialogResult = [System.Windows.Forms.DialogResult]::Cancel
-        $frmNodeSelector.Controls.Add($btnCancel)
+        $frmMUImportSelector.Controls.Add($btnCancel)
 
         $LVSource = New-Object System.Windows.Forms.ListView 
         $LVSource.View = 'Details'
@@ -73,10 +73,10 @@ function Start-RJDBRegistrationCycle {
             [void]$LVI.SubItems.Add($NextAction)
             [void]$LVSource.Items.Add($LVI)
         }
-        $frmNodeSelector.Controls.Add($LVSource)
+        $frmMUImportSelector.Controls.Add($LVSource)
         #endregion
         # Display the form
-        $Result = $frmNodeSelector.ShowDialog()
+        $Result = $frmMUImportSelector.ShowDialog()
         if ($Result -eq 'OK') {
             $ReturnCSVSorted  = $CSVItems  | Sort-Object {$_.SourceURL, $_.ListTitle}
             return $ReturnCSVSorted 

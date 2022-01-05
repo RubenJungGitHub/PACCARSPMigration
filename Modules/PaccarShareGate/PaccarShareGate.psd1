@@ -89,7 +89,8 @@ FunctionsToExport = 'Compare-MtHdiff', 'Connect-MtHSharePoint',
                'Test-MtHAdminRightsAllSites', 'Test-MtHMUChange', 
                'Test-MtHSPMigUnitModified', 'Update-MtHSQLMigUnitStatus',
                'Distribute-RJSiteCollectionsOverNodes','Start-RJDBRegistrationCycle',
-               'Resolve-RJCSVItems','ExtractFrom-RJSourceURL','Rename-RJListsTitlePrefix'
+               'Resolve-RJCSVItems','ExtractFrom-RJSourceURL','Rename-RJListsTitlePrefix',
+               "Select-RJMusForDeletion"
 
 # Cmdlets to export from this module, for best performance, do not use wildcards and do not delete the entry, use an empty array if there are no cmdlets to export.
 CmdletsToExport = @()
