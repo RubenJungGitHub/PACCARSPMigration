@@ -1,7 +1,7 @@
 {
     "Validate":  true,
     "FilePath":  {
-                     "SettingsFile":  "C:\\GITWorkSpace\\Paccar\\PACCARSPMigration\\Settings.json",
+                     "SettingsFile":  "C:\\GITWorkSpace\\PACCARSPMigration\\Settings.json",
                      "Logging":  "C:\\Beheer\\Data\\Paccar\\Logging",
                      "SGErrorReports":  "C:\\Beheer\\Data\\Paccar\\ShareGateReports",
                      "MUInput":  "C:\\Beheer\\Data\\Paccar\\MUInput",
@@ -19,13 +19,13 @@
     "DatabaseDetails":  [
                             {
                                 "Name":  "O365",
-                                "Instance":  "DESKTOP-Q0P52LG\\SQLExpress",
+                                "Instance":  "DAFEHVLPP99304\\SQLExpress",
                                 "Database":  "PACCARSQLO365",
                                 "DeleteDB":  true
                             },
                             {
                                 "Name":  "TestonO365",
-                                "Instance":  "DESKTOP-Q0P52LG\\SQLExpress",
+                                "Instance":  "DAFEHVLPP99304\\SQLExpress",
                                 "Database":  "PACCARSQLTestO365",
                                 "DeleteDB":  true
                             },
@@ -39,18 +39,18 @@
     "EnvironmentDetails":  [
                                {
                                    "Name":  "o365",
-                                   "UserName":  "admin@rubentesttenant.onmicrosoft.com",
+                                   "UserName":  "ruben.jung@paccar.onmicrosoft.com",
                                    "LoginType":  "UseWebLogin",
-                                   "DisAbleSSO":  false,
+                                   "DIsableSSO":  false,
                                    "SPVersion":  "SharePointOnline",
                                    "MigrationURLS":  [
                                                          {
-                                                             "SourceTenantDomain":  "rubentesttenant.sharepoint.com",
-                                                             "DestinationTenantDomain":  "rubentesttenant.sharepoint.com",
+                                                             "SourceTenantDomain":  "paccar.sharepoint.com",
+                                                             "DestinationTenantDomain":"paccar.sharepoint.com",
                                                              "ManagedPath":  [
                                                                                  "sites"
                                                                              ],
-                                                             "ConnectURL":  "/TSBuzaSourceDemo",
+                                                             "ConnectURL":  "/DAF-OPS-Site",
                                                              "SitePrefix":  "M1-",
                                                              "DemoSite":  [
                                                                               ""
@@ -64,10 +64,9 @@
                                    "DeleteNotFoundMUS":  false,
                                    "MUSourceItemsDeleteSync":  false,
                                    "ComputerNames":  [
-                                                         "DESKTOP-Q0P52LG"
-                                                     ],
-                                   "EncryptedPassword":  "01000000d08c9ddf0115d1118c7a00c04fc297eb010000000807dc7f5ea6c34da19a712c06863075000000000200000000001066000000010000200000002e562b9326d859a5db48e43e06969a837f70847de127a80601b5ea22da12fe44000000000e80000000020000200000008bf103ffcae31fafe02177aa1f401a55ec01602f43bbe2a5958ceda7ab6a83f220000000130cecfcb653a690580400f389a1af42019ce99ec3edb4b074b894000292096e4000000075aaaafd4eef898ba0000e6d292b201b68c74c005899afa67a95ceb0da98da5b35feea5e01aa595b171f75d6a7b49863bd36e9a897421f8eafd67eab62680759"
-                               }
+                                                         "DAFEHVLPP99304"
+                                                     ]
+                                 }
                            ],
     "StartUp":  {
                     "LocalModules":  "PaccarShareGate",
@@ -80,7 +79,7 @@
                     "Elevated":  false
                 },
     "Sharegate":  {
-                      "UserMap":  false,
+                      "UserMap":  true,
                       "TemplateMap":  false,
                       "PermissionsMap":  false,
                       "PropertyMap":  false,
