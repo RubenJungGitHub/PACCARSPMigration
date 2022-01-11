@@ -35,11 +35,20 @@ Order By DestinationURL
         #Connection failed. Unable to check
         #Check if list can be found. If existant no exception  : No deletion 
         $List = Get-PnPList -Identity $RemoveMU.ListTitle 
+        $ListWithPrefix = ""
+        if ($null -eq $List) {
+            Write-Host "$($RemoveMU.ListTitle) not found in $($RemoveMU.DestinationURL) . Try U-Case" -ForegroundColor Yellow
+            $List = Get-PnPList -Identity $RemoveMU.ListTitle.ToUpper()
+        }
         if ($null -eq $List) {
             Write-Host "$($RemoveMU.ListTitle) not found in $($RemoveMU.DestinationURL) . Try with prefix $($RemoveMU.DuplicateTargetLibPrefix)" -ForegroundColor Yellow
             $ListWithPrefix = -Join ($RemoveMU.ListTitle, $RemoveMU.DuplicateTargetLibPrefix) 
             $List = Get-PnPList -Identity $ListWithPrefix
         }
+        if ($null -eq $List) {
+            Write-Host "$($ListWithPrefix) not found in $($RemoveMU.DestinationURL) . Try with prefix $($RemoveMU.DuplicateTargetLibPrefix)" -ForegroundColor red
+        }
+        
         If ($Null -ne $Connection -and $null -ne $List) {
             #remove list 
             $result = Remove-RJLibraryMU -MigrationItem $RemoveMU

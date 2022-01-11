@@ -44,7 +44,6 @@ function Start-MtHSGMigration {
     $TSLoadMappings = New-TimeSpan -Start $MigrationStart -End (Get-Date)
     Write-Verbose 'Completed mappings and copy settings load' 
 
-
     #different Site, List and Library options executed
     #reporting to adapt ....???
     $securePwd = $settings.current.EncryptedPassword | ConvertTo-SecureString
@@ -56,11 +55,11 @@ function Start-MtHSGMigration {
         }
         else {
             #For Paccar SP2010 
-            #$srcSite = Connect-Site -Url $MigrationItems[0].SourceURL 
+            $srcSite = Connect-Site -Url $MigrationItems[0].SourceURL
 
             #For Demo (Office365 Source)
-            $srcSite = Connect-Site -Url $MigrationItems[0].SourceURL -Browser -DisableSSO:$DisableSSO
-         }
+            #$srcSite = Connect-Site -Url $MigrationItems[0].SourceURL -Browser -DisableSSO:$DisableSSO
+        }
     }
     $TSConnectSource = New-TimeSpan -Start $SourceConnectStart -End (Get-Date)
     Write-Verbose "Connected to SOURCE Site Collection $($MigrationItems[0].SourceURL) Successfully!"
@@ -94,9 +93,8 @@ function Start-MtHSGMigration {
     
     $ActualMigrationStart = Get-Date
     if ($MigrateSitePermissions) {
-        Copy-ObjectPermissions -Source $srcSite -Destination $dstSite | out-null
+        #Copy-ObjectPermissions -Source $srcSite -Destination $dstSite | out-null 
     }
-
 
     switch ($MigrationItems[0].Scope) {
         'site' { 
@@ -119,13 +117,20 @@ function Start-MtHSGMigration {
                     $ListTitleWithPrefix = -Join ($List.ListTitle, $List.DuplicateTargetLibPrefix)                    
                 }
                 #Find original source list Title and copy MU
+                if ($Null -eq $ToCopy) {
+                    write-Verbose "No renamed list(s) detected to copy"
+                }
                 $SourceSiteList = $ToCopy | where-Object { $_.RootFolder.SubString(0, $_.RootFolder.Length - 1) -eq $List.ListURL }
-                $result = Copy-List  -SourceSite $srcSite  -Name $SourceSiteList.Title  -ListTitleUrlSegment $ListTitleWithPrefix -ListTitle $ListTitleWithPrefix -NoWorkflows -NoWebParts -NoNintexWorkflowHistory -ForceNewListExperience -NoCustomizedListForms -WaitForImportCompletion  @MigrationParameters
+                #     $result = Copy-List  -SourceSite $srcSite  -Name $SourceSiteList.Title  -ListTitleUrlSegment $ListTitleWithPrefix -ListTitle $ListTitleWithPrefix -NoWorkflows -NoWebParts -NoNintexWorkflowHistory -ForceNewListExperience -NoCustomizedListForms -WaitForImportCompletion  @MigrationParameters
                 $MigrationresultItem = [PSCustomObject]@{
                     Result     = $result
-                    MigUnitIDs = $List.MigUNitID
+                    MigUnitIDs = $List.MigUNitID 
                 }
                 $Results.Add($MigrationresultItem)
+                #Register related MU Id's
+                if ($Null -ne $ListTitleWithPrefix) {
+                    Register-RJListID -dstSite  $MigrationItems[0].DestinationUrl -ListNames $ListTitleWithPrefix
+                }
                 Write-Progress "Check custom permissions required for renamed item "
                 if ($List.UniquePermissions) {
                     $DestinationList = Get-List -Site $dstSite -Name $ListTitleWithPrefix
@@ -140,18 +145,22 @@ function Start-MtHSGMigration {
             $BatchWiseLists = $MigrationItems | Where-Object { $_.ListTitle -NotIn $renamedLists.ListTitle }
             if ($BatchWiseLists ) {
                 $toCopyBatch = Get-List -Site $srcSite | Where-Object { $_.Title -in $BatchWiseLists.ListTitle -or $_.Title -in $MigrationItems.ListTitle.replace(' ', '' ) } 
-                $result = Copy-List -List $toCopyBatch  -NoWorkflows -NoWebParts -NoNintexWorkflowHistory -ForceNewListExperience -NoCustomizedListForms  -WaitForImportCompletion @MigrationParameters
+                if ($Null -eq $ToCopy) {
+                    write-Verbose "No batch list(s) detected to copy"
+                }
+                # $result = Copy-List -List $toCopyBatch  -NoWorkflows -NoWebParts -NoNintexWorkflowHistory -ForceNewListExperience -NoCustomizedListForms  -WaitForImportCompletion @MigrationParameters
                 $MigrationresultItem = [PSCustomObject]@{
                     Result     = $result
                     MigUnitIDs = $MigrationItems.MigUNitID
                 }
                 $Results.Add($MigrationresultItem)
+                if ($Null -ne $ToCopyBatch) { Register-RJListID -dstSite $MigrationItems[0].DestinationUrl -ListNames $toCopyBatch.Title }
                 Write-Progress "Check custom permissions required for batch item "
                 ForEach ($MigrationItem in $BatchWiseLists) {
                     if ($MigrationItem.UniquePermissions) {
                         $SourceList = Get-List -Site $SrcSite -Name $MigrationItem.ListTitle
                         $DestinationList = Get-List -Site $dstSite -Name $MigrationItem.ListTitle
-                        $result = Copy-ObjectPermissions -Source $SourceList -Destination $DestinationList 
+                        #$result = Copy-ObjectPermissions -Source $SourceList -Destination $DestinationList 
                         $MigrationresultItem = [PSCustomObject]@{
                             Result     = $result
                             MigUnitIDs = $MigrationItems.MigUNitID

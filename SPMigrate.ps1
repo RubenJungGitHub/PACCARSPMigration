@@ -52,11 +52,13 @@ do {
         'Migrate Real' {
             #Connect-MtHSharePoint
             Start-MtHExecutionCycle 
+            
         }
         'Delete MU-s from target'
         {
             $MUsForDeletion = Select-RJMusForDeletion
             If($MUsForDeletion){Start-RJDeletionCycle $MUsForDeletion}
+            Write-Host "Deletion cycle completed" -ForegroundColor Cyan
         }
         'Deactive All Test Lists' {
             $TestSourceURLS = [System.Collections.Generic.List[PSCustomObject]]::new()

@@ -46,7 +46,7 @@
                                    "MigrationURLS":  [
                                                          {
                                                              "SourceTenantDomain":  "paccar.sharepoint.com",
-                                                             "DestinationTenantDomain":"paccar.sharepoint.com",
+                                                             "DestinationTenantDomain":  "paccar.sharepoint.com",
                                                              "ManagedPath":  [
                                                                                  "sites"
                                                                              ],
@@ -65,8 +65,9 @@
                                    "MUSourceItemsDeleteSync":  false,
                                    "ComputerNames":  [
                                                          "DAFEHVLPP99304"
-                                                     ]
-                                 }
+                                                     ],
+                                   "EncryptedPassword":  "01000000d08c9ddf0115d1118c7a00c04fc297eb01000000f6bb826111d78d4997e9b7c56f9432ea0000000002000000000003660000c0000000100000006d8a3220a45708ea51dd7b7d4273f96f0000000004800000a0000000100000007372787a086f374cede479a3d6bb2d04200000004ab0e1ad8f44e63ec98f4f800220bab33479b1314c2a04567de841f61d0a668b1400000038e144428654fd87c472971b0bf756351f4e5b1c"
+                               }
                            ],
     "StartUp":  {
                     "LocalModules":  "PaccarShareGate",

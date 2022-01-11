@@ -65,5 +65,12 @@ function Start-MtHExecutionCycle {
             }
         }
     }
+    #Update SQL DB with MU;s not in SOurce
+    $sql = @"
+    UPDATE MigrationUnits
+    SET ListID = 'NOT DETECTED IN SOURCE' 
+    WHERE  LISTID IS NULL OR LISTID = ''
+"@
+    Invoke-Sqlcmd -ServerInstance $Settings.SQLDetails.Instance -Database $Settings.SQLDetails.Database -Query $sql
     Write-Progress -Activity $activity -Status 'Ready' -Completed
 }

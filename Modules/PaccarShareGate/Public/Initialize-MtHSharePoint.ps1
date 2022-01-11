@@ -8,7 +8,8 @@ function Initialize-MtHSharePoint {
     param()
 
     # if we use credentials, we need to put them in a global variable for later reuse. We also put them encrypted in the settings file.
-    if ($settings.Current.LoginType -eq 'Credentials') {
+    #if ($settings.Current.LoginType -eq 'Credentials') {
+        #allways store credentials 
         try {
             # if the password is encrypted in the settingsfile, this should be OK
             $securePwd = $settings.current.EncryptedPassword | ConvertTo-SecureString -ErrorAction Stop
@@ -21,7 +22,7 @@ function Initialize-MtHSharePoint {
             $settings.current | Add-Member -NotePropertyName EncryptedPassword -NotePropertyValue $encryptedPassword
             $Settings | Select-Object -Property * -ExcludeProperty current, timezone, SQLdetails | ConvertTo-Json -Depth 5 | Set-Content $settings.FilePath.SettingsFile
         }
-    }
+   # }
 
     # if the SharePoint SPScheduledTaskAccountName is added to the properties, we need to request the password and add that to the settings file
     if ('SPScheduledTaskAccountName' -in $settings.Current.PSObject.Properties.Name) {
