@@ -22,6 +22,14 @@ FROM [PACCARSQLO365].[dbo].[MigrationUnits]
 Where DestinationURL In ($DeleteURLS)
 Order By DestinationURL
 "@
+<#
+$Sql = @"
+SELECT   *
+FROM [PACCARSQLO365].[dbo].[MigrationUnits]
+Where DestinationURL In ($DeleteURLS) AND  ListID NOT Like 'NOT DETECTED IN %'
+Order By DestinationURL
+"@
+#>
 
     $RemoveMUS = Invoke-Sqlcmd -ServerInstance $Settings.SQLDetails.Instance -Query $Sql | Resolve-MtHMUClass
 
@@ -34,7 +42,7 @@ Order By DestinationURL
         }
         #Connection failed. Unable to check
         #Check if list can be found. If existant no exception  : No deletion 
-        $List = Get-PnPList -Identity $RemoveMU.ListTitle 
+        $List = Get-PnPList -Identity $RemoveMU.LISTId 
         $ListWithPrefix = ""
         if ($null -eq $List) {
             Write-Host "$($RemoveMU.ListTitle) not found in $($RemoveMU.DestinationURL) . Try U-Case" -ForegroundColor Yellow

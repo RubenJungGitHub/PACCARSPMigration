@@ -7,13 +7,14 @@ function Register-RJListID {
         [parameter(mandatory = $true)] [String[]]$ListNames
     )
  
-    foreach ($Listname in $ListNames)
-    {
+    foreach ($Listname in $ListNames) {
+        If ($ListName -eq 'CetrificatesTestPrefix') {
+             $a = 1 }
         $List = Get-PnPList -Identity $ListName
         $sql = @"
         UPDATE MigrationUnits
         SET ListID = CASE WHEN ('$($List.ID)' IS NULL) THEN 'NOT DETECTED IN TARGET' WHEN ('$($List.ID)' = '') THEN 'NOT DETECTED IN TARGET' ELSE '$($List.ID)' END
-        WHERE  DestinationURl= '$($dstSite)' And ListTitle = '$($Listname)' ;
+        WHERE  DestinationURl= '$($dstSite)' And (ListTitle = '$($Listname)' OR ListTitleWithPrefix  = '$($Listname)')
 "@
         Invoke-Sqlcmd -ServerInstance $Settings.SQLDetails.Instance -Database $Settings.SQLDetails.Database -Query $sql
     }

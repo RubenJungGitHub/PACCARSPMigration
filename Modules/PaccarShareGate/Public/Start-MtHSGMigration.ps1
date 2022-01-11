@@ -93,7 +93,7 @@ function Start-MtHSGMigration {
     
     $ActualMigrationStart = Get-Date
     if ($MigrateSitePermissions) {
-        #Copy-ObjectPermissions -Source $srcSite -Destination $dstSite | out-null 
+       Copy-ObjectPermissions -Source $srcSite -Destination $dstSite | out-null 
     }
 
     switch ($MigrationItems[0].Scope) {
@@ -121,7 +121,7 @@ function Start-MtHSGMigration {
                     write-Verbose "No renamed list(s) detected to copy"
                 }
                 $SourceSiteList = $ToCopy | where-Object { $_.RootFolder.SubString(0, $_.RootFolder.Length - 1) -eq $List.ListURL }
-                #     $result = Copy-List  -SourceSite $srcSite  -Name $SourceSiteList.Title  -ListTitleUrlSegment $ListTitleWithPrefix -ListTitle $ListTitleWithPrefix -NoWorkflows -NoWebParts -NoNintexWorkflowHistory -ForceNewListExperience -NoCustomizedListForms -WaitForImportCompletion  @MigrationParameters
+                $result = Copy-List  -SourceSite $srcSite  -Name $SourceSiteList.Title  -ListTitleUrlSegment $ListTitleWithPrefix -ListTitle $ListTitleWithPrefix -NoWorkflows -NoWebParts -NoNintexWorkflowHistory -ForceNewListExperience -NoCustomizedListForms -WaitForImportCompletion  @MigrationParameters
                 $MigrationresultItem = [PSCustomObject]@{
                     Result     = $result
                     MigUnitIDs = $List.MigUNitID 
@@ -129,7 +129,7 @@ function Start-MtHSGMigration {
                 $Results.Add($MigrationresultItem)
                 #Register related MU Id's
                 if ($Null -ne $ListTitleWithPrefix) {
-                    Register-RJListID -dstSite  $MigrationItems[0].DestinationUrl -ListNames $ListTitleWithPrefix
+                    Register-RJListID -dstSite  $MigrationItems[0].DestinationUrl -ListNames $ListTitleWithPrefix 
                 }
                 Write-Progress "Check custom permissions required for renamed item "
                 if ($List.UniquePermissions) {
@@ -144,11 +144,12 @@ function Start-MtHSGMigration {
             }
             $BatchWiseLists = $MigrationItems | Where-Object { $_.ListTitle -NotIn $renamedLists.ListTitle }
             if ($BatchWiseLists ) {
-                $toCopyBatch = Get-List -Site $srcSite | Where-Object { $_.Title -in $BatchWiseLists.ListTitle -or $_.Title -in $MigrationItems.ListTitle.replace(' ', '' ) } 
+                #Drop renamed lists
+                $toCopyBatch = Get-List -Site $srcSite | Where-Object {($_.Title -in $BatchWiseLists.ListTitle -or $_.Title -in $MigrationItems.ListTitle.replace(' ', '' )) -and $_. Title -NotIn $renamedLists.ListTitle} 
                 if ($Null -eq $ToCopy) {
                     write-Verbose "No batch list(s) detected to copy"
                 }
-                # $result = Copy-List -List $toCopyBatch  -NoWorkflows -NoWebParts -NoNintexWorkflowHistory -ForceNewListExperience -NoCustomizedListForms  -WaitForImportCompletion @MigrationParameters
+                $result = Copy-List -List $toCopyBatch  -NoWorkflows -NoWebParts -NoNintexWorkflowHistory -ForceNewListExperience -NoCustomizedListForms  -WaitForImportCompletion @MigrationParameters
                 $MigrationresultItem = [PSCustomObject]@{
                     Result     = $result
                     MigUnitIDs = $MigrationItems.MigUNitID
@@ -160,7 +161,7 @@ function Start-MtHSGMigration {
                     if ($MigrationItem.UniquePermissions) {
                         $SourceList = Get-List -Site $SrcSite -Name $MigrationItem.ListTitle
                         $DestinationList = Get-List -Site $dstSite -Name $MigrationItem.ListTitle
-                        #$result = Copy-ObjectPermissions -Source $SourceList -Destination $DestinationList 
+                        $result = Copy-ObjectPermissions -Source $SourceList -Destination $DestinationList 
                         $MigrationresultItem = [PSCustomObject]@{
                             Result     = $result
                             MigUnitIDs = $MigrationItems.MigUNitID

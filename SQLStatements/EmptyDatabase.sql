@@ -11,6 +11,7 @@ CREATE TABLE MigrationUnits
     TargetLibPrefixGiven VARCHAR(400) NULL,
     ListUrl VARCHAR(400) NULL,
     ListTitle NVARCHAR(400) NULL,
+    ListTitleWithPrefix NVARCHAR(400) NULL,
     ListID VARCHAR(400) NULL,
     UniquePermissions BIT,
     MergeMUS BIT,

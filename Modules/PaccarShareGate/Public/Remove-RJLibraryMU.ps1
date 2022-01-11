@@ -14,7 +14,7 @@ function Remove-RJLibraryMU
     $output = $true  
     try 
     {
-        Remove-PnPList -Identity $MigrationItem.ListTitle -force
+        Remove-PnPList -Identity $MigrationItem.LISTId -force
     }
     catch 
     {
