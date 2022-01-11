@@ -11,7 +11,8 @@ function ExtractFrom-RJSourceURL {
     if ($ExtractURL.IsAbsoluteUri) {
         $SourceURL = $SourceURL.Replace('https://','')        
         $SourceURL = $SourceURL.Replace('http://','')        
-        #Drop trailing slash
+        #Trim and Drop trailing slash
+        $SourceURL = $SourceURL.TrimEnd()
         If ($SourceURL -match '/$') {$SourceURL = $SourceURL.Substring(0, $SourceURL.Length-1)}
         $MUSourceURL = ""
         $MUListURL = ""
