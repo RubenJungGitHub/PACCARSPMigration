@@ -33,6 +33,9 @@ function Resolve-RJCSVItems {
             $Mu.UniquePermissions = !!$TSMU."UP 1"
             $MU.MergeMUS = !!$TSMU."Merge 1"
             $Mu.Scope = $TSMU."Scope 1"
+            if($Settings.ListNamesFromURL -eq $false){
+                $Mu.ListTitle= $TSMU."ListName 1"
+            }
             $returnlist.Add($MU)
         }
         ForEach ($TSG in $TargetSite2SourcesGrouped) {
@@ -48,6 +51,9 @@ function Resolve-RJCSVItems {
             $Mu.UniquePermissions = !!$TSMU."UP 2"
             $MU.MergeMUS = !!$TSMU."Merge 2"
             $Mu.Scope = $TSMU."Scope 2"
+            if($Settings.ListNamesFromURL -eq $false){
+                $Mu.ListTitle= $TSMU."ListName 2"
+            }
             $returnlist.Add($MU)
         }
         ForEach ($TSG in $TargetSite3SourcesGrouped) {
@@ -63,6 +69,9 @@ function Resolve-RJCSVItems {
             $Mu.UniquePermissions = !!$TSMU."UP 3"
             $MU.MergeMUS = !!$TSMU."Merge 3"
             $Mu.Scope = $TSMU."Scope 3"
+            if($Settings.ListNamesFromURL -eq $false){
+                $Mu.ListTitle= $TSMU."ListName 3"
+            }
             $returnlist.Add($MU)
         }
         

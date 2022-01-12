@@ -26,6 +26,7 @@ function Register-MtHAllSitesLists {
     }
     #Temp
     $totalsites = $MUsINSP.Count
+    
     #First remove old entries 
     $SiteCollections | ForEach-Object { Invoke-MtHSQLquery -QueryName C-MUSC -DestinationURL $_.Name }
 
@@ -87,15 +88,7 @@ function Register-MtHAllSitesLists {
         }
         $i++
     }
-    #Update Targets if duplicate
-    <#   $Duplicates = Get-MtHSQLMigUnits -all | Group-Object -Property DestinationURL, ListTitle | Where-Object {$_.Count -gt 1}
-    foreach($DPLTarget in $Duplicates.Group)
-    {
-        $DPLTarget.ListTitle = -Join($DPLTarget.DuplicateTargetLibPrefix,$DPLTarget.ListTitle)
-      #  Update-MtHSQLMigUnitStatus -Item $DPLTarget -UpdateListTitle
-    }
-    #$Duplicates.Group | ForEach-Object ($_.ListTitle = -Join($_.TargetPrefix, $_.ListTitle))
-    #>
+
    
     $MergeMUGroups = Get-MtHSQLMigUnits -all | Where-Object { $_.TargetURL -in $MUsINSP.TargetURL -and $_.MergeMUS -eq $True } |  Group-Object -Property DestinationURL, ListTitle 
     foreach ($MergeMUS  in $MergeMUGroups) {

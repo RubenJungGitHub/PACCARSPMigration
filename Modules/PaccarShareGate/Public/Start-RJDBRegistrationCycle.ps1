@@ -19,9 +19,7 @@ function Start-RJDBRegistrationCycle {
 
         $CSVItems = Resolve-RJCSVItems $CSVItems | Sort-Object CompleteSourceURL
 
-        
-
-        $CSVItemsGrouped = $CSVItems |  Group-Object -Property CompleteSourceURL | Sort-Object CompleteSourceURL
+        $CSVItemsGrouped = $CSVItems |  Group-Object -Property CompleteSourceURL, listTitle | Sort-Object CompleteSourceURL
         
         #For demo purposes only because sourceURL alters when ending on Sites
     
@@ -63,14 +61,30 @@ function Start-RJDBRegistrationCycle {
         [void]$LVSource.Columns.Add('TargetURL')
         $LVSource.Columns[2].Width = 450
         [void]$LVSource.Columns.Add('Action')
-        $LVSource.Columns[3].Width = 80
+        $LVSource.Columns[3].Width = 100
+        [void]$LVSource.Columns.Add('ListTtilesMissing')
+        $LVSource.Columns[4].Width = 100
+
+
 
         foreach ($CSVItemGroup in $CSVItemsGrouped) {
             $i++
+            $ListItemColour = "white"
+            $ListTitleMissing = $CSVItemGroup.Group | Where-Object { $_.ListTitle -ne ' ' }
+            if ($NUll -eq $ListTitleMissing) {
+                $ListTitleMissing = 'TRUE'
+                $ListItemColour = "red"
+            }
+            else {
+                $ListTitleMissing = 'FALSE'
+            }
+
             $LVi = New-Object System.Windows.Forms.ListViewItem($i)
             [void]$LVI.SubItems.Add($CSVItemGroup.Group[0].CompleteSourceURL)
             [void]$LVI.SubItems.Add($CSVItemGroup.Group[0].DestinationURL)
             [void]$LVI.SubItems.Add($NextAction)
+            [void]$LVI.SubItems.Add($ListTitleMissing)
+            $LVI.BackColor = $ListItemColour
             [void]$LVSource.Items.Add($LVI)
         }
         $frmMUImportSelector.Controls.Add($LVSource)

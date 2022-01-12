@@ -12,6 +12,7 @@
     "Environment":  "o365",
     "NodeId":  1,
     "MaxNodeId":  3,
+    "ListNamesFromURL" : false,
     "SourceURLIgnoreSections":  [
                                     "Lists",
                                     "Lijsten"
