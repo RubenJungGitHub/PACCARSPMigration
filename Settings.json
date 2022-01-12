@@ -13,7 +13,7 @@
     "NodeId":  1,
     "MaxNodeId":  3,
     "ListNamesFromURL" : false,
-    "WaitForImportCompletion" : false,
+    "WaitForImportCompletion" : true,
     "SourceURLIgnoreSections":  [
                                     "Lists",
                                     "Lijsten"
