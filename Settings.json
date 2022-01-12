@@ -13,6 +13,7 @@
     "NodeId":  1,
     "MaxNodeId":  3,
     "ListNamesFromURL" : false,
+    "WaitForImportCompletion" : false,
     "SourceURLIgnoreSections":  [
                                     "Lists",
                                     "Lijsten"
@@ -85,6 +86,6 @@
                       "TemplateMap":  false,
                       "PermissionsMap":  false,
                       "PropertyMap":  false,
-                      "MigrationMode":  "Insane"
+                      "MigrationMode":  "Normal"
                   }
 }

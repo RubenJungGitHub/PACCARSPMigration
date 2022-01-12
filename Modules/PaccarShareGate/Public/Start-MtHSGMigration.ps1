@@ -121,7 +121,7 @@ function Start-MtHSGMigration {
                     write-Verbose "No renamed list(s) detected to copy"
                 }
                 $SourceSiteList = $ToCopy | where-Object { $_.RootFolder.SubString(0, $_.RootFolder.Length - 1) -eq $List.ListURL }
-                $result = Copy-List  -SourceSite $srcSite  -Name $SourceSiteList.Title  -ListTitleUrlSegment $ListTitleWithPrefix -ListTitle $ListTitleWithPrefix -NoWorkflows -NoWebParts -NoNintexWorkflowHistory -ForceNewListExperience -NoCustomizedListForms -WaitForImportCompletion  @MigrationParameters
+                $result = Copy-List  -SourceSite $srcSite  -Name $SourceSiteList.Title  -ListTitleUrlSegment $ListTitleWithPrefix -ListTitle $ListTitleWithPrefix -NoWorkflows -NoWebParts -NoNintexWorkflowHistory -ForceNewListExperience -NoCustomizedListForms -WaitForImportCompletion::$Settings.WaitForImportCompletion  @MigrationParameters
                 $MigrationresultItem = [PSCustomObject]@{
                     Result     = $result
                     MigUnitIDs = $List.MigUNitID 
@@ -149,7 +149,7 @@ function Start-MtHSGMigration {
                 if ($Null -eq $ToCopy) {
                     write-Verbose "No batch list(s) detected to copy"
                 }
-                $result = Copy-List -List $toCopyBatch  -NoWorkflows -NoWebParts -NoNintexWorkflowHistory -ForceNewListExperience -NoCustomizedListForms  -WaitForImportCompletion @MigrationParameters
+                $result = Copy-List -List $toCopyBatch  -NoWorkflows -NoWebParts -NoNintexWorkflowHistory -ForceNewListExperience -NoCustomizedListForms  -WaitForImportCompletion:$Settings.WaitForImportCompletion @MigrationParameters
                 $MigrationresultItem = [PSCustomObject]@{
                     Result     = $result
                     MigUnitIDs = $MigrationItems.MigUNitID
