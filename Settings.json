@@ -86,6 +86,6 @@
                       "TemplateMap":  false,
                       "PermissionsMap":  false,
                       "PropertyMap":  false,
-                      "MigrationMode":  "Normal"
+                      "MigrationMode":  "Insane"
                   }
 }
