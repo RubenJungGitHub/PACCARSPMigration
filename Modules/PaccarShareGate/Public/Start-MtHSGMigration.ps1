@@ -5,7 +5,8 @@ function Start-MtHSGMigration {
         [parameter(Mandatory = $true)] [MigrationUnitClass[]]$MigrationItems,
         [switch]$LogPerformanceTests,
         [switch]$MigrateSitePermissions,
-        [switch]$DisableSSO
+        [switch]$DisableSSO,
+        [switch]$TestSPConnections
     )
     $MigrationStart = Get-Date
     $Results = [System.Collections.Generic.List[PSCustomObject]]::new()
@@ -91,96 +92,108 @@ function Start-MtHSGMigration {
         $MigrationParameters.Remove('NoContent')
     }
     
-    $ActualMigrationStart = Get-Date
-    if ($MigrateSitePermissions) {
-       Copy-ObjectPermissions -Source $srcSite -Destination $dstSite | out-null 
-    }
-
-    switch ($MigrationItems[0].Scope) {
-        'site' { 
-            Write-Verbose 'Initiate site copy......' 
-            $ParamInfo = ($MigrationParameters | convertTo-Json -Depth 5) -replace '\s' -replace '"'
-            Write-Verbose "Paramaters:  $ParamInfo"
-            $result = Copy-Site @MigrationParameters 
+    if ($TestSPConnections) {
+        If ($srcSite -AND $dstSite) {
+            Write-Host "Test SP connection only, no actual migration.   Destination $($dstSite) and source $($srcSite)  accessible" -ForegroundColor Black -BackgroundColor Green
         }
-        'list' {
-            Write-Verbose 'Initiate list copy.......' 
-            $ParamInfo = ($MigrationParameters | convertTo-Json -Depth 5) -replace '\s' -replace '"'
-            Write-Verbose "Paramaters:  $ParamInfo"
-            write-Verbose "Migrating $($migrationItems.count) Lists: $($MigrationItems.ListTitle -join ', ')"
-            $ToCopy = Get-List -Site $srcSite | Where-Object { $_.Title -in $MigrationItems.ListTitle -or $_.Title.replace(' ', '' ) -in $MigrationItems.ListTitle } 
-            $renamedLists = Rename-RJListsTitlePrefix -Lists $ToCopy -MUS $MigrationItems -dstSite $dstSite.Address
-            $ListTitleWithPrefix
-            foreach ($List in $RenamedLists) {
-                if ($List.MergeMUS) { $ListTitleWithPrefix = -Join ($List.ListTitle, $List.TargetLibPrefixGiven) }
-                else {
-                    $ListTitleWithPrefix = -Join ($List.ListTitle, $List.DuplicateTargetLibPrefix)                    
-                }
-                #Find original source list Title and copy MU
-                if ($Null -eq $ToCopy) {
-                    write-Verbose "No renamed list(s) detected to copy"
-                }
-                $SourceSiteList = $ToCopy | where-Object { $_.RootFolder.SubString(0, $_.RootFolder.Length - 1) -eq $List.ListURL }
-                $result = Copy-List  -SourceSite $srcSite  -Name $SourceSiteList.Title  -ListTitleUrlSegment $ListTitleWithPrefix -ListTitle $ListTitleWithPrefix -NoWorkflows -NoWebParts -NoNintexWorkflowHistory -ForceNewListExperience -NoCustomizedListForms -WaitForImportCompletion::$Settings.WaitForImportCompletion  @MigrationParameters
-                $MigrationresultItem = [PSCustomObject]@{
-                    Result     = $result
-                    MigUnitIDs = $List.MigUNitID 
-                }
-                $Results.Add($MigrationresultItem)
-                #Register related MU Id's
-                if ($Null -ne $ListTitleWithPrefix) {
-                    Register-RJListID -dstSite  $MigrationItems[0].DestinationUrl -ListNames $ListTitleWithPrefix 
-                }
-                Write-Progress "Check custom permissions required for renamed item "
-                if ($List.UniquePermissions) {
-                    $DestinationList = Get-List -Site $dstSite -Name $ListTitleWithPrefix
-                    $result = Copy-ObjectPermissions -Source $SourceSiteList -Destination $DestinationList
+        Else {
+            Write-Host "Test SP connection only, no actual migration.   Destination $($dstSite) or  source $($srcSite) NOT accessible" -ForegroundColor Black -BackgroundColor red
+        }
+        Return $Null
+    }
+    else {
+        Write-Host "MIGRATE  source $($srcSite) to Destination $($dstSite)"  -ForegroundColor Cyan
+        $ActualMigrationStart = Get-Date
+        if ($MigrateSitePermissions) {
+            Copy-ObjectPermissions -Source $srcSite -Destination $dstSite | out-null 
+        }
+
+        switch ($MigrationItems[0].Scope) {
+            'site' { 
+                Write-Verbose 'Initiate site copy......' 
+                $ParamInfo = ($MigrationParameters | convertTo-Json -Depth 5) -replace '\s' -replace '"'
+                Write-Verbose "Paramaters:  $ParamInfo"
+                $result = Copy-Site @MigrationParameters 
+            }
+            'list' {
+                Write-Verbose 'Initiate list copy.......' 
+                $ParamInfo = ($MigrationParameters | convertTo-Json -Depth 5) -replace '\s' -replace '"'
+                Write-Verbose "Paramaters:  $ParamInfo"
+                write-Verbose "Migrating $($migrationItems.count) Lists: $($MigrationItems.ListTitle -join ', ')"
+                $ToCopy = Get-List -Site $srcSite | Where-Object { $_.Title -in $MigrationItems.ListTitle -or $_.Title.replace(' ', '' ) -in $MigrationItems.ListTitle } 
+                $renamedLists = Rename-RJListsTitlePrefix -Lists $ToCopy -MUS $MigrationItems -dstSite $dstSite.Address
+                $ListTitleWithPrefix
+                foreach ($List in $RenamedLists) {
+                    if ($List.MergeMUS) { $ListTitleWithPrefix = -Join ($List.ListTitle, $List.TargetLibPrefixGiven) }
+                    else {
+                        $ListTitleWithPrefix = -Join ($List.ListTitle, $List.DuplicateTargetLibPrefix)                    
+                    }
+                    #Find original source list Title and copy MU
+                    if ($Null -eq $ToCopy) {
+                        write-Verbose "No renamed list(s) detected to copy"
+                    }
+                    $SourceSiteList = $ToCopy | where-Object { $_.RootFolder.SubString(0, $_.RootFolder.Length - 1) -eq $List.ListURL }
+                    $result = Copy-List  -SourceSite $srcSite  -Name $SourceSiteList.Title  -ListTitleUrlSegment $ListTitleWithPrefix -ListTitle $ListTitleWithPrefix -NoWorkflows -NoWebParts -NoNintexWorkflowHistory -ForceNewListExperience -NoCustomizedListForms -WaitForImportCompletion:$Settings.WaitForImportCompletion  @MigrationParameters
                     $MigrationresultItem = [PSCustomObject]@{
                         Result     = $result
-                        MigUnitIDs = $List.MigUNitID
+                        MigUnitIDs = $List.MigUNitID 
                     }
                     $Results.Add($MigrationresultItem)
-                }
-            }
-            $BatchWiseLists = $MigrationItems | Where-Object { $_.ListTitle -NotIn $renamedLists.ListTitle }
-            if ($BatchWiseLists ) {
-                #Drop renamed lists
-                $toCopyBatch = Get-List -Site $srcSite | Where-Object {($_.Title -in $BatchWiseLists.ListTitle -or $_.Title -in $MigrationItems.ListTitle.replace(' ', '' )) -and $_. Title -NotIn $renamedLists.ListTitle} 
-                if ($Null -eq $ToCopy) {
-                    write-Verbose "No batch list(s) detected to copy"
-                }
-                $result = Copy-List -List $toCopyBatch  -NoWorkflows -NoWebParts -NoNintexWorkflowHistory -ForceNewListExperience -NoCustomizedListForms  -WaitForImportCompletion:$Settings.WaitForImportCompletion @MigrationParameters
-                $MigrationresultItem = [PSCustomObject]@{
-                    Result     = $result
-                    MigUnitIDs = $MigrationItems.MigUNitID
-                }
-                $Results.Add($MigrationresultItem)
-                if ($Null -ne $ToCopyBatch) { Register-RJListID -dstSite $MigrationItems[0].DestinationUrl -ListNames $toCopyBatch.Title }
-                Write-Progress "Check custom permissions required for batch item "
-                ForEach ($MigrationItem in $BatchWiseLists) {
-                    if ($MigrationItem.UniquePermissions) {
-                        $SourceList = Get-List -Site $SrcSite -Name $MigrationItem.ListTitle
-                        $DestinationList = Get-List -Site $dstSite -Name $MigrationItem.ListTitle
-                        $result = Copy-ObjectPermissions -Source $SourceList -Destination $DestinationList 
+                    #Register related MU Id's
+                    if ($Null -ne $ListTitleWithPrefix) {
+                        Register-RJListID -dstSite  $MigrationItems[0].DestinationUrl -ListNames $ListTitleWithPrefix 
+                    }
+                    Write-Progress "Check custom permissions required for renamed item "
+                    if ($List.UniquePermissions) {
+                        $DestinationList = Get-List -Site $dstSite -Name $ListTitleWithPrefix
+                        $result = Copy-ObjectPermissions -Source $SourceSiteList -Destination $DestinationList
                         $MigrationresultItem = [PSCustomObject]@{
                             Result     = $result
-                            MigUnitIDs = $MigrationItems.MigUNitID
+                            MigUnitIDs = $List.MigUNitID
                         }
-                        $Results.Add($ReMigrationresultItemsult)
+                        $Results.Add($MigrationresultItem)
+                    }
+                }
+                $BatchWiseLists = $MigrationItems | Where-Object { $_.ListTitle -NotIn $renamedLists.ListTitle }
+                if ($BatchWiseLists ) {
+                    #Drop renamed lists
+                    $toCopyBatch = Get-List -Site $srcSite | Where-Object { ($_.Title -in $BatchWiseLists.ListTitle -or $_.Title -in $MigrationItems.ListTitle.replace(' ', '' )) -and $_. Title -NotIn $renamedLists.ListTitle } 
+                    if ($Null -eq $ToCopy) {
+                        write-Verbose "No batch list(s) detected to copy"
+                    }
+                    $result = Copy-List -List $toCopyBatch  -NoWorkflows -NoWebParts -NoNintexWorkflowHistory -ForceNewListExperience -NoCustomizedListForms  -WaitForImportCompletion:$Settings.WaitForImportCompletion @MigrationParameters
+                    $MigrationresultItem = [PSCustomObject]@{
+                        Result     = $result
+                        MigUnitIDs = $MigrationItems.MigUNitID
+                    }
+                    $Results.Add($MigrationresultItem)
+                    if ($Null -ne $ToCopyBatch) { Register-RJListID -dstSite $MigrationItems[0].DestinationUrl -ListNames $toCopyBatch.Title }
+                    Write-Progress "Check custom permissions required for batch item "
+                    ForEach ($MigrationItem in $BatchWiseLists) {
+                        if ($MigrationItem.UniquePermissions) {
+                            $SourceList = Get-List -Site $SrcSite -Name $MigrationItem.ListTitle
+                            $DestinationList = Get-List -Site $dstSite -Name $MigrationItem.ListTitle
+                            $result = Copy-ObjectPermissions -Source $SourceList -Destination $DestinationList 
+                            $MigrationresultItem = [PSCustomObject]@{
+                                Result     = $result
+                                MigUnitIDs = $MigrationItems.MigUNitID
+                            }
+                            $Results.Add($ReMigrationresultItemsult)
+                        }
                     }
                 }
             }
         }
-    }
 
-    $TSMigration = New-TimeSpan -Start $ActualMigrationStart -End (Get-Date)
+        $TSMigration = New-TimeSpan -Start $ActualMigrationStart -End (Get-Date)
 
-    Write-Verbose "Completed $($MigrationItems[0].NextAction) migration of $($MigrationItems[0].SourceUrl)"
+        Write-Verbose "Completed $($MigrationItems[0].NextAction) migration of $($MigrationItems[0].SourceUrl)"
     
-    $MigrationEnd = Get-Date
-    if ($LogPerformanceTests.IsPresent) {
-        If ($Null -eq $Result) { $Result = 'test' }
-        Register-RJPerformanceTestResults -MigrationUnit $MigrationItems[0] -MigrationStart  $MigrationStart -MigrationEnd $MigrationEnd -MigrationResult $Result -TSLoadMappings $TSLoadMappings -TSConnectSource $TSConnectSource -TSConnectTarget $TSConnectTarget -TSMigration $TSMigration
-    } 
-    return $results
+        $MigrationEnd = Get-Date
+        if ($LogPerformanceTests.IsPresent) {
+            If ($Null -eq $Result) { $Result = 'test' }
+            Register-RJPerformanceTestResults -MigrationUnit $MigrationItems[0] -MigrationStart  $MigrationStart -MigrationEnd $MigrationEnd -MigrationResult $Result -TSLoadMappings $TSLoadMappings -TSConnectSource $TSConnectSource -TSConnectTarget $TSConnectTarget -TSMigration $TSMigration
+        } 
+        return $results
+    }
 }

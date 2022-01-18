@@ -6,6 +6,7 @@ function Get-MtHSQLMigUnits {
         
         [parameter(mandatory = $false)] [String] $Url,
         [parameter(mandatory = $false)] [String] $CompleteSourceUrl,
+        [parameter(mandatory = $false)] [String] $DestinationURL,
         [parameter(mandatory = $false)] [int] $MigUnitId,
         [switch] $all
     )
@@ -30,7 +31,7 @@ function Get-MtHSQLMigUnits {
             $sql = @"
     SELECT EnvironmentName, MigUnitId, SourceUrl, DestinationUrl,DuplicateTargetLibPrefix, ListUrl, ListTitle, ListId,  ShareGateCopySettings,  UniquePermissions, MergeMUS,Scope, MUStatus, NodeId, NextAction
     FROM MigrationUnits
-    WHERE CompleteSourceURL= '$CompleteSourceUrl'
+    WHERE CompleteSourceURL= '$CompleteSourceUrl' And DestinationURL = '$DestinationURL'
     ORDER BY MigUnitId;
 "@
         }

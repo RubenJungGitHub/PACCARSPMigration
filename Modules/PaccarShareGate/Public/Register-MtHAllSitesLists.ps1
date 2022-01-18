@@ -42,7 +42,7 @@ function Register-MtHAllSitesLists {
             #$MUsinSP = Get-MtHOneSPSiteLists -Url $siteCollection
             
             # Get all registered Migration Units of a sitecollection from the SQL database, MU List
-            $MUinSQL = Get-MtHSQLMigUnits -CompleteSourceUrl $MUinSP.CompleteSourceURL
+            $MUinSQL = Get-MtHSQLMigUnits -CompleteSourceUrl $MUinSP.CompleteSourceURL -DestinationUrl $MUinSP.DestinationURL
             
             # is the MU in SharePoint new?
             if ($MUinSQL.Count -eq 0) {

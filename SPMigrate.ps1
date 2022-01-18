@@ -18,8 +18,8 @@ Write-Verbose "Used Database = $($settings.SQLDetails.Name),$($settings.SQLDetai
 #$ModulePath = -Join ($Settings.FilePath.LocalWorkSpaceModule, 'Public')
 #Set-Location -Path $ModulePath
 do {
-    $action = ('++++++++++++++++++++++++++++++++++++++++++++++++++++++', 'Create DataBase', 'Remove DataBase', 'Register Set of Sites and Lists for first migration', 'Register Set of Sites and Lists for delta migration','Migrate Real', 
-        'Delete MU-s from target','Create MenuItem',  'Quit') | Out-GridView -Title 'Choose Activity (Only working on dev and test env)' -PassThru
+    $action = ('++++++++++++++++++++++++++++++++++++++++++++++++++++++', 'Create DataBase', 'Remove DataBase', 'Register Set of Sites and Lists for first migration', 'Register Set of Sites and Lists for delta migration', 'Test SP connections', 'Reset runs after truncation', 'Migrate Real', 
+        'Delete MU-s from target', 'Create MenuItem', 'Quit') | Out-GridView -Title 'Choose Activity (Only working on dev and test env)' -PassThru
     #Make sure the testprocedures only access Dev and test.
     switch ($action) {
         'Create DataBase' {
@@ -46,18 +46,26 @@ do {
             $Items = Start-RJDBRegistrationCycle  -NextAction "Delta"
             If ($Null -ne $Items) { Register-MtHAllSitesLists -MUsINSP $Items -NextAction "Delta" }
         }
+        'Test SP connections' {
+            #Connect-MtHSharePoint
+            Start-MtHExecutionCycle -TestSPConnections
+        }
+        'Reset runs after truncation' {
+            $sql = @'
+            Delete from MigrationRuns  Where Result = 'Started';
+'@
+        Invoke-Sqlcmd -ServerInstance $Settings.SQLDetails.Instance -Database $Settings.SQLDetails.Database -Query $sql | Resolve-MtHMRClass
+        }
         'Migrate Fake' {
             Start-MtHExecutionCycle -Fake    
         }
         'Migrate Real' {
             #Connect-MtHSharePoint
             Start-MtHExecutionCycle 
-            
         }
-        'Delete MU-s from target'
-        {
+        'Delete MU-s from target' {
             $MUsForDeletion = Select-RJMusForDeletion
-            If($MUsForDeletion){Start-RJDeletionCycle $MUsForDeletion}
+            If ($MUsForDeletion) { Start-RJDeletionCycle $MUsForDeletion }
             Write-Host "Deletion cycle completed" -ForegroundColor Cyan
         }
         'Deactive All Test Lists' {
