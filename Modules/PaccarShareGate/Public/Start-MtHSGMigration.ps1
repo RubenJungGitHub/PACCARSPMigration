@@ -134,7 +134,7 @@ function Start-MtHSGMigration {
                     }
                     #Find original source list Title and copy MU
                     $SourceSiteList = $ToCopy | where-Object { $_.RootFolder.SubString(0, $_.RootFolder.Length - 1) -eq $List.ListURL }
-                #    $result = Copy-List  -SourceSite $srcSite  -Name $SourceSiteList.Title  -ListTitleUrlSegment $ListTitleWithPrefix -ListTitle $ListTitleWithPrefix -NoWorkflows -NoWebParts -NoNintexWorkflowHistory -ForceNewListExperience -NoCustomizedListForms -WaitForImportCompletion:$Settings.WaitForImportCompletion  @MigrationParameters
+                    $result = Copy-List  -SourceSite $srcSite  -Name $SourceSiteList.Title  -ListTitleUrlSegment $ListTitleWithPrefix -ListTitle $ListTitleWithPrefix -NoWorkflows -NoWebParts -NoNintexWorkflowHistory -ForceNewListExperience -NoCustomizedListForms -WaitForImportCompletion:$Settings.WaitForImportCompletion  @MigrationParameters
                     $MigrationresultItem = [PSCustomObject]@{
                         Result     = $result
                         MigUnitIDs = $List.MigUNitID 
@@ -162,7 +162,7 @@ function Start-MtHSGMigration {
                     if ($NUll -eq $toCopyBatch) {
                         Write-Host  "Eror detecting MU-s batch  to copy not detected:  MUs passed : $($BatchWiseLists) "-BackgroundColor red
                     }
-                    #$result = Copy-List -List $toCopyBatch  -NoWorkflows -NoWebParts -NoNintexWorkflowHistory -ForceNewListExperience -NoCustomizedListForms  -WaitForImportCompletion:$Settings.WaitForImportCompletion @MigrationParameters
+                    $result = Copy-List -List $toCopyBatch  -NoWorkflows -NoWebParts -NoNintexWorkflowHistory -ForceNewListExperience -NoCustomizedListForms  -WaitForImportCompletion:$Settings.WaitForImportCompletion @MigrationParameters
                     $MigrationresultItem = [PSCustomObject]@{
                         Result     = $result
                         MigUnitIDs = $MigrationItems.MigUNitID
