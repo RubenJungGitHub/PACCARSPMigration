@@ -83,7 +83,7 @@ function Start-MtHSGMigration {
         DestinationSite     = $dstSite
         MappingSettings     = $MappingSettings
         NoContent           = $false
-        NoCustomPermissions = ($MigrationItems[0].ShareGateCopySettings -contains 'p')
+        #NoCustomPermissions = ($MigrationItems[0].ShareGateCopySettings -contains 'p')
         CopySettings        = $copySettings
     }
 
@@ -131,7 +131,7 @@ function Start-MtHSGMigration {
                 foreach ($List in $RenamedLists) {
                     if ($List.MergeMUS) { $ListTitleWithPrefix = -Join ($List.ListTitle, $List.TargetLibPrefixGiven) }
                     else {
-                        $ListTitleWithPrefix = -Join ($List.ListTitle, $List.DuplicateTargetLibPrefix)                    
+                        $ListTitleWithPrefix = (-Join ($List.ListTitle, $List.DuplicateTargetLibPrefix)).SubString(0,50)
                     }
                     #Find original source list Title and copy MU
                     $SourceSiteList = $ToCopy | where-Object { $_.RootFolder.SubString(0, $_.RootFolder.Length - 1) -eq $List.ListURL }
