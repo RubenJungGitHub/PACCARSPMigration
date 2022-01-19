@@ -15,7 +15,7 @@ function Start-RJDBRegistrationCycle {
     If ($FileBrowser.FileNames -like '*\*') {
         #Region construct form 
         #  csv should have Headers 'MigUnitId', 'CurrentMUStatus', 'NewMUStatus', 'NodeId'
-        $CSVItems = Import-Csv -Path $FileBrowser.FileName -Delimiter ';'  
+        $CSVItems = Import-Csv -Path $FileBrowser.FileName -Delimiter ';'  -encoding UTF8
 
         $CSVItems = Resolve-RJCSVItems $CSVItems |  Sort-Object CompleteSourceURL
 

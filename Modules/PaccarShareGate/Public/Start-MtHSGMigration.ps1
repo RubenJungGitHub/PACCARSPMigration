@@ -119,8 +119,13 @@ function Start-MtHSGMigration {
                 Write-Verbose 'Initiate list copy.......' 
                 $ParamInfo = ($MigrationParameters | convertTo-Json -Depth 5) -replace '\s' -replace '"'
                 Write-Verbose "Paramaters:  $ParamInfo"
-                write-Verbose "Migrating $($migrationItems.count) Lists: $($MigrationItems.ListTitle -join ', ')"
+                write-Host "Migrating $($migrationItems.count) Lists: $($MigrationItems.ListTitle -join ', ')" -f green
                 $ToCopy = Get-List -Site $srcSite | Where-Object { $_.Title -in $MigrationItems.ListTitle -or $_.Title.replace(' ', '' ) -in $MigrationItems.ListTitle } 
+                #To do check Empty ToCopy
+                if($Null -eq $ToCopy)
+                {
+                    Write-Host  "Eror detecting MU-s to copy not detected  : MUs passed : $($MigrationItems.CompleteSourceUrl)" -BackgroundColor red
+                }
                 $renamedLists = Rename-RJListsTitlePrefix -Lists $ToCopy -MUS $MigrationItems -dstSite $dstSite.Address
                 $ListTitleWithPrefix
                 foreach ($List in $RenamedLists) {
@@ -129,9 +134,6 @@ function Start-MtHSGMigration {
                         $ListTitleWithPrefix = -Join ($List.ListTitle, $List.DuplicateTargetLibPrefix)                    
                     }
                     #Find original source list Title and copy MU
-                    if ($Null -eq $ToCopy) {
-                        write-Verbose "No renamed list(s) detected to copy"
-                    }
                     $SourceSiteList = $ToCopy | where-Object { $_.RootFolder.SubString(0, $_.RootFolder.Length - 1) -eq $List.ListURL }
                     $result = Copy-List  -SourceSite $srcSite  -Name $SourceSiteList.Title  -ListTitleUrlSegment $ListTitleWithPrefix -ListTitle $ListTitleWithPrefix -NoWorkflows -NoWebParts -NoNintexWorkflowHistory -ForceNewListExperience -NoCustomizedListForms -WaitForImportCompletion:$Settings.WaitForImportCompletion  @MigrationParameters
                     $MigrationresultItem = [PSCustomObject]@{
@@ -141,7 +143,7 @@ function Start-MtHSGMigration {
                     $Results.Add($MigrationresultItem)
                     #Register related MU Id's
                     if ($Null -ne $ListTitleWithPrefix) {
-                        Register-RJListID -dstSite  $MigrationItems[0].DestinationUrl -ListNames $ListTitleWithPrefix 
+                        Register-RJListID -CompleteSourceURL $MigrationItems[0].CompleteSourceURL -dstSite  $dstSite -ListNames $ListTitleWithPrefix 
                     }
                     Write-Progress "Check custom permissions required for renamed item "
                     if ($List.UniquePermissions) {
@@ -158,8 +160,9 @@ function Start-MtHSGMigration {
                 if ($BatchWiseLists ) {
                     #Drop renamed lists
                     $toCopyBatch = Get-List -Site $srcSite | Where-Object { ($_.Title -in $BatchWiseLists.ListTitle -or $_.Title -in $MigrationItems.ListTitle.replace(' ', '' )) -and $_. Title -NotIn $renamedLists.ListTitle } 
-                    if ($Null -eq $ToCopy) {
-                        write-Verbose "No batch list(s) detected to copy"
+                    if($NUll -eq $toCopyBatch)
+                    {
+                        Write-Host  "Eror detecting MU-s batch  to copy not detected:  MUs passed : $($MigrationItems.CompleteSourceUrl) "-BackgroundColor red
                     }
                     $result = Copy-List -List $toCopyBatch  -NoWorkflows -NoWebParts -NoNintexWorkflowHistory -ForceNewListExperience -NoCustomizedListForms  -WaitForImportCompletion:$Settings.WaitForImportCompletion @MigrationParameters
                     $MigrationresultItem = [PSCustomObject]@{
@@ -167,7 +170,7 @@ function Start-MtHSGMigration {
                         MigUnitIDs = $MigrationItems.MigUNitID
                     }
                     $Results.Add($MigrationresultItem)
-                    if ($Null -ne $ToCopyBatch) { Register-RJListID -dstSite $MigrationItems[0].DestinationUrl -ListNames $toCopyBatch.Title }
+                    if ($Null -ne $ToCopyBatch) {Register-RJListID -CompleteSourceURL $MigrationItems[0].CompleteSourceURL  -dstSite  $dstSite  -ListNames $toCopyBatch.Title}
                     Write-Progress "Check custom permissions required for batch item "
                     ForEach ($MigrationItem in $BatchWiseLists) {
                         if ($MigrationItem.UniquePermissions) {
