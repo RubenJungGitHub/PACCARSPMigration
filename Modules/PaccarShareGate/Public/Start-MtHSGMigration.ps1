@@ -123,7 +123,7 @@ function Start-MtHSGMigration {
                 $ToCopy = Get-List -Site $srcSite | Where-Object { $_.Title -in $MigrationItems.ListTitle -or $_.Title.replace(' ', '' ) -in $MigrationItems.ListTitle } 
                 #To do check Empty ToCopy
                 if ($Null -eq $ToCopy) {
-                    Write-Host  "Eror detecting MU-s to copy not detected  : MUs passed : $($MigrationItems.CompleteSourceUrl)" -BackgroundColor red
+                    Write-Host  "Eror detecting renamed MU-s to copy not detected  : MUs passed : $($MigrationItems.CompleteSourceUrl)" -BackgroundColor red
                 }
                 $renamedLists = Rename-RJListsTitlePrefix -Lists $ToCopy -MUS $MigrationItems -dstSite $dstSite.Address
                 $ListTitleWithPrefix
@@ -138,7 +138,7 @@ function Start-MtHSGMigration {
                     }
                     #Find original source list Title and copy MU
                     $SourceSiteList = $ToCopy | where-Object { $_.RootFolder.SubString(0, $_.RootFolder.Length - 1) -eq $List.ListURL }
-                    $result = Copy-List  -SourceSite $srcSite  -Name $SourceSiteList.Title  -ListTitleUrlSegment $ListTitleWithPrefix -ListTitle $ListTitleWithPrefix -NoWorkflows -NoWebParts -NoNintexWorkflowHistory -ForceNewListExperience -NoCustomizedListForms -WaitForImportCompletion:$Settings.WaitForImportCompletion  @MigrationParameters
+                    #$result = Copy-List  -SourceSite $srcSite  -Name $SourceSiteList.Title  -ListTitleUrlSegment $ListTitleWithPrefix -ListTitle $ListTitleWithPrefix -NoWorkflows -NoWebParts -NoNintexWorkflowHistory -ForceNewListExperience -NoCustomizedListForms -WaitForImportCompletion:$Settings.WaitForImportCompletion  @MigrationParameters
                     $MigrationresultItem = [PSCustomObject]@{
                         Result     = $result
                         MigUnitIDs = $List.MigUNitID 
@@ -164,15 +164,15 @@ function Start-MtHSGMigration {
                     #Drop renamed lists
                     $toCopyBatch = Get-List -Site $srcSite | Where-Object { ($_.Title -in $BatchWiseLists.ListTitle -or $_.Title -in $MigrationItems.ListTitle.replace(' ', '' )) -and $_. Title -NotIn $renamedLists.ListTitle } 
                     if ($NUll -eq $toCopyBatch) {
-                        Write-Host  "Eror detecting MU-s batch  to copy not detected:  MUs passed : $($BatchWiseLists) "-BackgroundColor red
+                        Write-Host  "Eror detecting MU-s batch  to copy not detected:  MUs passed :  $($BatchWiseLists.CompleteSourceUrl)   "-BackgroundColor red
                     }
-                    $result = Copy-List -List $toCopyBatch  -NoWorkflows -NoWebParts -NoNintexWorkflowHistory -ForceNewListExperience -NoCustomizedListForms  -WaitForImportCompletion:$Settings.WaitForImportCompletion @MigrationParameters
+                   # $result = Copy-List -List $toCopyBatch  -NoWorkflows -NoWebParts -NoNintexWorkflowHistory -ForceNewListExperience -NoCustomizedListForms  -WaitForImportCompletion:$Settings.WaitForImportCompletion @MigrationParameters
                     $MigrationresultItem = [PSCustomObject]@{
                         Result     = $result
                         MigUnitIDs = $MigrationItems.MigUNitID
                     }
                     $Results.Add($MigrationresultItem)
-                    if ($Null -ne $ToCopyBatch) { Register-RJListID -scrSite $srcSite -dstSite  $dstSite  -ListNames $toCopyBatch}
+                    if ($Null -ne $ToCopyBatch) { Register-RJListID -scrSite $srcSite -dstSite  $dstSite  -Lists $ToCopyBatch}
                     Write-Progress "Check custom permissions required for batch item "
                     ForEach ($MigrationItem in $BatchWiseLists) {
                         if ($MigrationItem.UniquePermissions) {

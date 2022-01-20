@@ -8,21 +8,26 @@ function Register-RJListID {
         [parameter(mandatory = $true)] [PSCustomObject]$Lists,
         [parameter(mandatory = $false)] [String]$RenamedList
     )
- 
+    $ListRelPath
     foreach ($List in $Lists) {
         $GetPNPListName = $RenamedList
-        if('' -eq $GetPNPListName)
+        if ('' -eq $GetPNPListName) {
+            $GetPNPListName = $list.Title
+        }
+        #Make sure the correct source url is referenced
+        if ( $List.GetType() -eq [MigrationUnitClass])
         {
-            $GetPNPListName = $list.ListTitle
+            $ListRelPath = $List.ListURL
+        }
+        else {
+            #Drop Trailing /
+            $ListRelPath = $List.RootFolder.Substring(0, $List.RootFolder.Length-1)
         }
         $pnplst = Get-PnPList -Identity $GetPNPListName
-        <#$CompleteSourceURLhttp  = -Join($srcSite.Address.AbsoluteUri.Replace('https','http'),$List.RootFolder.ServerRelativeUrl.Split('/')[($List.RootFolder.ServerRelativeUrl.Split('/').Length-1)],'/').Replace('%20',' ')
-        $CompleteSourceURLhttps  = -Join($srcSite.Address.AbsoluteUri,$List.RootFolder.ServerRelativeUrl.Split('/')[($List.RootFolder.ServerRelativeUrl.Split('/').Length-1)],'/').Replace('%20',' ')
-        #>
         $sql = @"
         UPDATE MigrationUnits
         SET ListID = CASE WHEN ('$($pnplst.ID)' IS NULL) THEN 'NOT DETECTED IN TARGET' WHEN ('$($pnplst.ID)' = '') THEN 'NOT DETECTED IN TARGET' ELSE '$($pnplst.ID)' END
-        WHERE ListURL = '$($List.ListURL)'
+        WHERE ListURL = '$($ListRelPath)'
 "@
         Invoke-Sqlcmd -ServerInstance $Settings.SQLDetails.Instance -Database $Settings.SQLDetails.Database -Query $sql
     }
