@@ -130,7 +130,11 @@ function Start-MtHSGMigration {
                 foreach ($List in $RenamedLists) {
                     if ($List.MergeMUS) { $ListTitleWithPrefix = -Join ($List.ListTitle, $List.TargetLibPrefixGiven) }
                     else {
-                        $ListTitleWithPrefix = ( -Join ($List.ListTitle, $List.DuplicateTargetLibPrefix)).SubString(0, 50)
+                        $ListTitleWithPrefix = ( -Join ($List.ListTitle, $List.DuplicateTargetLibPrefix))
+                        #Max listname length truncation
+                        If ($ListTitleWithPrefix.Length -gt 50) {
+                            $ListTitleWithPrefix = $ListTitleWithPrefix.SubString(0, 50)
+                        }
                     }
                     #Find original source list Title and copy MU
                     $SourceSiteList = $ToCopy | where-Object { $_.RootFolder.SubString(0, $_.RootFolder.Length - 1) -eq $List.ListURL }
@@ -142,7 +146,7 @@ function Start-MtHSGMigration {
                     $Results.Add($MigrationresultItem)
                     #Register related MU Id's
                     if ($Null -ne $ListTitleWithPrefix) {
-                        Register-RJListID -CompleteSourceURL -scrSite $srcSite -dstSite  $dstSite -ListNames $ListTitleWithPrefix 
+                        Register-RJListID Register-RJListID -scrSite $srcSite -dstSite  $dstSite -ListNames $ListTitleWithPrefix 
                     }
                     Write-Progress "Check custom permissions required for renamed item "
                     if ($List.UniquePermissions) {
