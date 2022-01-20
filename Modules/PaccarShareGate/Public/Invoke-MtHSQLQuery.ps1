@@ -33,13 +33,13 @@ function Invoke-MtHSQLquery {
         'E-ALLANDFAKE' {
             # Query E1 : Select all migrations to do
             $sql = @"
-            SELECT U.MigUnitId AS MigUnitId, EnvironmentName, CompleteSourceUrl,SitePermissionsSource, SourceUrl, DestinationUrl, DuplicateTargetLibPrefix, TargetLibPrefixGiven, ListUrl, ListTitle, ListId,  UniquePermissions, MergeMUS,  ShareGateCopySettings, Scope, MUStatus, NodeId, NextAction, MAX(StartTime) AS LastStartTime
+            SELECT U.MigUnitId AS MigUnitId, EnvironmentName, CompleteSourceUrl,SitePermissionsSource, SourceUrl, DestinationUrl, DuplicateTargetLibPrefix, TargetLibPrefixGiven, ListUrl, ListTitleWithPrefix, ListTitle, ListId,  UniquePermissions, MergeMUS,  ShareGateCopySettings, Scope, MUStatus, NodeId, NextAction, MAX(StartTime) AS LastStartTime
             FROM MIgrationUnits AS U
             LEFT OUTER JOIN
             MigrationRuns AS R
             ON U.MigUnitId = R.MigUnitId
             WHERE (U.NextAction IN ('first','delta') AND U.NodeId = $($settings.NodeId) AND (U.MUStatus = 'Active' OR U.MUStatus = 'Fake') AND (R.Result <> 'started' OR  R.Result IS NULL))
-            GROUP BY U.MigUnitId, EnvironmentName, CompleteSourceUrl, SitePermissionsSource,SourceUrl, DestinationUrl, DuplicateTargetLibPrefix, TargetLibPrefixGiven, ListUrl, ListTitle, ListId, UniquePermissions, MergeMUS,  ShareGateCopySettings, Scope, MUStatus, NodeId, NextAction
+            GROUP BY U.MigUnitId, EnvironmentName, CompleteSourceUrl, SitePermissionsSource,SourceUrl, DestinationUrl, DuplicateTargetLibPrefix, TargetLibPrefixGiven, ListUrl, ListTitleWithPrefix, ListTitle, ListId, UniquePermissions, MergeMUS,  ShareGateCopySettings, Scope, MUStatus, NodeId, NextAction
             ORDER BY SourceURL;
 "@
         }

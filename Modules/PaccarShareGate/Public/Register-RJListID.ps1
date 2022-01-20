@@ -5,17 +5,24 @@ function Register-RJListID {
     Param(        
         [parameter(mandatory = $true)] [String]$scrSite,
         [parameter(mandatory = $true)] [String]$dstSite,
-        [parameter(mandatory = $true)] [String[]]$ListNames
+        [parameter(mandatory = $true)] [PSCustomObject]$Lists,
+        [parameter(mandatory = $false)] [String]$RenamedList
     )
  
-    foreach ($Listname in $ListNames) {
-        $List = Get-PnPList -Identity $ListName
-        $CompleteSourceURLhttp  = -Join($srcSite.Address.AbsoluteUri.Replace('https','http'),$List.RootFolder.ServerRelativeUrl.Split('/')[($List.RootFolder.ServerRelativeUrl.Split('/').Length-1)],'/').Replace('%20',' ')
+    foreach ($List in $Lists) {
+        $GetPNPListName = $RenamedList
+        if('' -eq $GetPNPListName)
+        {
+            $GetPNPListName = $list.ListTitle
+        }
+        $pnplst = Get-PnPList -Identity $GetPNPListName
+        <#$CompleteSourceURLhttp  = -Join($srcSite.Address.AbsoluteUri.Replace('https','http'),$List.RootFolder.ServerRelativeUrl.Split('/')[($List.RootFolder.ServerRelativeUrl.Split('/').Length-1)],'/').Replace('%20',' ')
         $CompleteSourceURLhttps  = -Join($srcSite.Address.AbsoluteUri,$List.RootFolder.ServerRelativeUrl.Split('/')[($List.RootFolder.ServerRelativeUrl.Split('/').Length-1)],'/').Replace('%20',' ')
+        #>
         $sql = @"
         UPDATE MigrationUnits
-        SET ListID = CASE WHEN ('$($List.ID)' IS NULL) THEN 'NOT DETECTED IN TARGET' WHEN ('$($List.ID)' = '') THEN 'NOT DETECTED IN TARGET' ELSE '$($List.ID)' END
-        WHERE CompleteSourceURL = '$($CompleteSourceURLhttp)' OR  CompleteSourceURL = '$($CompleteSourceURLhttps)'
+        SET ListID = CASE WHEN ('$($pnplst.ID)' IS NULL) THEN 'NOT DETECTED IN TARGET' WHEN ('$($pnplst.ID)' = '') THEN 'NOT DETECTED IN TARGET' ELSE '$($pnplst.ID)' END
+        WHERE ListURL = '$($List.ListURL)'
 "@
         Invoke-Sqlcmd -ServerInstance $Settings.SQLDetails.Instance -Database $Settings.SQLDetails.Database -Query $sql
     }

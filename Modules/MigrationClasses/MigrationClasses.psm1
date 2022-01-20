@@ -19,6 +19,7 @@ class MigrationUnitClass {
     [String]$NextAction = 'none'
     [String]$DuplicateTargetLibPrefix = ''
     [String]$TargetLibPrefixGiven = ''
+    [String]$ListTitleWithPrefix = ''
     [int]$MigUnitId = 0
     [dateTime]$LastStartTime
     # constructors

@@ -146,7 +146,7 @@ function Start-MtHSGMigration {
                     $Results.Add($MigrationresultItem)
                     #Register related MU Id's
                     if ($Null -ne $ListTitleWithPrefix) {
-                        Register-RJListID Register-RJListID -scrSite $srcSite -dstSite  $dstSite -ListNames $ListTitleWithPrefix 
+                        Register-RJListID -scrSite $srcSite -dstSite  $dstSite -List $List -RenamedList $ListTitleWithPrefix
                     }
                     Write-Progress "Check custom permissions required for renamed item "
                     if ($List.UniquePermissions) {
@@ -172,7 +172,7 @@ function Start-MtHSGMigration {
                         MigUnitIDs = $MigrationItems.MigUNitID
                     }
                     $Results.Add($MigrationresultItem)
-                    if ($Null -ne $ToCopyBatch) { Register-RJListID -scrSite $srcSite -dstSite  $dstSite  -ListNames $toCopyBatch.Title }
+                    if ($Null -ne $ToCopyBatch) { Register-RJListID -scrSite $srcSite -dstSite  $dstSite  -ListNames $toCopyBatch}
                     Write-Progress "Check custom permissions required for batch item "
                     ForEach ($MigrationItem in $BatchWiseLists) {
                         if ($MigrationItem.UniquePermissions) {
