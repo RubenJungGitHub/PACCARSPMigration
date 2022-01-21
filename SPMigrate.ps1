@@ -18,7 +18,7 @@ Write-Verbose "Used Database = $($settings.SQLDetails.Name),$($settings.SQLDetai
 #$ModulePath = -Join ($Settings.FilePath.LocalWorkSpaceModule, 'Public')
 #Set-Location -Path $ModulePath
 do {
-    $action = ('++++++++++++++++++++++++++++++++++++++++++++++++++++++', 'Create DataBase', 'Remove DataBase', 'Register Set of Sites and Lists for first migration', 'Register Set of Sites and Lists for delta migration', 'Test SP connections', 'Reset runs after truncation', 'Migrate Real', 
+    $action = ('++++++++++++++++++++++++++++++++++++++++++++++++++++++', 'Create DataBase', 'Remove DataBase', 'Deactivate Set of Sites and Lists for migration', 'Register Set of Sites and Lists for first migration', 'Register Set of Sites and Lists for delta migration', 'Test SP connections', 'Reset runs after truncation', 'Migrate Real', 
         'Delete MU-s from target', 'Create MenuItem', 'Quit') | Out-GridView -Title 'Choose Activity (Only working on dev and test env)' -PassThru
     #Make sure the testprocedures only access Dev and test.
     switch ($action) {
@@ -35,6 +35,11 @@ do {
         'Register All Sites and Lists' {
             Start-RJDBRegistrationCycle
             Register-MtHAllSitesLists 
+        }
+        'Deactivate Set of Sites and Lists for migration' {
+            #not included
+            $Items = Start-RJDBRegistrationCycle -NextAction "First"
+            If ($Null -ne $Items) { Register-MtHAllSitesLists -MUsINSP $Items -NextAction "none" }
         }
         'Register Set of Sites and Lists for first migration' {
             #not included
