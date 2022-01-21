@@ -43,7 +43,7 @@ do {
                 $sql = @"
                 Update MigrationUnits SET NextAction ='none' where CompleteSourceURL = '$($Item.CompleteSourceURL)' 
 "@
-               Invoke-Sqlcmd -ServerInstance $Settings.SQLDetails.Instance -Database $Settings.SQLDetails.Database -Query $sql
+                Invoke-Sqlcmd -ServerInstance $Settings.SQLDetails.Instance -Database $Settings.SQLDetails.Database -Query $sql
             }
         }
         'Register Set of Sites and Lists for first migration' {
@@ -64,44 +64,44 @@ do {
             $sql = @'
             Delete from MigrationRuns  Where Result = 'Started';
 '@
-                Invoke-Sqlcmd -ServerInstance $Settings.SQLDetails.Instance -Database $Settings.SQLDetails.Database -Query $sql
-            }
-            'Migrate Fake' {
-                Start-MtHExecutionCycle -Fake    
-            }
-            'Migrate Real' {
-                #Connect-MtHSharePoint
-                Start-MtHExecutionCycle 
-            }
-            'Delete MU-s from target' {
-                $MUsForDeletion = Select-RJMusForDeletion
-                If ($MUsForDeletion) { Start-RJDeletionCycle $MUsForDeletion }
-                Write-Host "Deletion cycle completed" -ForegroundColor Cyan
-            }
-            'Deactive All Test Lists' {
-                $TestSourceURLS = [System.Collections.Generic.List[PSCustomObject]]::new()
-                foreach ($MigUnitURL in $Settings.Current.MigrationURLS) {
-                    foreach ($DemoSite  in $MigUnitURL.DemoSite) {
-                        $TestURL = ConvertTo-MtHHttpAbsPath -SourceURL $MigUnitURL.SourceTenantDomain -path $DemoSite
-                        $TestSourceURLS.Add($TestURL)
-                    }
-                }
-                $dbitems = $TestSourceURLS | ForEach-Object { Get-MtHSQLMigUnits -Url $_ }
-                $items = $dbitems | Where-Object { ($_.NextAction -ne 'none') }
-                $items | ForEach-Object {
-                    $Item = [PSCustomObject]@{
-                        MUStatus   = $_.MUStatus 
-                        NextAction = 'none' 
-                        NodeId     = $_.NodeId
-                        MigUnitId  = $_.MigUnitId
-                    }
-                    Update-MtHSQLMigUnitStatus -Item $Item
+            Invoke-Sqlcmd -ServerInstance $Settings.SQLDetails.Instance -Database $Settings.SQLDetails.Database -Query $sql
+        }
+        'Migrate Fake' {
+            Start-MtHExecutionCycle -Fake    
+        }
+        'Migrate Real' {
+            #Connect-MtHSharePoint
+            Start-MtHExecutionCycle 
+        }
+        'Delete MU-s from target' {
+            $MUsForDeletion = Select-RJMusForDeletion
+            If ($MUsForDeletion) { Start-RJDeletionCycle $MUsForDeletion }
+            Write-Host "Deletion cycle completed" -ForegroundColor Cyan
+        }
+        'Deactive All Test Lists' {
+            $TestSourceURLS = [System.Collections.Generic.List[PSCustomObject]]::new()
+            foreach ($MigUnitURL in $Settings.Current.MigrationURLS) {
+                foreach ($DemoSite  in $MigUnitURL.DemoSite) {
+                    $TestURL = ConvertTo-MtHHttpAbsPath -SourceURL $MigUnitURL.SourceTenantDomain -path $DemoSite
+                    $TestSourceURLS.Add($TestURL)
                 }
             }
-            'Create menuItem' {
-                $URL = "https://paccar.sharepoint.com/sites/DAF-MS-ASCOM-Site"
+            $dbitems = $TestSourceURLS | ForEach-Object { Get-MtHSQLMigUnits -Url $_ }
+            $items = $dbitems | Where-Object { ($_.NextAction -ne 'none') }
+            $items | ForEach-Object {
+                $Item = [PSCustomObject]@{
+                    MUStatus   = $_.MUStatus 
+                    NextAction = 'none' 
+                    NodeId     = $_.NodeId
+                    MigUnitId  = $_.MigUnitId
+                }
+                Update-MtHSQLMigUnitStatus -Item $Item
             }
         }
-    } while (($action -ne 'Quit') -and ($null -ne $action))
+        'Create menuItem' {
+            $URL = "https://paccar.sharepoint.com/sites/DAF-MS-ASCOM-Site"
+        }
+    }
+} while (($action -ne 'Quit') -and ($null -ne $action))
 
-    Stop-MtHLocalPowershell
+Stop-MtHLocalPowershell
