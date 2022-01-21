@@ -39,7 +39,13 @@ function Resolve-RJCSVItems {
             $returnlist.Add($MU)
         }
         ForEach ($TSG in $TargetSite2SourcesGrouped) {
+
             $TSMU = $TSG.Group[0]
+            if($TSMU."ListName 2" -eq 'Normering')
+            {
+                    $a = 1
+
+            }
             $MU = New-Object MigrationUnitClass 
             $MU.SourceSC = $TSMU."Bron Site Collectie"
             $MU.DestinationURL = $TargetSite2.'Target Site 2'
