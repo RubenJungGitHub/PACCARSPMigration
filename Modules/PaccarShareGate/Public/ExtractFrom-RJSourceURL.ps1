@@ -23,7 +23,6 @@ function ExtractFrom-RJSourceURL {
         $MUListitle = $MUListUrl.Split('/')[$MUListUrl.Split('/').Length - 1]
         For($i = 0; $i -lt $Segments.Length-1; $i++){
             $MUSourceURL = -join ($MUSourceURL, $Segments[$i],'/')
-            Write-Host $MUSourceURL
         }
         #remove ignores 
         ForEach ($Ignore in  $Settings.SourceURLIgnoreSections) {
