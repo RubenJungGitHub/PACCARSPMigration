@@ -12,7 +12,7 @@ function Start-RJNavigation {
     If ($FileBrowser.FileNames -like '*\*') {
         #Region construct form 
         #  csv should have Headers 'MigUnitId', 'CurrentMUStatus', 'NewMUStatus', 'NodeId'
-        $CSVItems = Import-Csv -Path $FileBrowser.FileName -Delimiter ';'  -encoding UTF7 | Where-Object {$_.Parent -ne ''}
+        $CSVItems = Import-Csv -Path $FileBrowser.FileName -Delimiter ';'  -encoding UTF7 | Where-Object { $_.Parent -ne '' }
         $TargetSites = $CSVItems.TargetSites |   Where-Object { $_ -ne '' }
         $NavItemsGrouped = $CSVItems | Where-Object { $_.Name -ne '' } |   Group-Object -Property Parent, SubLevel1, SubLevel2
         #First Clear all Menuitems
@@ -23,16 +23,16 @@ function Start-RJNavigation {
             $CurrentNavNodes = Get-PnPNavigationNode -Location QuickLaunch
             ForEach ($Node in $CurrentNavNodes) {
                 Remove-PnPNavigationNode -Identity $Node.ID -Force                
-                }
             }
             #First create Home Node 
-            $HomeURL = $NavItemsGrouped | Where-Object {$_.Name -like 'Home*'}
+            $HomeURL = $NavItemsGrouped | Where-Object { $_.Name -like 'Home*' }
             Add-PnPNavigationNode -Title "Home" -Url $HomeURL.Group.Target -Location "QuickLaunch" -First
-            }
 
             #Now create new menu
             foreach ($navgroup in $NavItemsGrouped) {
-
+                #Implment better logic to first create all First level and get Parents, Then second and get parent and then get third level 
+                Add-PnPNavigationNode -Title "Home" -Url $HomeURL.Group.Target -Location "QuickLaunch" -First
+                #Add-PnPNavigationNode -Title "Contoso USA" -Url "http://contoso.sharepoint.com/sites/contoso/usa/" -Location "QuickLaunch" -Parent 2012
 
             }
         }
