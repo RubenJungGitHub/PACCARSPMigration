@@ -70,7 +70,12 @@ do {
             Start-MtHExecutionCycle -Fake    
         }
         'Migrate Real' {
-            #Connect-MtHSharePoint
+            #First clear truncated runs
+            $sql = @'
+            Delete from MigrationRuns  Where Result = 'Started';
+'@
+            Invoke-Sqlcmd -ServerInstance $Settings.SQLDetails.Instance -Database $Settings.SQLDetails.Database -Query $sql
+            #Then restart migration
             Start-MtHExecutionCycle 
         }
         'Delete MU-s from target' {
