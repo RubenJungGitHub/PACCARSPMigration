@@ -19,7 +19,7 @@ Write-Verbose "Used Database = $($settings.SQLDetails.Name),$($settings.SQLDetai
 #Set-Location -Path $ModulePath
 do {
     $action = ('++++++++++++++++++++++++++++++++++++++++++++++++++++++', 'Create DataBase', 'Remove DataBase', 'Deactivate Set of Sites and Lists in DB', 'Register Set of Sites and Lists for first migration', 'Register Set of Sites and Lists for delta migration', 'Test SP connections', 'Reset runs after truncation', 'Migrate Real', 
-        'Delete MU-s from target', 'Create MenuItem', 'Quit') | Out-GridView -Title 'Choose Activity (Only working on dev and test env)' -PassThru
+        'Delete MU-s from target', 'Create Navigation', 'Quit') | Out-GridView -Title 'Choose Activity (Only working on dev and test env)' -PassThru
     #Make sure the testprocedures only access Dev and test.
     switch ($action) {
         'Create DataBase' {
@@ -98,8 +98,9 @@ do {
                 Update-MtHSQLMigUnitStatus -Item $Item
             }
         }
-        'Create menuItem' {
-            $URL = "https://paccar.sharepoint.com/sites/DAF-MS-ASCOM-Site"
+        'Create Navigation'
+         {
+            Start-RJNavigation
         }
     }
 } while (($action -ne 'Quit') -and ($null -ne $action))
