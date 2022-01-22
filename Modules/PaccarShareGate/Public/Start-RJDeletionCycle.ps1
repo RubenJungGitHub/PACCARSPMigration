@@ -22,15 +22,6 @@ FROM [PACCARSQLO365].[dbo].[MigrationUnits]
 Where DestinationURL In ($DeleteURLS)
 Order By DestinationURL
 "@
-<#
-$Sql = @"
-SELECT   *
-FROM [PACCARSQLO365].[dbo].[MigrationUnits]
-Where DestinationURL In ($DeleteURLS) AND  ListID NOT Like 'NOT DETECTED IN %'
-Order By DestinationURL
-"@
-#>
-
     $RemoveMUS = Invoke-Sqlcmd -ServerInstance $Settings.SQLDetails.Instance -Query $Sql | Resolve-MtHMUClass
 
     foreach ($RemoveMU in $RemoveMUs) {

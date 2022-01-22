@@ -18,7 +18,7 @@ Write-Verbose "Used Database = $($settings.SQLDetails.Name),$($settings.SQLDetai
 #$ModulePath = -Join ($Settings.FilePath.LocalWorkSpaceModule, 'Public')
 #Set-Location -Path $ModulePath
 do {
-    $action = ('++++++++++++++++++++++++++++++++++++++++++++++++++++++', 'Create DataBase', 'Remove DataBase', 'Deactivate Set of Sites and Lists in DB', 'Register Set of Sites and Lists for first migration', 'Register Set of Sites and Lists for delta migration', 'Test SP connections', 'Reset runs after truncation', 'Migrate Real', 
+    $action = ('++++++++++++++++++++++++++++++++++++++++++++++++++++++', 'Create DataBase', 'Remove DataBase', 'Deactivate Set of Sites and Lists in DB', 'Register Set of Sites and Lists for first migration', 'Register Set of Sites and Lists for delta migration', 'Test SP connections', 'Reset runs after truncation', 'Migrate Real', 'Validate lists migrated', 
         'Delete MU-s from target', 'Create Navigation', 'Quit') | Out-GridView -Title 'Choose Activity (Only working on dev and test env)' -PassThru
     #Make sure the testprocedures only access Dev and test.
     switch ($action) {
@@ -70,16 +70,42 @@ do {
             Start-MtHExecutionCycle -Fake    
         }
         'Migrate Real' {
-            #First clear truncated runs
-            $sql = @'
-            Delete from MigrationRuns  Where Result = 'Started';
-'@
-            Invoke-Sqlcmd -ServerInstance $Settings.SQLDetails.Instance -Database $Settings.SQLDetails.Database -Query $sql
-            #Then restart migration
             Start-MtHExecutionCycle 
+            Write-Host "Migration completed!" -b Green 
+        }
+        'Validate lists migrated' {
+            $MUsForValidation = Select-RJMusForProcessing -Validate 
+            foreach ($MUURL in $MUsForValidation) {
+                $URL = $MUURL.SubItems[2].Text
+
+                $SQL = @"
+                SELECT   *
+                FROM [PACCARSQLO365].[dbo].[MigrationUnits]
+                Where DestinationURL = '$($URL)'
+                Order By DestinationURL
+"@
+                $MUSforValidation = Invoke-Sqlcmd -ServerInstance $Settings.SQLDetails.Instance -Database $Settings.SQLDetails.Database -Query $sql
+                Connect-MtHSharePoint -URL $Url
+                Write-Host "Detected $($MUsForValidation.Count) Migration units for connected destination site $($URL)" -b green
+                ForEach ($MU in  $MUSforValidation) {
+                    try {
+                        $List = Get-PnPList -Identity $MU.ListID
+                        if ($Null -ne $List) {
+                            Write-Host "$($List.Title) detected " -f green
+                        }
+                        else {
+                            Write-Host "$($MU.ListTitle) NOT detected in target. DB Message : $($MU.ListID) " -f red
+                        }                        
+                    }
+                    catch {
+                        Write-Host "$($MU.ListTitle) NOT detected in target" -f red
+                    }
+                }
+                Write-Host "Validation completed!" 
+            }
         }
         'Delete MU-s from target' {
-            $MUsForDeletion = Select-RJMusForDeletion
+            $MUsForDeletion = Select-RJMusForProcessing -Delete
             If ($MUsForDeletion) { Start-RJDeletionCycle $MUsForDeletion }
             Write-Host "Deletion cycle completed" -ForegroundColor Cyan
         }
@@ -103,8 +129,7 @@ do {
                 Update-MtHSQLMigUnitStatus -Item $Item
             }
         }
-        'Create Navigation'
-         {
+        'Create Navigation' {
             Start-RJNavigation
         }
     }

@@ -29,8 +29,18 @@ function Start-RJNavigation {
             Add-PnPNavigationNode -Title "Home" -Url $HomeURL.Group.Target -Location "QuickLaunch" -First
 
             #Now create new menu
+            $NavItemsGrouped = $NavItemsGrouped | Where-Object { $_.Name -Notlike 'Home*' }
             foreach ($navgroup in $NavItemsGrouped) {
-                #Implment better logic to first create all First level and get Parents, Then second and get parent and then get third level 
+                $NavElements = $navGroup.Name.Split(',')
+                ForEach($NavElement in $NavElements)
+                {
+                    #Create top level 
+                  $NavURL = $NavItemsGrouped.Group  | Where-Object {$_.Parent -eq $Navelement -and $_.ParentNavigation  -ne ''}
+                    Add-PnPNavigationNode -Title $NavElement -Url $NavURL -Location "QuickLaunch" -First                    
+
+
+                }
+
                 Add-PnPNavigationNode -Title "Home" -Url $HomeURL.Group.Target -Location "QuickLaunch" -First
                 #Add-PnPNavigationNode -Title "Contoso USA" -Url "http://contoso.sharepoint.com/sites/contoso/usa/" -Location "QuickLaunch" -Parent 2012
 

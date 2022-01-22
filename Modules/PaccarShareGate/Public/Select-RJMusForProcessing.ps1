@@ -1,7 +1,11 @@
 Add-Type -AssemblyName System.Windows.Forms
 
-function Select-RJMusForDeletion {
+function Select-RJMusForProcessing {
     [CmdletBinding()]
+    param(
+        [switch]$Delete,
+        [switch]$Validate
+    )
     $Sql = @"
     SELECT [EnvironmentName]
       ,[DestinationUrl]
@@ -13,7 +17,16 @@ function Select-RJMusForDeletion {
     $frmMuDeletionSelector = New-Object system.Windows.Forms.Form
 
     $frmMuDeletionSelector.ClientSize = '1400,600'
-    $frmMuDeletionSelector.text = 'Destination URL MU Deletion selection'
+    If($Delete)
+    {
+        $frmMuDeletionSelector.text = 'Destination URL MU deletion selection  (Alter column # in d for delete)'
+    }   
+    If($Validate)
+    {
+        $frmMuDeletionSelector.text = 'Destination URL MU deletion selection  (Alter column # in v for validation)'
+    }   
+
+    
     $frmMuDeletionSelector.BackColor = '#ffffff'
     $frmMuDeletionSelector.StartPosition = 'CenterScreen'
     $frmMuDeletionSelector.FormBorderStyle = [System.Windows.Forms.FormBorderStyle]::FixedDialog
@@ -56,10 +69,16 @@ function Select-RJMusForDeletion {
     #endregion
     # Display the form
     $Result = $frmMuDeletionSelector.ShowDialog()
+    $returnMUS = $null
     if ($Result -eq 'OK') {
         #Return items marked with D
-        $DestinationMUForDeletion = $LVSource.Items | Where-Object {$_.Text  -eq 'D'}  | Select-Object -Property SubItems
-        return $DestinationMUForDeletion 
+        if ($Delete) {
+            $returnMUs = $LVSource.Items | Where-Object { $_.Text -eq 'D' }  | Select-Object -Property SubItems
+        }
+        If($Validate) {
+            $ReturnMUs = $LVSource.Items | Where-Object { $_.Text -eq 'V' }  | Select-Object -Property SubItems
+        }
+        return $returnMUs
     }
+    return $null
 }
-return $null

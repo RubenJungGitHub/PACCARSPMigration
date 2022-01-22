@@ -128,7 +128,8 @@ function Start-MtHSGMigration {
                 $renamedLists = Rename-RJListsTitlePrefix -Lists $ToCopy -MUS $MigrationItems -dstSite $dstSite.Address
                 $ListTitleWithPrefix
                 foreach ($List in $RenamedLists) {
-                    if ($List.MergeMUS) { $ListTitleWithPrefix = -Join ($List.ListTitle, $List.TargetLibPrefixGiven) }
+                    write-Host "Migrating Renamedlist $($List.ListTitle)"  -f Magenta
+                        if ($List.MergeMUS) { $ListTitleWithPrefix = -Join ($List.ListTitle, $List.TargetLibPrefixGiven) }
                     else {
                         $ListTitleWithPrefix = ( -Join ($List.ListTitle, $List.DuplicateTargetLibPrefix))
                         #Max listname length truncation
@@ -166,6 +167,7 @@ function Start-MtHSGMigration {
                     if ($NUll -eq $toCopyBatch) {
                         Write-Host  "Eror detecting MU-s batch  to copy not detected:  MUs passed :  $($BatchWiseLists.CompleteSourceUrl)   "-BackgroundColor red
                     }
+                    write-Host "Migrating batch $($ToCopyBatch.Title)"  -f CYAN
                     $result = Copy-List -List $toCopyBatch  -NoWorkflows -NoWebParts -NoNintexWorkflowHistory -ForceNewListExperience -NoCustomizedListForms  -WaitForImportCompletion:$Settings.WaitForImportCompletion @MigrationParameters
                     $MigrationresultItem = [PSCustomObject]@{
                         Result     = $result
