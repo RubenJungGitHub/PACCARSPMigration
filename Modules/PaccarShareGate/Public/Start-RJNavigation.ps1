@@ -56,8 +56,8 @@ function Start-RJNavigation {
                 }
             }
             #Finally create Home Node 
-            $HomeURL = $NavItemsGrouped | Where-Object { $_.Name -like 'Home*' }
-            Add-PnPNavigationNode -Title "Home" -Url $HomeURL.Group.Target -Location "QuickLaunch" -First
+            $HomeURL = $NavItemsTLGrouped | Where-Object { $_.Name -like 'Home*' }
+            Add-PnPNavigationNode -Title "Home" -Url $HomeURL.Group.ParentNavigation -Location "QuickLaunch" -First
             
         }
     }
