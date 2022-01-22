@@ -169,7 +169,6 @@ function Start-MtHSGMigration {
                         Write-Host  "Eror detecting MU-s batch  to copy not detected:  MUs passed :  $($BatchWiseLists.CompleteSourceUrl)   "-BackgroundColor red
                     }
                     #For Throttling reasons limit number of lists to 5 and split 
-
                     $BatchCycleCounter = [math]::Round($toCopyBatchAll.Length / $Settings.MigrationBatchSplitSize, 0)
                     write-Host "Complete batch split into $($BatchCycleCounter) runs of $($Settings.MigrationBatchSplitSize) migrationunits"  -f DarkYellow
                     For ($b = 0; $b -lt $BatchCycleCounter; $b++) {
