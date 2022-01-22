@@ -8,6 +8,7 @@ function Start-MtHSGMigration {
         [switch]$DisableSSO,
         [switch]$TestSPConnections
     )
+    $BatchSTart = 0
     $MigrationStart = Get-Date
     $Results = [System.Collections.Generic.List[PSCustomObject]]::new()
     # $MigrationItems = @($MigrationItem)
@@ -128,8 +129,8 @@ function Start-MtHSGMigration {
                 $renamedLists = Rename-RJListsTitlePrefix -Lists $ToCopy -MUS $MigrationItems -dstSite $dstSite.Address
                 $ListTitleWithPrefix
                 foreach ($List in $RenamedLists) {
-                    write-Host "Migrating Renamedlist $($List.ListTitle)"  -f Magenta
-                        if ($List.MergeMUS) { $ListTitleWithPrefix = -Join ($List.ListTitle, $List.TargetLibPrefixGiven) }
+                    write-Host "Migrating Renamedlist $($List.ListTitleWithPrefix)"  -f Magenta
+                    if ($List.MergeMUS) { $ListTitleWithPrefix = -Join ($List.ListTitle, $List.TargetLibPrefixGiven) }
                     else {
                         $ListTitleWithPrefix = ( -Join ($List.ListTitle, $List.DuplicateTargetLibPrefix))
                         #Max listname length truncation
@@ -163,29 +164,38 @@ function Start-MtHSGMigration {
                 $BatchWiseLists = $MigrationItems | Where-Object { $_.ListTitle -NotIn $renamedLists.ListTitle }
                 if ($BatchWiseLists ) {
                     #Drop renamed lists
-                    $toCopyBatch = Get-List -Site $srcSite | Where-Object { ($_.Title -in $BatchWiseLists.ListTitle -or $_.Title -in $MigrationItems.ListTitle.replace(' ', '' )) -and $_. Title -NotIn $renamedLists.ListTitle } 
-                    if ($NUll -eq $toCopyBatch) {
+                    $toCopyBatchAll = Get-List -Site $srcSite | Where-Object { ($_.Title -in $BatchWiseLists.ListTitle -or $_.Title -in $MigrationItems.ListTitle.replace(' ', '' )) -and $_. Title -NotIn $renamedLists.ListTitle } 
+                    if ($NUll -eq $toCopyBatchAll) {
                         Write-Host  "Eror detecting MU-s batch  to copy not detected:  MUs passed :  $($BatchWiseLists.CompleteSourceUrl)   "-BackgroundColor red
                     }
-                    write-Host "Migrating batch $($ToCopyBatch.Title)"  -f CYAN
-                    $result = Copy-List -List $toCopyBatch  -NoWorkflows -NoWebParts -NoNintexWorkflowHistory -ForceNewListExperience -NoCustomizedListForms  -WaitForImportCompletion:$Settings.WaitForImportCompletion @MigrationParameters
-                    $MigrationresultItem = [PSCustomObject]@{
-                        Result     = $result
-                        MigUnitIDs = $MigrationItems.MigUNitID
-                    }
-                    $Results.Add($MigrationresultItem)
-                    if ($Null -ne $ToCopyBatch) { Register-RJListID -scrSite $srcSite -dstSite  $dstSite  -Lists $ToCopyBatch}
-                    Write-Progress "Check custom permissions required for batch item "
-                    ForEach ($MigrationItem in $BatchWiseLists) {
-                        if ($MigrationItem.UniquePermissions) {
-                            $SourceList = Get-List -Site $SrcSite -Name $MigrationItem.ListTitle
-                            $DestinationList = Get-List -Site $dstSite -Name $MigrationItem.ListTitle
-                            $result = Copy-ObjectPermissions -Source $SourceList -Destination $DestinationList 
-                            $MigrationresultItem = [PSCustomObject]@{
-                                Result     = $result
-                                MigUnitIDs = $MigrationItems.MigUNitID
+                    #For Throttling reasons limit number of lists to 5 and split 
+
+                    $BatchCycleCounter = [math]::Round($toCopyBatchAll.Length / $Settings.MigrationBatchSplitSize, 0)
+                    write-Host "Complete batch split into $($BatchCycleCounter) runs of $($Settings.MigrationBatchSplitSize) migrationunits"  -f DarkYellow
+                    For ($b = 0; $b -lt $BatchCycleCounter; $b++) {
+                        $BatchEnd = $BatchStart + $Settings.MigrationBatchSplitSize-1
+                        $ToCopyBatch = $toCopyBatchAll[$BatchSTart..$BatchEnd]
+                        $BatchStart = $BatchEnd +1 
+                        write-Host "Migrating batch $($ToCopyBatch.Title)"  -f CYAN
+                        $result = Copy-List -List $toCopyBatch  -NoWorkflows -NoWebParts -NoNintexWorkflowHistory -ForceNewListExperience -NoCustomizedListForms  -WaitForImportCompletion:$Settings.WaitForImportCompletion @MigrationParameters
+                        $MigrationresultItem = [PSCustomObject]@{
+                            Result     = $result
+                            MigUnitIDs = $MigrationItems.MigUNitID
+                        }
+                        $Results.Add($MigrationresultItem)
+                        if ($Null -ne $ToCopyBatch) { Register-RJListID -scrSite $srcSite -dstSite  $dstSite  -Lists $ToCopyBatch }
+                        Write-Progress "Check custom permissions required for batch item "
+                        ForEach ($MigrationItem in $BatchWiseLists) {
+                            if ($MigrationItem.UniquePermissions) {
+                                $SourceList = Get-List -Site $SrcSite -Name $MigrationItem.ListTitle
+                                $DestinationList = Get-List -Site $dstSite -Name $MigrationItem.ListTitle
+                                $result = Copy-ObjectPermissions -Source $SourceList -Destination $DestinationList 
+                                $MigrationresultItem = [PSCustomObject]@{
+                                    Result     = $result
+                                    MigUnitIDs = $MigrationItems.MigUNitID
+                                }
+                                $Results.Add($ReMigrationresultItemsult)
                             }
-                            $Results.Add($ReMigrationresultItemsult)
                         }
                     }
                 }

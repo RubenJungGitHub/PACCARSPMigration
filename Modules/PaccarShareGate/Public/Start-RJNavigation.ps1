@@ -24,27 +24,26 @@ function Start-RJNavigation {
             ForEach ($Node in $CurrentNavNodes) {
                 Remove-PnPNavigationNode -Identity $Node.ID -Force                
             }
-            #First create Home Node 
-            $HomeURL = $NavItemsGrouped | Where-Object { $_.Name -like 'Home*' }
-            Add-PnPNavigationNode -Title "Home" -Url $HomeURL.Group.Target -Location "QuickLaunch" -First
 
             #Now create new menu
             $NavItemsGrouped = $NavItemsGrouped | Where-Object { $_.Name -Notlike 'Home*' }
             foreach ($navgroup in $NavItemsGrouped) {
                 $NavElements = $navGroup.Name.Split(',')
-                ForEach($NavElement in $NavElements)
-                {
+                ForEach ($NavElement in $NavElements) {
                     #Create top level 
-                  $NavURL = $NavItemsGrouped.Group  | Where-Object {$_.Parent -eq $Navelement -and $_.ParentNavigation  -ne ''}
-                    Add-PnPNavigationNode -Title $NavElement -Url $NavURL -Location "QuickLaunch" -First                    
+                    $NavURL = $NavItemsGrouped.Group  | Where-Object { $_.Parent -eq $Navelement -and $_.ParentNavigation -ne '' }
+                    $Parent = Add-PnPNavigationNode -Title $NavElement -Url $NavURL.ParentNavigation -Location "QuickLaunch" -First -Parent $Parent.ID                   
+                    $a = 1
+                    #GetParentID
+                    #$ParentID  =Get-PnPNavigationNode -
 
 
                 }
-
-                Add-PnPNavigationNode -Title "Home" -Url $HomeURL.Group.Target -Location "QuickLaunch" -First
-                #Add-PnPNavigationNode -Title "Contoso USA" -Url "http://contoso.sharepoint.com/sites/contoso/usa/" -Location "QuickLaunch" -Parent 2012
-
             }
+            #Finally create Home Node 
+            $HomeURL = $NavItemsGrouped | Where-Object { $_.Name -like 'Home*' }
+            Add-PnPNavigationNode -Title "Home" -Url $HomeURL.Group.Target -Location "QuickLaunch" -First
+            
         }
     }
 }

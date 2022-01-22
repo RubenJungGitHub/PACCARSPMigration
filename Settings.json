@@ -14,6 +14,7 @@
     "MaxNodeId":  3,
     "ListNamesFromURL" : false,
     "WaitForImportCompletion" : false,
+    "MigrationBatchSplitSize" : 5,
     "SourceURLIgnoreSections":  [
                                     "Lists",
                                     "Lijsten"
