@@ -128,7 +128,7 @@ function Start-MtHSGMigration {
                 $renamedLists = Rename-RJListsTitlePrefix -Lists $ToCopy -MUS $MigrationItems -dstSite $dstSite.Address
                 $ListTitleWithPrefix
                 foreach ($List in $RenamedLists) {
-                    write-Host "Migrating Renamedlist $($List.ListTitleWithPrefix)"  -f Magenta
+                    write-Host "Migrating Renamedlist $($List.ListTitleWithPrefix) : REALMIGRATION? : $($Settings.RealMigration)"  -f Magenta
                     if ($List.MergeMUS) { $ListTitleWithPrefix = -Join ($List.ListTitle, $List.TargetLibPrefixGiven) }
                     else {
                         $ListTitleWithPrefix = ( -Join ($List.ListTitle, $List.DuplicateTargetLibPrefix))
@@ -139,7 +139,10 @@ function Start-MtHSGMigration {
                     }
                     #Find original source list Title and copy MU
                     $SourceSiteList = $ToCopy | where-Object { $_.RootFolder.SubString(0, $_.RootFolder.Length - 1) -eq $List.ListURL }
-                    $result = Copy-List  -SourceSite $srcSite  -Name $SourceSiteList.Title  -ListTitleUrlSegment $ListTitleWithPrefix -ListTitle $ListTitleWithPrefix -NoWorkflows -NoWebParts -NoNintexWorkflowHistory -ForceNewListExperience -NoCustomizedListForms -WaitForImportCompletion:$Settings.WaitForImportCompletion  @MigrationParameters
+                    #Dryrun?
+                    if ($Settings.RealMigration) {
+                        $result = Copy-List  -SourceSite $srcSite  -Name $SourceSiteList.Title  -ListTitleUrlSegment $ListTitleWithPrefix -ListTitle $ListTitleWithPrefix -NoWorkflows -NoWebParts -NoNintexWorkflowHistory -ForceNewListExperience -NoCustomizedListForms -WaitForImportCompletion:$Settings.WaitForImportCompletion  @MigrationParameters
+                    }
                     $MigrationresultItem = [PSCustomObject]@{
                         Result     = $result
                         MigUnitIDs = $List.MigUNitID 
@@ -172,11 +175,14 @@ function Start-MtHSGMigration {
                     write-Host "Complete batch split into $($BatchCycleCounter) runs of $($Settings.MigrationBatchSplitSize) migrationunits"  -f DarkYellow
                     $BatchStart = 0
                     For ($b = 0; $b -lt $BatchCycleCounter; $b++) {
-                        $BatchEnd = $BatchStart + $Settings.MigrationBatchSplitSize-1
+                        $BatchEnd = $BatchStart + $Settings.MigrationBatchSplitSize - 1
                         $ToCopyBatch = $toCopyBatchAll[$BatchSTart..$BatchEnd]
-                        $BatchStart = $BatchEnd +1 
-                        write-Host "Migrating batch $($ToCopyBatch.Title)"  -f CYAN
-                        $result = Copy-List -List $toCopyBatch  -NoWorkflows -NoWebParts -NoNintexWorkflowHistory -ForceNewListExperience -NoCustomizedListForms  -WaitForImportCompletion:$Settings.WaitForImportCompletion @MigrationParameters
+                        $BatchStart = $BatchEnd + 1 
+                        write-Host "Migrating batch $($ToCopyBatch.Title) : REALMIGRATION? : $($Settings.RealMigration)"  -f CYAN
+                        #Dryrun?
+                        if ($Settings.RealMigration) {
+                            $result = Copy-List -List $toCopyBatch  -NoWorkflows -NoWebParts -NoNintexWorkflowHistory -ForceNewListExperience -NoCustomizedListForms  -WaitForImportCompletion:$Settings.WaitForImportCompletion @MigrationParameters
+                        }
                         $MigrationresultItem = [PSCustomObject]@{
                             Result     = $result
                             MigUnitIDs = $MigrationItems.MigUNitID

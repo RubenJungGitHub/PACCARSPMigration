@@ -92,7 +92,7 @@ function Register-MtHAllSitesLists {
     }
 
    
-    $MergeMUGroups = Get-MtHSQLMigUnits -all | Where-Object { $_.TargetURL -in $MUsINSP.TargetURL -and $_.MergeMUS -eq $True } |  Group-Object -Property DestinationURL, ListTitle 
+    $MergeMUGroups = Get-MtHSQLMigUnits -all | Where-Object { $_.DestinationURL -in $MUsINSP.DestinationURL -and $_.MergeMUS -eq $True } |  Group-Object -Property DestinationURL, ListTitle 
     foreach ($MergeMUS  in $MergeMUGroups) {
         for ($i = 1; $i -lt $MergeMUS.Count ; $i++) {
             $ChangeItem = $MergeMUS.Group[$i]
