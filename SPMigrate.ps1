@@ -18,7 +18,7 @@ Write-Verbose "Used Database = $($settings.SQLDetails.Name),$($settings.SQLDetai
 #$ModulePath = -Join ($Settings.FilePath.LocalWorkSpaceModule, 'Public')
 #Set-Location -Path $ModulePath
 do {
-    $action = ('++++++++++++++++++++++++++++++++++++++++++++++++++++++', 'Create DataBase', 'Remove DataBase', 'Deactivate Set of Sites and Lists in DB', 'Register Set of Sites and Lists for first migration', 'Register Set of Sites and Lists for delta migration', 'Test SP connections', 'Reset runs after truncation', 'Migrate Real', 'Validate lists migrated', 
+    $action = ('++++++++++++++++++++++++++++++++++++++++++++++++++++++', 'Create DataBase', 'Remove DataBase', 'Deactivate Set of Sites and Lists in DB', 'Register Set of Sites and Lists for first migration', 'Register Set of Sites and Lists for delta migration', 'Test SP connections', '************************************' , 'Reset runs after truncation', 'Validate lists to migrate in source', 'Migrate Real', 'Validate lists migrated in target', 
         'Delete MU-s from target', 'Create Navigation', 'Quit') | Out-GridView -Title 'Choose Activity (Only working on dev and test env)' -PassThru
     #Make sure the testprocedures only access Dev and test.
     switch ($action) {
@@ -69,11 +69,46 @@ do {
         'Migrate Fake' {
             Start-MtHExecutionCycle -Fake    
         }
+        'Validate lists to migrate in source' {
+            $MUsForValidation = Select-RJMusForProcessing -Validate 
+            foreach ($MUURL in $MUsForValidation) {
+                $URL = $MUURL.SubItems[2].Text
+
+                $SQL = @"
+                SELECT   *
+                FROM [PACCARSQLO365].[dbo].[MigrationUnits]
+                Where DestinationURL = '$($URL)'
+                Order By DestinationURL
+"@
+                $MUSforValidation = Invoke-Sqlcmd -ServerInstance $Settings.SQLDetails.Instance -Database $Settings.SQLDetails.Database -Query $sql | Group-Object -Property SourceURL
+                ForEach ($MUSource  in  $MUSforValidation) {
+                    $securePwd = $settings.current.EncryptedPassword | ConvertTo-SecureString
+                    $cred = New-Object System.Management.Automation.PSCredential -ArgumentList $settings.current.UserNameSP2010, $securePwd
+                    Connect-PnPOnline -URL $MUSource.Name -Credentials $cred -ErrorAction Stop 
+#                    Write-Host "Connected to source site $($MUSource.Name). Detected $($MUSource.Group.Count) Migration units $($URL)" -b green
+                    ForEach ($MUGroup  in  $MUSource.Group) {
+                        try {
+                            $List = Get-PnPList -Identity $MUGroup.ListTitle
+                            if ($Null -ne $List) {
+                                Write-Host "$($List.Title) detected in $($MuSource.name)" -f green
+                            }
+                            else {
+                                Write-Host "$($MU.ListTitle) NOT detected in target. DB Message : $($MU.ListID) " -f red
+                            }                        
+                        }
+                        catch {
+                            Write-Host "$($MU.ListTitle) NOT detected in target" -f red
+                        }
+                    }
+                }
+                Write-Host "Validation completed!" 
+            }
+        }
         'Migrate Real' {
             Start-MtHExecutionCycle 
             Write-Host "Migration completed!" -b Green 
         }
-        'Validate lists migrated' {
+        'Validate lists migrated in target' {
             $MUsForValidation = Select-RJMusForProcessing -Validate 
             foreach ($MUURL in $MUsForValidation) {
                 $URL = $MUURL.SubItems[2].Text

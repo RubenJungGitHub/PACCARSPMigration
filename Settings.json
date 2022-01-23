@@ -44,6 +44,7 @@
                                {
                                    "Name":  "o365",
                                    "UserName":  "ruben.jung@paccar.onmicrosoft.com",
+                                   "UserNameSP2010":  "ruben.jung",
                                    "LoginType":  "UseWebLogin",
                                    "DIsableSSO":  false,
                                    "SPVersion":  "SharePointOnline",
