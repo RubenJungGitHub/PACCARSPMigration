@@ -8,7 +8,6 @@ function Start-MtHSGMigration {
         [switch]$DisableSSO,
         [switch]$TestSPConnections
     )
-    $BatchSTart = 0
     $MigrationStart = Get-Date
     $Results = [System.Collections.Generic.List[PSCustomObject]]::new()
     # $MigrationItems = @($MigrationItem)
@@ -171,6 +170,7 @@ function Start-MtHSGMigration {
                     #For Throttling reasons limit number of lists to 5 and split 
                     $BatchCycleCounter = [math]::Ceiling($toCopyBatchAll.Length / $Settings.MigrationBatchSplitSize)
                     write-Host "Complete batch split into $($BatchCycleCounter) runs of $($Settings.MigrationBatchSplitSize) migrationunits"  -f DarkYellow
+                    $BatchStart = 0
                     For ($b = 0; $b -lt $BatchCycleCounter; $b++) {
                         $BatchEnd = $BatchStart + $Settings.MigrationBatchSplitSize-1
                         $ToCopyBatch = $toCopyBatchAll[$BatchSTart..$BatchEnd]
