@@ -176,7 +176,14 @@ function Start-MtHSGMigration {
                     $BatchStart = 0
                     For ($b = 0; $b -lt $BatchCycleCounter; $b++) {
                         $BatchEnd = $BatchStart + $Settings.MigrationBatchSplitSize - 1
-                        $ToCopyBatch = $toCopyBatchAll[$BatchSTart..$BatchEnd]
+                        #Tricky... Because in case the collection contanis one item the length of the toCopyBatchAll collection needs to be checked first 
+                        if ($toCopyBatchAll.Length -eq 1) {
+                            #Select first item from collection
+                            $ToCopyBatch = $toCopyBatchAll[0]
+                        }
+                        else {
+                            $ToCopyBatch = $toCopyBatchAll[$BatchSTart..$BatchEnd]
+                        }
                         $BatchStart = $BatchEnd + 1 
                         write-Host "Migrating batch $($ToCopyBatch.Title) : REALMIGRATION? : $($Settings.RealMigration)"  -f CYAN
                         #Dryrun?
