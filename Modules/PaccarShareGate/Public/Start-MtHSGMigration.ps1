@@ -102,7 +102,7 @@ function Start-MtHSGMigration {
         Return $Null
     }
     else {
-        Write-Host "MIGRATE  source $($srcSite) to Destination $($dstSite)"  -ForegroundColor Cyan
+        Write-Host "MIGRATE  source $($srcSite) to Destination $($dstSite)"  -ForegroundColor yellow
         $ActualMigrationStart = Get-Date
         if ($MigrateSitePermissions) {
             Copy-ObjectPermissions -Source $srcSite -Destination $dstSite | out-null 
