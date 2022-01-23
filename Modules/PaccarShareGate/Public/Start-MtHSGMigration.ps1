@@ -172,7 +172,7 @@ function Start-MtHSGMigration {
                     }
                     #For Throttling reasons limit number of lists to 5 and split 
                     $BatchCycleCounter = [math]::Ceiling($toCopyBatchAll.Length / $Settings.MigrationBatchSplitSize)
-                    write-Host "Complete batch split into $($BatchCycleCounter) runs of $($Settings.MigrationBatchSplitSize) migrationunits"  -f DarkYellow
+                    write-Host "Complete batch split into $($BatchCycleCounter) runs of max. $($Settings.MigrationBatchSplitSize) migrationunits"  -f DarkYellow
                     $BatchStart = 0
                     For ($b = 0; $b -lt $BatchCycleCounter; $b++) {
                         $BatchEnd = $BatchStart + $Settings.MigrationBatchSplitSize - 1
