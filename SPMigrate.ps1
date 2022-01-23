@@ -112,14 +112,13 @@ do {
             $MUsForValidation = Select-RJMusForProcessing -Validate 
             foreach ($MUURL in $MUsForValidation) {
                 $URL = $MUURL.SubItems[2].Text
-
                 $SQL = @"
                 SELECT   *
                 FROM [PACCARSQLO365].[dbo].[MigrationUnits]
                 Where DestinationURL = '$($URL)'
                 Order By DestinationURL
 "@
-                $MUSforValidation = Invoke-Sqlcmd -ServerInstance $Settings.SQLDetails.Instance -Database $Settings.SQLDetails.Database -Query $sql
+                $MUSforValidation = Invoke-Sqlcmd -ServerInstance $Settings.SQLDetails.Instance -Database $Settings.SQLDetails.Database -Query $sql 
                 Connect-MtHSharePoint -URL $Url
                 Write-Host "Detected $($MUsForValidation.Count) Migration units for connected destination site $($URL)" -b green
                 ForEach ($MU in  $MUSforValidation) {
@@ -129,7 +128,7 @@ do {
                             Write-Host "$($List.Title) detected " -f green
                         }
                         else {
-                            Write-Host "$($MU.ListTitle) NOT detected in target. DB Message : $($MU.ListID) " -f red
+                            Write-Host "$($MU.ListTitle) NOT detected in target!" -f red
                         }                        
                     }
                     catch {
