@@ -28,7 +28,8 @@ function Register-MtHAllSitesLists {
     $totalsites = $MUsINSP.Count
     
     #First remove old entries 
-    $SiteCollections | ForEach-Object { Invoke-MtHSQLquery -QueryName C-MUSC -DestinationURL $_.Name }
+    #$SiteCollections | ForEach-Object { Invoke-MtHSQLquery -QueryName C-MUSC -DestinationURL $_.Name }
+     $MUsINSP | ForEach-Object {Invoke-MtHSQLquery -QueryName C-MUSC -MU $_}
 
 
 
@@ -42,7 +43,8 @@ function Register-MtHAllSitesLists {
             #$MUsinSP = Get-MtHOneSPSiteLists -Url $siteCollection
             
             # Get all registered Migration Units of a sitecollection from the SQL database, MU List
-            $MUinSQL = Get-MtHSQLMigUnits -CompleteSourceUrl $MUinSP.CompleteSourceURL -DestinationUrl $MUinSP.DestinationURL
+            #$MUinSQL = Get-MtHSQLMigUnits -CompleteSourceUrl $MUinSP.CompleteSourceURL -DestinationUrl $MUinSP.DestinationURL
+            $MUinSQL = Get-MtHSQLMigUnits -CompleteSourceUrl $MUinSP.CompleteSourceURL 
             
             # is the MU in SharePoint new?
             if ($MUinSQL.Count -eq 0) {
