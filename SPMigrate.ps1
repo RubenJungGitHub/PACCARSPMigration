@@ -6,7 +6,7 @@ param()
 #start-MtHLocalPowerShell -settingfile "$(Get-MtHGitDirectory)\settings.json" -Verbose -initsp
 start-MtHLocalPowerShell -settingfile "$(Get-MtHGitDirectory)\settings.json" -Verbose  -InitSP
 # open the demo site and fill the Demo Library
-
+$PSDefaultParameterValues['*:Encoding'] = 'utf8'
 # Create testdata : check if the SP demo library (locally stored) is already filled, if not fill it
 if ($settings.environment -ne 'production') {
     # New-MtHTestData -Number 50 -MaxFileSize 130000
@@ -18,7 +18,7 @@ Write-Verbose "Used Database = $($settings.SQLDetails.Name),$($settings.SQLDetai
 #$ModulePath = -Join ($Settings.FilePath.LocalWorkSpaceModule, 'Public')
 #Set-Location -Path $ModulePath
 do {
-    $action = ('++++++++++++++++++++++++++++++++++++++++++++++++++++++', 'Create DataBase', 'Remove DataBase', 'Deactivate Set of Sites and Lists in DB', 'Register Set of Sites and Lists for first migration', 'Register Set of Sites and Lists for delta migration', 'Test SP connections', '************************************' , 'Reset runs after truncation', 'Validate lists to migrate in source', 'Migrate Real', 'Validate lists migrated in target', 
+    $action = ('++++++++++++++++++++++++++++++++++++++++++++++++++++++', 'Create DataBase', 'Remove DataBase', '************************************' , 'Deactivate Set of Sites and Lists in DB', 'Register Set of Sites and Lists for first migration', 'Register Set of Sites and Lists for delta migration', 'Verify SP connections (prior to migrate)', '************************************' , 'Reset runs after truncation', 'Verify lists to migrate in source', 'Migrate Real', 'Verify lists migrated in target', 
         'Delete MU-s from target', 'Create Navigation', 'Quit') | Out-GridView -Title 'Choose Activity (Only working on dev and test env)' -PassThru
     #Make sure the testprocedures only access Dev and test.
     switch ($action) {
@@ -56,7 +56,7 @@ do {
             $Items = Start-RJDBRegistrationCycle  -NextAction "Delta"
             If ($Null -ne $Items) { Register-MtHAllSitesLists -MUsINSP $Items -NextAction "Delta" }
         }
-        'Test SP connections' {
+        'Verify SP connections (prior to migrate)' {
             #Connect-MtHSharePoint
             Start-MtHExecutionCycle -TestSPConnections
         }
@@ -69,11 +69,10 @@ do {
         'Migrate Fake' {
             Start-MtHExecutionCycle -Fake    
         }
-        'Validate lists to migrate in source' {
-            $MUsForValidation = Select-RJMusForProcessing -Validate 
+        'Verify lists to migrate in source' {
+            $MUsForValidation = Select-RJMusForProcessing -Verify 
             foreach ($MUURL in $MUsForValidation) {
                 $URL = $MUURL.SubItems[2].Text
-
                 $SQL = @"
                 SELECT   *
                 FROM [PACCARSQLO365].[dbo].[MigrationUnits]
@@ -85,12 +84,17 @@ do {
                     $securePwd = $settings.current.EncryptedPassword | ConvertTo-SecureString
                     $cred = New-Object System.Management.Automation.PSCredential -ArgumentList $settings.current.UserNameSP2010, $securePwd
                     Connect-PnPOnline -URL $MUSource.Name -Credentials $cred -ErrorAction Stop 
-#                    Write-Host "Connected to source site $($MUSource.Name). Detected $($MUSource.Group.Count) Migration units $($URL)" -b green
+                    #                    Write-Host "Connected to source site $($MUSource.Name). Detected $($MUSource.Group.Count) Migration units $($URL)" -b green
                     ForEach ($MUGroup  in  $MUSource.Group) {
                         try {
                             $List = Get-PnPList -Identity $MUGroup.ListTitle
                             if ($Null -ne $List) {
                                 Write-Host "$($List.Title) detected in $($MuSource.name)" -f green
+                                $SQL = @"
+                                UPDATE MigrationUnits Set Itemcount = $($List.ItemCount) where ListURL = '$($list.RootFolder.ServerRelativeUrl)'
+"@
+                                Invoke-Sqlcmd -ServerInstance $Settings.SQLDetails.Instance -Database $Settings.SQLDetails.Database -Query $sql
+
                             }
                             else {
                                 Write-Host "$($MU.ListTitle) NOT detected in target. DB Message : $($MU.ListID) " -f red
@@ -108,24 +112,28 @@ do {
             Start-MtHExecutionCycle 
             Write-Host "Migration completed!" -b Green 
         }
-        'Validate lists migrated in target' {
-            $MUsForValidation = Select-RJMusForProcessing -Validate 
+        'Verify lists migrated in target' {
+            $MUsForValidation = Select-RJMusForProcessing -Verify 
             foreach ($MUURL in $MUsForValidation) {
                 $URL = $MUURL.SubItems[2].Text
-                $SQL = @"
-                SELECT   *
-                FROM [PACCARSQLO365].[dbo].[MigrationUnits]
-                Where DestinationURL = '$($URL)'
-                Order By DestinationURL
-"@
-                $MUSforValidation = Invoke-Sqlcmd -ServerInstance $Settings.SQLDetails.Instance -Database $Settings.SQLDetails.Database -Query $sql 
-                Connect-MtHSharePoint -URL $Url
-                Write-Host "Detected $($MUsForValidation.Count) Migration units for connected destination site $($URL)" -b green
-                ForEach ($MU in  $MUSforValidation) {
+                #GetUniqueLists for target
+                $sql = @"
+                SELECT   u1.ListTitle, LISTID, MergeMUS, SUM(u1.ItemCount) As ItemCount
+                FROM [MigrationUnits] u1
+                Where U1.DestinationURL = '$($URL)'
+                Group by U1.ListTitle,U1 .ListID, MergeMUs
+                Order By U1.ListTitle
+"@      
+                $UniqueMUS = Invoke-Sqlcmd -ServerInstance $Settings.SQLDetails.Instance -Database $Settings.SQLDetails.Database -Query $sql 
+                Write-Host "Detected $($UniqueMUS.Count) Migration units for connected destination site $($URL)" -b green
+                foreach ($MuforValidation in $UniqueMUS) {
+                    Connect-MtHSharePoint -URL $Url | out-null
                     try {
-                        $List = Get-PnPList -Identity $MU.ListID
+                        $List = Get-PnPList -Identity $MuforValidation.ListID
                         if ($Null -ne $List) {
+                            $ItemCountMatch = $List.ItemCount -eq $MuforValidation.ItemCount
                             Write-Host "$($List.Title) detected " -f green
+                            Write-Host "Source itemcount : $($MuforValidation.ItemCount) - Target itemcount $($List.ItemCount) -> match : $($ItemCountMatch) MUsMerged : $($MuforValidation.MergeMUS)" -f yellow 
                         }
                         else {
                             Write-Host "$($MU.ListTitle) NOT detected in target!" -f red

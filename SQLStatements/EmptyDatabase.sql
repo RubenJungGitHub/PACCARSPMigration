@@ -13,6 +13,7 @@ CREATE TABLE MigrationUnits
     ListTitle NVARCHAR(400) NULL,
     ListTitleWithPrefix NVARCHAR(400) NULL,
     ListID VARCHAR(400) NULL,
+    ItemCount INT Null,
     UniquePermissions BIT,
     MergeMUS BIT,
     

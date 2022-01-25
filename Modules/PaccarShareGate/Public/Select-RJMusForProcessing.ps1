@@ -4,7 +4,7 @@ function Select-RJMusForProcessing {
     [CmdletBinding()]
     param(
         [switch]$Delete,
-        [switch]$Validate
+        [switch]$Verify
     )
     $Sql = @"
     SELECT [EnvironmentName]
@@ -21,7 +21,7 @@ function Select-RJMusForProcessing {
     {
         $frmMuDeletionSelector.text = 'Destination URL MU deletion selection  (Alter column # in d for delete)'
     }   
-    If($Validate)
+    If($Verify)
     {
         $frmMuDeletionSelector.text = 'Destination URL MU deletion selection  (Alter column # in v for validation)'
     }   
@@ -75,7 +75,7 @@ function Select-RJMusForProcessing {
         if ($Delete) {
             $returnMUs = $LVSource.Items | Where-Object { $_.Text -eq 'D' }  | Select-Object -Property SubItems
         }
-        If($Validate) {
+        If($Verify) {
             $ReturnMUs = $LVSource.Items | Where-Object { $_.Text -eq 'V' }  | Select-Object -Property SubItems
         }
         return $returnMUs
