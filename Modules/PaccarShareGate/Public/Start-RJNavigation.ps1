@@ -23,6 +23,7 @@ function Start-RJNavigation {
         #First Clear all Menuitems
         
         foreach ($Site in $TargetSites) {
+            Write-Host "Connect to $($Site)" 
             Connect-MtHSharePoint -URL $Site | Out-Null
             #First remove all existing Nodes 
             $CurrentNavNodes = Get-PnPNavigationNode -Location QuickLaunch
@@ -34,7 +35,7 @@ function Start-RJNavigation {
             #Now create new menu
             #Drop home on toplevel, naming conventions questionable
             if ($create) {
-                $NavTLItemsGrouped = $NavItemsTLGrouped | Where-Object { $_.Name -Notlike 'Home*' }
+                $NavTLItemsGrouped = $NavItemsTLGrouped | Where-Object { $_.Name -Notlike 'Home*' } | sort-Object -Property Name -Descending
                 foreach ($navgroup in $NavTLItemsGrouped) {
 
                     #Get and create top level 
@@ -42,27 +43,35 @@ function Start-RJNavigation {
                     if ($Null -eq $NavItem) {
                         $NavItem = $NavGroup.Group[0]
                     }
-                    $ParentTL = Add-PnPNavigationNode -Title $NavItem.Parent -Url $NavItem.ParentNavigation -Location "QuickLaunch"  -Parent $Parent.ID                   
+                    Write-Host "Create parent node $($NavItem.Parent)" -ForegroundColor Green
+                    $ParentTL = Add-PnPNavigationNode -Title $NavItem.Parent -Url $NavItem.ParentNavigation -Location "QuickLaunch"  -Parent $Parent.ID  -first                 
 
                     #Get and create sublevel 1    
-                    $NavSL1ItemsGrouped = $NavItemsSL1Grouped | Where-Object { $_.name -like ( -join ($ParentTL.Title, '*')) }
+                    $NavSL1ItemsGrouped = $NavItemsSL1Grouped | Where-Object { $_.name -like ( -join ($ParentTL.Title, '*')) } | sort-Object -Property Name  
+                    $NavSL1ItemsGrouped = $NavSL1ItemsGrouped | Sort-object -Property Name -Descending
                     ForEach ($Navslgroup in $NavSL1ItemsGrouped) {
                         $NavItem = $Navslgroup.Group  | Where-Object { $_.Parent -eq $ParentTL.Title -and $_.SubLevel1Navigation -ne '' }
                         if ($Null -eq $NavItem) {
                             $NavItem = $Navslgroup.Group[0]
                         }
-                        $ParentSL1 = Add-PnPNavigationNode -Title $NavItem.SubLevel1 -Url $NavItem.SubLevel1Navigation -Location "QuickLaunch" -Parent $ParentTL.ID        
+                        Write-Host "Create sublevel 1 node $($ParentTL) / $($NavItem.SubLevel1)" -ForegroundColor Green
+                        $ParentSL1 = Add-PnPNavigationNode -Title $NavItem.SubLevel1 -Url $NavItem.SubLevel1Navigation -Location "QuickLaunch" -Parent $ParentTL.ID  -first
                    
                         #Get and create sublevel 2
-                        $NavSL2ItemsGrouped = $NavItemsSL2Grouped | Where-Object { $_.name -like ( -join ($ParentTL.Title, ', ', $ParentSL1.Title, '*')) }
+                        $NavSL2ItemsGrouped = $NavItemsSL2Grouped | Where-Object { $_.name -like ( -join ($ParentTL.Title, ', ', $ParentSL1.Title, '*')) }| sort-Object -Property Name 
+                        $NavSL2ItemsGrouped = $NavSL2ItemsGrouped | Sort-object -Property Name -desc
                         ForEach ($Navsl2group in $NavSL2ItemsGrouped) {
-                            Add-PnPNavigationNode -Title $Navsl2group.Group.SubLevel2 -Url $Navsl2group.Group.SubLevel2Navigation -Location "QuickLaunch" -Parent $ParentSL1.ID        
+                            Write-Host "Create sublevel 2 node $($ParentTL) / $($NavItem.SubLevel1) / $($Navsl2group.Group.SubLevel2)" -ForegroundColor Green
+                            if ($Navsl2group.Group.SubLevel2 -ne '') {
+                                Add-PnPNavigationNode -Title $Navsl2group.Group.SubLevel2 -Url $Navsl2group.Group.SubLevel2Navigation -Location "QuickLaunch" -Parent $ParentSL1.ID  -first     | out-null
+                            }
                         }
                     }
                 }
                 #Finally create Home Node 
+                Write-Host "Create HOME node" -ForegroundColor Green
                 $HomeURL = $NavItemsTLGrouped | Where-Object { $_.Name -like 'Home*' }
-                Add-PnPNavigationNode -Title "Home" -Url $HomeURL.Group.ParentNavigation -Location "QuickLaunch" -First
+                Add-PnPNavigationNode -Title "Home" -Url $HomeURL.Group.ParentNavigation -Location "QuickLaunch" -First | out-null
             }
         }
     }
