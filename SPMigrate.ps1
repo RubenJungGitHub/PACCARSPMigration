@@ -125,9 +125,10 @@ do {
             Order By ListTitle
 "@      
                 $UniqueMUS = Invoke-Sqlcmd -ServerInstance $Settings.SQLDetails.Instance -Database $Settings.SQLDetails.Database -Query $sql 
+                Connect-MtHSharePoint -URL $Url | out-null
                 Write-Host "Detected $($UniqueMUS.Count) Migration units for connected destination site $($URL)" -b green
                 foreach ($MuforValidation in $UniqueMUS) {
-                    Connect-MtHSharePoint -URL $Url | out-null
+
                     try {
                         $List = Get-PnPList -Identity $MuforValidation.ListID
                         if ($Null -ne $List) {
