@@ -83,7 +83,7 @@ function Start-MtHSGMigration {
         DestinationSite = $dstSite
         MappingSettings = $MappingSettings
         NoContent       = $false
-        #NoCustomPermissions = ($MigrationItems[0].ShareGateCopySettings -contains 'p')
+        NoCustomPermissions =  $true  #($MigrationItems[0].ShareGateCopySettings -contains 'p')
         CopySettings    = $copySettings
     }
 

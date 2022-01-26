@@ -18,7 +18,7 @@ Write-Verbose "Used Database = $($settings.SQLDetails.Name),$($settings.SQLDetai
 #$ModulePath = -Join ($Settings.FilePath.LocalWorkSpaceModule, 'Public')
 #Set-Location -Path $ModulePath
 do {
-    $action = ('++++++++++++++++++++++++++++++++++++++++++++++++++++++', 'Create DataBase', 'Remove DataBase', '************************************' , 'Deactivate Set of Sites and Lists in DB', 'Register Set of Sites and Lists for first migration', 'Register Set of Sites and Lists for delta migration', 'Verify SP connections (prior to migrate)', '************************************' , 'Reset runs after truncation', 'Verify lists to migrate in source', 'Migrate Real', 'Verify lists migrated in target', 
+    $action = ('++++++++++++++++++++++++++++++++++++++++++++++++++++++', 'Create DataBase', 'Remove DataBase', '************************************' , 'Deactivate Set of Sites and Lists in DB', 'Register Set of Sites and Lists for first migration', 'Register Set of Sites and Lists for delta migration', 'Verify SP connections (prior to migrate)', '************************************' , 'Reset runs after truncation', 'Verify lists to migrate in source', 'Migrate Real', 'Verify lists migrated in target (Verify in source FIRST)', 
         'Delete MU-s from target', '************************************', 'Clear Navigation' ,'Create Navigation', '************************************', 'Quit') | Out-GridView -Title 'Choose Activity (Only working on dev and test env)' -PassThru
     #Make sure the testprocedures only access Dev and test.
     switch ($action) {
@@ -97,11 +97,11 @@ do {
 
                             }
                             else {
-                                Write-Host "$($MU.ListTitle) NOT detected in target. DB Message : $($MU.ListID) " -f red
+                                Write-Host "$($MUGroup.ListTitle) NOT detected in target. DB Message : $($MU.ListID) " -f red
                             }                        
                         }
                         catch {
-                            Write-Host "$($MU.ListTitle) NOT detected in target" -f red
+                            Write-Host "$($MUGroup.ListTitle) NOT detected in target" -f red
                         }
                     }
                 }
@@ -112,17 +112,17 @@ do {
             Start-MtHExecutionCycle 
             Write-Host "Migration completed!" -b Green 
         }
-        'Verify lists migrated in target' {
+        'Verify lists migrated in target (Verify in source FIRST)' {
             $MUsForValidation = Select-RJMusForProcessing -Verify 
             foreach ($MUURL in $MUsForValidation) {
                 $URL = $MUURL.SubItems[2].Text
                 #GetUniqueLists for target
                 $sql = @"
-                SELECT   u1.ListTitle, LISTID, MergeMUS, SUM(u1.ItemCount) As ItemCount
-                FROM [MigrationUnits] u1
-                Where U1.DestinationURL = '$($URL)'
-                Group by U1.ListTitle,U1 .ListID, MergeMUs
-                Order By U1.ListTitle
+            SELECT   ListTitle, ListTitleWithPrefix, LISTID, MergeMUS, SUM(ItemCount) As ItemCount
+            FROM [MigrationUnits] 
+            Where DestinationURL = '$($URL)'
+            Group by ListTitle, ListID, MergeMUs, ListTitleWithPrefix
+            Order By ListTitle
 "@      
                 $UniqueMUS = Invoke-Sqlcmd -ServerInstance $Settings.SQLDetails.Instance -Database $Settings.SQLDetails.Database -Query $sql 
                 Write-Host "Detected $($UniqueMUS.Count) Migration units for connected destination site $($URL)" -b green
@@ -136,11 +136,11 @@ do {
                             Write-Host "Source itemcount : $($MuforValidation.ItemCount) - Target itemcount $($List.ItemCount) -> match : $($ItemCountMatch) MUsMerged : $($MuforValidation.MergeMUS)" -f yellow 
                         }
                         else {
-                            Write-Host "$($MU.ListTitle) NOT detected in target!" -f red
+                            Write-Host "$($MuforValidation.ListTitle) / $($MuforValidation.ListTitleWithPrefix) NOT detected in target!" -f red
                         }                        
                     }
                     catch {
-                        Write-Host "$($MU.ListTitle) NOT detected in target" -f red
+                        Write-Host "$($MuforValidation.ListTitle) / $($MuforValidation.ListTitleWithPrefix) NOT detected in target!" -f red
                     }
                 }
                 Write-Host "Validation completed!" 
