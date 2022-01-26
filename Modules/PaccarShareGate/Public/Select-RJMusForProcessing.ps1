@@ -12,7 +12,7 @@ function Select-RJMusForProcessing {
     FROM [PACCARSQLO365].[dbo].[MigrationUnits]
     Group BY EnvironmentName, DestinationURL
 "@
-    $DestinationURLS = Invoke-Sqlcmd -ServerInstance $Settings.SQLDetails.Instance -Query $Sql
+    $DestinationURLS = Invoke-Sqlcmd -ServerInstance $Settings.SQLDetails.Instance -Query $Sql | Sort-Object -Property DestinationURL
   
     $frmMuDeletionSelector = New-Object system.Windows.Forms.Form
 
