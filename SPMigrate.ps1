@@ -173,9 +173,11 @@ do {
         }
         'Clear Navigation' {
             Start-RJNavigation
+            Write-Host "Navigation cleared" -b Green
         }
         'Create Navigation' {
             Start-RJNavigation -Create
+            Write-Host "Navigation re-created" -b Green
         }
     }
 } while (($action -ne 'Quit') -and ($null -ne $action))

@@ -12,9 +12,10 @@ function Invoke-MtHSQLquery {
     )
     Switch ($QueryName) {
         'C-MUSC' {
+            #Re-consider this. Obsolete migrations may remain in the DB. Not a real issue
             # query C1 : Clear all MUs from MigrationUnits where TargetURL macthes (After reimport)
             $sql = @"
-            Delete from MigrationUnits where CompleteSourceURL  = '$($MU.CompleteSourceURL)'
+            Delete from MigrationUnits where CompleteSourceURL  = '$($MU.CompleteSourceURL)' And DestinationURL = '$($MU.DestinationURL)'
 "@
         }
         'D-ALL' {
