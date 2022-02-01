@@ -3,24 +3,37 @@ Function Inherit_RJPermissionsFromSource {
     $dstSite = 'https://paccar.sharepoint.com/sites/DAF-MS-ASCOM-Document-Site'
     $scrListTitle = 'Presentaties'
     $dstlistTitle = 'Presentaties'
-    start-MtHLocalPowerShell -settingfile "$(Get-MtHGitDirectory)\settings.json" -Verbose  -InitSP
-    
     #GetSourceLib
     $securePwd = $settings.current.EncryptedPassword | ConvertTo-SecureString
     $cred = New-Object System.Management.Automation.PSCredential -ArgumentList $settings.current.UserNameSP2010, $securePwd
     $scrConn = Connect-PnPOnline -URL $scrSite -Credentials $cred -ErrorAction Stop -ReturnConnection
-    Write-Host "Connected to sourcesite ($($scrConn.Url)" -BackgroundColor Green
-    $scrList = Get-PnPList -Identity $scrListTitle
-    $scrGroups = Get-PnPGroup -Connection $scrConn
+    Write-Host "Connected to sourcesite $($scrConn.Url)" -BackgroundColor Green
+    $dstConn = Connect-PnPOnline -URL $dstSite -UseWebLogin -ErrorAction Stop -ReturnConnection
+    Write-Host "Connected to destinationSite $($dstConn.Url)" -BackgroundColor yellow
+    $scrList = Get-PnPList -Identity $scrListTitle   -Connection $scrConn 
+    $scrSPGroups = [System.Collections.Generic.List[PSObject]]::new()
+    if ($settings.AssociatedGroupsOnly) {
+        $scrSPGroups.Add(9Get-PnPGroup -Connection $scrConn -AssociatedMemberGroup))
+        $scrSPGroups.Add((Get-PnPGroup -Connection $scrConn -AssociatedVisitorGroup))
+        $scrSPGroups.Add((Get-PnPGroup -Connection $scrConn -AssociatedOwnerGroup))
+    }
+    Else 
+    {
+        $scrSPGroups = Get-PnPGroup -Connection $scrConn | Where-Object { $_.Title -match $Settings.SourceGroupMembersCopy }
+    }
+
+    #$scrSecGroups= Get-PnPUser | Were-Object {$_.Principaltype -eq 'SecurityGroup'}
+    $dstGroups = Get-PnPGroup -Connection $dstConn | Where-Object { $_.Title -match $Settings.SourceGroupMembersCopy }
     foreach ($scrGroup in $ScrGroups) {
         $scrGroupMembers = Get-PnPGroupMembers -Identity $scrGroup.ID
         Write-Host "$($scrGroup.Title) detected :  $($ScrGroupMembers.Count) members" -ForegroundColor Yellow
         foreach ($scrGroupMember in $ScrGroupMembers) {
             Write-Host "$($scrGroupMember.Title)" -f cyan
-    
+            #Find associated destination group 
+            $DestGroup = $dstGroups | Where-Object { $_.Title }
         }
     }
-<#
+    <#
     
     $DocumentLibraries = Get-PnPList | Where-Object { $_.Hidden -eq $false } #Or $_.BaseType -eq "DocumentLibrary"
 

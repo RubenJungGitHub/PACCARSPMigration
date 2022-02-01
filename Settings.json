@@ -11,8 +11,6 @@
     "PopulateMUCreationItemCountThreshold":  10000,
     "Environment":  "o365",
     "NodeId":  1,
-    "MaxNodeId":  3,
-    "ListNamesFromURL" : false,
     "WaitForImportCompletion" : false,
     "RealMigration" : true,
     "MigrationBatchSplitSize" : 10,
@@ -20,6 +18,9 @@
                                     "Lists",
                                     "Lijsten"
                                 ],
+    "AssociatedGroupsOnly":  true,
+    "SourceGroupMembersCopy":  ["Owners|Visitors|Members"],
+    "DeleteObsoleteGroups" : false,
     "DatabaseDetails":  [
                             {
                                 "Name":  "O365",
