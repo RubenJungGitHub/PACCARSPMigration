@@ -10,29 +10,113 @@ Function Inherit_RJPermissionsFromSource {
     Write-Host "Connected to sourcesite $($scrConn.Url)" -BackgroundColor Green
     $dstConn = Connect-PnPOnline -URL $dstSite -UseWebLogin -ErrorAction Stop -ReturnConnection
     Write-Host "Connected to destinationSite $($dstConn.Url)" -BackgroundColor yellow
-    $scrList = Get-PnPList -Identity $scrListTitle   -Connection $scrConn 
+    $scrList = Get-PnPList -Identity $scrListTitle   -Connection $scrConn -Includes RoleAssignments
+    $dstList = Get-PnPList -Identity $dstListTitle   -Connection $dstConn -Includes RoleAssignments
     $scrSPGroups = [System.Collections.Generic.List[PSObject]]::new()
+    $dstSPGroups = [System.Collections.Generic.List[PSObject]]::new()
+    #if only associated groups (AssociatedGroupsOnly = true) need to be migrated file collections, else use SourceGroupMembersCopy from settings to populate collections
     if ($settings.AssociatedGroupsOnly) {
-        $scrSPGroups.Add(9Get-PnPGroup -Connection $scrConn -AssociatedMemberGroup))
+        #Keep this order!
         $scrSPGroups.Add((Get-PnPGroup -Connection $scrConn -AssociatedVisitorGroup))
+        $scrSPGroups.Add((Get-PnPGroup -Connection $scrConn -AssociatedMemberGroup))
         $scrSPGroups.Add((Get-PnPGroup -Connection $scrConn -AssociatedOwnerGroup))
+        $dstSPGroups.Add((Get-PnPGroup -Connection $dstConn -AssociatedVisitorGroup))
+        $dstSPGroups.Add((Get-PnPGroup -Connection $dstConn -AssociatedMemberGroup))
+        $dstSPGroups.Add((Get-PnPGroup -Connection $dstConn -AssociatedOwnerGroup))
     }
-    Else 
-    {
+    Else {
         $scrSPGroups = Get-PnPGroup -Connection $scrConn | Where-Object { $_.Title -match $Settings.SourceGroupMembersCopy }
+        $dstSPGroups = Get-PnPGroup -Connection $dstConn | Where-Object { $_.Title -match $Settings.SourceGroupMembersCopy }
     }
 
+    $RoleAssignments = $scrList.RoleAssignments
+    $PermissionCollection = @()
+    Foreach ($RoleAssignment in $RoleAssignments) {
+        #Get the Permission Levels assigned and Member
+        Get-PnPProperty -ClientObject $roleAssignment -Property RoleDefinitionBindings, Member
+     
+        #Get the Principal Type: User, SP Group, AD Group
+        $PermissionType = $RoleAssignment.Member.PrincipalType
+        #Get all permission levels assigned (Excluding:Limited Access)
+        $PermissionLevels = $RoleAssignment.RoleDefinitionBindings | Select-object -property Name | Where-Object {$_.Name -ne 'Limited Access'}
+        #$PermissionLevels = ($PermissionLevels | Where { $_ -ne "Limited Access" }) -join ","
+
+        If ($PermissionLevels.Length -eq 0) { Continue }
+        #Write-Host "PermissionType $($PermissionType)"
+        #Get SharePoint group members
+        If ($PermissionType -in $Settings.PermissionTypes) {
+            #Get Group Members
+            if ($PermissionType -eq 'SharePointGroup') {
+                $GroupMembers = Get-PnPGroupMembers -Identity $RoleAssignment.Member            
+            }
+            else {
+                $Permissions = New-Object PSObject
+                $Permissions | Add-Member NoteProperty group("-")
+                $Permissions | Add-Member NoteProperty AssociatedSiteSPGroup("-")
+                $Permissions | Add-Member NoteProperty User($RoleAssignment.Member.Title)
+                $Permissions | Add-Member NoteProperty Type($PermissionType)
+                $Permissions | Add-Member NoteProperty Permissions($PermissionLevels)
+                $Permissions | Add-Member NoteProperty GrantedThrough("SharePoint Group: $($RoleAssignment.Member.LoginName)")
+                $PermissionCollection += $Permissions
+            }
+            #Leave Empty Groups
+            If ($GroupMembers.count -eq 0) { Continue }
+     
+            ForEach ($User in $GroupMembers) {
+                #Add the Data to Object
+                $Association = ''
+                Switch ($RoleAssignment.member.Title) {
+                    $scrSPGroups[0].Title {$Association = 'Visitor' }
+                    $scrSPGroups[1].Title {$Association = 'Member'}
+                    $scrSPGroups[2].Title {$Association = 'Owner'}
+                }
+                $Permissions = New-Object PSObject
+                $Permissions | Add-Member NoteProperty Group($RoleAssignment.Member.Title)
+                $Permissions | Add-Member NoteProperty AssociatedSiteSPGroup($Association)
+                $Permissions | Add-Member NoteProperty User($User.Title)
+                $Permissions | Add-Member NoteProperty Type($PermissionType)
+                $Permissions | Add-Member NoteProperty Permissions($PermissionLevels)
+                $Permissions | Add-Member NoteProperty GrantedThrough("SharePoint Group: $($RoleAssignment.Member.LoginName)")
+                $PermissionCollection += $Permissions
+            }
+        }
+  <#      Else {
+            #Add the Data to Object
+            $Permissions = New-Object PSObject
+            $Permissions | Add-Member NoteProperty User($RoleAssignment.Member.Title)
+            $Permissions | Add-Member NoteProperty Type($PermissionType)
+            $Permissions | Add-Member NoteProperty Permissions($PermissionLevels)
+            $Permissions | Add-Member NoteProperty GrantedThrough("Direct Permissions")
+            $PermissionCollection += $Permissions
+        }#>
+    }
+    $a = 1
+    #    $PermissionCollection
+    #    $PermissionCollection | Export-CSV $ReportOutput -NoTypeInformation
+    #    Write-host -f Green "Permission Report Generated Successfully!"
+    #>
+    
+    #Read more: https://www.sharepointdiary.com/2019/02/sharepoint-online-pnp-powershell-to-export-document-library-permissions.html#ixzz7JeeSW8UW
+
+    #Not sure if this is required
     #$scrSecGroups= Get-PnPUser | Were-Object {$_.Principaltype -eq 'SecurityGroup'}
-    $dstGroups = Get-PnPGroup -Connection $dstConn | Where-Object { $_.Title -match $Settings.SourceGroupMembersCopy }
-    foreach ($scrGroup in $ScrGroups) {
-        $scrGroupMembers = Get-PnPGroupMembers -Identity $scrGroup.ID
+    <#
+    foreach ($scrGroup in $scrSPGroups) {
+        $scrGroupMembers = Get-PnPGroupMembers -Identity $scrGroup
         Write-Host "$($scrGroup.Title) detected :  $($ScrGroupMembers.Count) members" -ForegroundColor Yellow
         foreach ($scrGroupMember in $ScrGroupMembers) {
             Write-Host "$($scrGroupMember.Title)" -f cyan
+            #Check Associated groups only 
+            if ($settings.AssociatedGroupsOnly) {
+                $a = 1
+
+            }
             #Find associated destination group 
-            $DestGroup = $dstGroups | Where-Object { $_.Title }
+            $DestGroup = $dstSPGroups | Where-Object { $_.Title }
         }
     }
+#>
+
     <#
     
     $DocumentLibraries = Get-PnPList | Where-Object { $_.Hidden -eq $false } #Or $_.BaseType -eq "DocumentLibrary"
