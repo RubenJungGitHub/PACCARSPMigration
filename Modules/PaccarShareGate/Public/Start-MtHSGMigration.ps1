@@ -198,7 +198,8 @@ function Start-MtHSGMigration {
                         $Results.Add($MigrationresultItem)
                         if ($Null -ne $ToCopyBatch) { Register-RJListID -scrSite $srcSite -dstSite  $dstSite  -Lists $ToCopyBatch }
                         Write-Progress "Check custom permissions required for batch item "
-                        ForEach ($MigrationItem in $BatchWiseLists) {
+                        #Different implementation Save for now-> Cleanup
+                        <#ForEach ($MigrationItem in $BatchWiseLists) {
                             if ($MigrationItem.UniquePermissions) {
                                 $SourceList = Get-List -Site $SrcSite -Name $MigrationItem.ListTitle
                                 $DestinationList = Get-List -Site $dstSite -Name $MigrationItem.ListTitle
@@ -209,7 +210,7 @@ function Start-MtHSGMigration {
                                 }
                                 $Results.Add($ReMigrationresultItemsult)
                             }
-                        }
+                        }#>
                     }
                 }
             }

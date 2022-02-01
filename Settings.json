@@ -19,13 +19,15 @@
         "Lijsten"
     ],
     "AssociatedGroupsOnly": true,
+    "AssoiciatedGroupMembersCopy": [
+        "Owners",
+        "Visitors",
+        "Members"
+    ],
     "PermissionTypes": [
         "SharepointGroup",
         "SecurityGroup",
         "User"
-    ],
-    "SourceGroupMembersCopy": [
-        "Owners|Visitors|Members"
     ],
     "DeleteObsoleteGroups": false,
     "DatabaseDetails": [

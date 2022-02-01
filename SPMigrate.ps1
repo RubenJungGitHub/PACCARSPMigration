@@ -2,8 +2,6 @@
 param()
 
 #initialize
-#Start-MtHLocalPowerShell -settingfile "$(Get-MtHGitDirectory)\settings.json" -initsp -Verbose
-#start-MtHLocalPowerShell -settingfile "$(Get-MtHGitDirectory)\settings.json" -Verbose -initsp
 start-MtHLocalPowerShell -settingfile "$(Get-MtHGitDirectory)\settings.json" -Verbose  -InitSP
 # open the demo site and fill the Demo Library
 $PSDefaultParameterValues['*:Encoding'] = 'utf8'
