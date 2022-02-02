@@ -106,7 +106,8 @@ function Start-MtHSGMigration {
         Write-Host "MIGRATE  source $($srcSite) to Destination $($dstSite)"  -ForegroundColor yellow
         $ActualMigrationStart = Get-Date
         if ($MigrateSitePermissions) {
-            Copy-ObjectPermissions -Source $srcSite -Destination $dstSite | out-null 
+            #Tricky Opens up complete site
+            #Copy-ObjectPermissions -Source $srcSite -Destination $dstSite | out-null 
         }
 
         switch ($MigrationItems[0].Scope) {
@@ -142,7 +143,7 @@ function Start-MtHSGMigration {
                     $SourceSiteList = $ToCopy | where-Object { $_.RootFolder.SubString(0, $_.RootFolder.Length - 1) -eq $List.ListURL }
                     #Dryrun?
                     if ($Settings.RealMigration) {
-                        $result = Copy-List  -SourceSite $srcSite  -Name $SourceSiteList.Title  -ListTitleUrlSegment $ListTitleWithPrefix -ListTitle $ListTitleWithPrefix -NoWorkflows -NoWebParts -NoNintexWorkflowHistory -ForceNewListExperience -NoCustomizedListForms -WaitForImportCompletion:$Settings.WaitForImportCompletion  @MigrationParameters
+                      #  $result = Copy-List  -SourceSite $srcSite  -Name $SourceSiteList.Title  -ListTitleUrlSegment $ListTitleWithPrefix -ListTitle $ListTitleWithPrefix -NoWorkflows -NoWebParts -NoNintexWorkflowHistory -ForceNewListExperience -NoCustomizedListForms -WaitForImportCompletion:$Settings.WaitForImportCompletion  @MigrationParameters
                         $MigrationresultItem = [PSCustomObject]@{
                             Result     = $result
                             MigUnitIDs = $List.MigUNitID 
@@ -151,21 +152,24 @@ function Start-MtHSGMigration {
                         Write-Progress "Check custom permissions required for renamed item "
                         if ($List.UniquePermissions) {
                             $DestinationList = Get-List -Site $dstSite -Name $ListTitleWithPrefix
-                            $result = Copy-ObjecPermissions -Source $SourceSiteList -Destination $DestinationList
+                            #$result = Copy-ObjecPermissions -Source $SourceSiteList -Destination $DestinationList
                             $MigrationresultItem = [PSCustomObject]@{
                                 Result     = $result
                                 MigUnitIDs = $List.MigUNitID
                             }
                             $Results.Add($MigrationresultItem)
                         }
-                        #To Do check Inheritfromsource
+                        #Map permissions from source to target 
+                        if ($List.InheritFromSource) {
+                           # Inherit_RJPermissionsFromSource -scrSite $srcSite.URL -dstSite $dstSite.URL -scrListTitle $List.ListTitle dstListTitle $ListTitleWithPrefix
+                        }
                     }
                     #Register related MU Id's
                     if ($Null -ne $ListTitleWithPrefix) {
                         Register-RJListID -scrSite $srcSite -dstSite  $dstSite -List $List -RenamedList $ListTitleWithPrefix
                     }
                 }
-                
+                #Migrate in batches
                 $BatchWiseLists = $MigrationItems | Where-Object { $_.ListTitle -NotIn $renamedLists.ListTitle }
                 if ($BatchWiseLists ) {
                     #Drop renamed lists
@@ -191,7 +195,7 @@ function Start-MtHSGMigration {
                         write-Host "Migrating batch $($ToCopyBatch.Title) : REALMIGRATION? : $($Settings.RealMigration)"  -f CYAN
                         #Dryrun?
                         if ($Settings.RealMigration) {
-                            $result = Copy-List -List $toCopyBatch  -NoWorkflows -NoWebParts -NoNintexWorkflowHistory -ForceNewListExperience -NoCustomizedListForms  -WaitForImportCompletion:$Settings.WaitForImportCompletion @MigrationParameters
+                           # $result = Copy-List -List $toCopyBatch  -NoWorkflows -NoWebParts -NoNintexWorkflowHistory -ForceNewListExperience -NoCustomizedListForms  -WaitForImportCompletion:$Settings.WaitForImportCompletion @MigrationParameters
                             $MigrationresultItem = [PSCustomObject]@{
                                 Result     = $result
                                 MigUnitIDs = $MigrationItems.MigUNitID
@@ -199,12 +203,12 @@ function Start-MtHSGMigration {
                             $Results.Add($MigrationresultItem)
                             if ($Null -ne $ToCopyBatch) { Register-RJListID -scrSite $srcSite -dstSite  $dstSite  -Lists $ToCopyBatch }
                             Write-Progress "Check custom permissions required for batch item "
-                            #Different implementation Save for now-> Cleanup
+                            #Filter From batchWiseLists where UNiquePermissions
                             ForEach ($MigrationItem in $BatchWiseLists) {
                                 if ($MigrationItem.UniquePermissions) {
                                     $SourceList = Get-List -Site $SrcSite -Name $MigrationItem.ListTitle
                                     $DestinationList = Get-List -Site $dstSite -Name $MigrationItem.ListTitle
-                                    $result = Copy-ObjectPermissions -Source $SourceList -Destination $DestinationList 
+                                 #   $result = Copy-ObjectPermissions -Source $SourceList -Destination $DestinationList 
                                     $MigrationresultItem = [PSCustomObject]@{
                                         Result     = $result
                                         MigUnitIDs = $MigrationItems.MigUNitID
@@ -212,7 +216,8 @@ function Start-MtHSGMigration {
                                     $Results.Add($ReMigrationresultItemsult)
                                 }
                             }
-                            #To Do check Inheritfromsource
+                            #Filter From batchWiseLists where InheritFromParent
+                            
                             
                         }
                     }

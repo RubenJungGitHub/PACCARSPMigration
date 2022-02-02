@@ -1,8 +1,12 @@
 Function Inherit_RJPermissionsFromSource {
-    $scrSite = 'http://dafshare-org.eu.paccar.com/organization/ops-smc/MTSMC'
-    $dstSite = 'https://paccar.sharepoint.com/sites/DAF-MS-ASCOM-Document-Site'
-    $scrListTitle = 'Presentaties'
-    $dstlistTitle = 'Presentaties'
+    [CmdletBinding()]
+    param (
+        [Parameter(Mandatory = $true)][string]$scrSite,
+        [Parameter(Mandatory = $true)][string]$dstSite,
+        [Parameter(Mandatory = $true)][string]$scrListTitle,
+        [Parameter(Mandatory = $true)][PSCustomObject]$dstListTitle
+    )
+    
     #GetSourceLib
     $securePwd = $settings.current.EncryptedPassword | ConvertTo-SecureString
     $cred = New-Object System.Management.Automation.PSCredential -ArgumentList $settings.current.UserNameSP2010, $securePwd
@@ -90,25 +94,26 @@ Function Inherit_RJPermissionsFromSource {
     Write-Host "Connected to destinationSite $($dstConn.Url)" -BackgroundColor yellow
     #Now map Source permissions to destination 
     $dstList = Get-PnPList -Identity $dstlistTitle  -Connection $dstConn -Includes RoleAssignments 
-    #Initially  break destination List permissions 
-    $hasUniquePermissions = Get-PnPProperty -ClientObject $dstList -Property "HasUniqueRoleAssignments"
 
-    if (-Not $hasUniquePermissions) {
-        Write-Host "Breaking permissions for MU '$($dstList.Title)'" -ForegroundColor cyan
-        Set-PnPList -Connection $dstConn -Identity $dstList.ID -BreakRoleInheritance -CopyRoleAssignments
+    #Initially  break destination List permissions  Depends on setting UniquePermissionsFromInheritance
+    if ($Settings.UniquePermissionsFromInheritance) {
+        $hasUniquePermissions = Get-PnPProperty -ClientObject $dstList -Property "HasUniqueRoleAssignments"
+        if (-Not $hasUniquePermissions) {
+            Write-Host "Breaking permissions for MU '$($dstList.Title)'" -ForegroundColor cyan
+            Set-PnPList -Connection $dstConn -Identity $dstList.ID -BreakRoleInheritance -CopyRoleAssignments
+        }
     }
-    
     Write-Host "Map permissions to destination MU $($dstList.Title)"
     #Check Only Associated Lists to be synchronized 
     if ($settings.AssociatedGroupsOnly) {
         $PermissionCollection = $PermissionCollection | Where-Object { $_.AssociatedSiteSPGroup -in $Settings.AssoiciatedGroupMembersCopy } 
     }
     else {
+        # NOT SYSTEM ACCOUNT MAPPING!
         $PermissionCollection = $PermissionCollection | Where-Object { $_.Group -ne '' -and $_.LoginName -ne 'SHAREPOINT\SYSTEM' } 
     }
     $PermissionCollectionGrouped = $PermissionCollection | Group-Object -Property Group, Type
-    
-    # NOT SYSTEM ACCOUNT MAPPING!
+        
     foreach ($permgroup in $PermissionCollectionGrouped) {
         if ($Settings.CreateGroupsAndGroups) {
             #Add  non existant target objects 

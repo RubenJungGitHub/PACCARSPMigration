@@ -14,8 +14,6 @@ if ($settings.environment -ne 'production') {
 Write-Verbose "NodeID = $($settings.NodeId)"
 Write-Verbose "Used Database = $($settings.SQLDetails.Name),$($settings.SQLDetails.Database)"
 #Set-Location -Path $ModulePath
-Inherit_RJPermissionsFromSource
-
 do {
     $action = ('++++++++++++++++++++++++++++++++++++++++++++++++++++++', 'Create DataBase', 'Remove DataBase', '************************************' , 'Deactivate Set of Sites and Lists in DB', 'Register Set of Sites and Lists for first migration', 'Register Set of Sites and Lists for delta migration', 'Verify SP connections (prior to migrate)', '************************************' , 'Reset runs after truncation', 'Verify lists to migrate in source', 'Migrate Real', 'Verify lists migrated in target (Verify in source FIRST)', 
         'Delete MU-s from target', '************************************', 'Clear Navigation' , 'Create Navigation', '************************************', 'Quit') | Out-GridView -Title 'Choose Activity (Only working on dev and test env)' -PassThru

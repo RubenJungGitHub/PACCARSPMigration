@@ -13,8 +13,9 @@
     "NodeId":  1,
     "WaitForImportCompletion":  false,
     "RealMigration":  true,
-    "MigrationBatchSplitSize":  10,
+    "MigrationBatchSplitSize":  20,
     "CreateGroupsAndGroups":  true,
+    "UniquePermissionsFromInheritance": false,
     "SourceURLIgnoreSections":  [
                                     "Lists",
                                     "Lijsten"
