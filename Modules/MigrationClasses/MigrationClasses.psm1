@@ -9,6 +9,7 @@ class MigrationUnitClass {
     [string]$ListTitle = ''
     [string]$ListId
     [bool]$UniquePermissions
+    [bool]$InheritFromSource
     [bool]$MergeMUS
     [int]$ListTemplate
     [int]$ItemCount

@@ -8,8 +8,7 @@ Function Inherit_RJPermissionsFromSource {
     $cred = New-Object System.Management.Automation.PSCredential -ArgumentList $settings.current.UserNameSP2010, $securePwd
     $scrConn = Connect-PnPOnline -URL $scrSite -Credentials $cred -ErrorAction Stop -ReturnConnection
     Write-Host "Connected to sourcesite $($scrConn.Url)" -BackgroundColor Green
-    $dstConn = Connect-PnPOnline -URL $dstSite -UseWebLogin -ErrorAction Stop -ReturnConnection
-    Write-Host "Connected to destinationSite $($dstConn.Url)" -BackgroundColor yellow
+
     $scrSPGroups = [System.Collections.Generic.List[PSObject]]::new()
     $dstSPGroups = [System.Collections.Generic.List[PSObject]]::new()
     #if only associated groups (AssociatedGroupsOnly = true) need to be migrated file collections, else use SourceGroupMembersCopy from settings to populate collections
@@ -36,6 +35,7 @@ Function Inherit_RJPermissionsFromSource {
      
         #Get the Principal Type: User, SP Group, AD Group
         $PermissionType = $RoleAssignment.Member.PrincipalType
+        
         #Get all permission levels assigned (Excluding:Limited Access)
         $PermissionLevels = $RoleAssignment.RoleDefinitionBindings | Select-object -property Name | Where-Object { $_.Name -ne 'Limited Access' }
         #$PermissionLevels = ($PermissionLevels | Where { $_ -ne "Limited Access" }) -join ","
@@ -52,10 +52,12 @@ Function Inherit_RJPermissionsFromSource {
                 $Permissions = New-Object PSObject
                 $Permissions | Add-Member NoteProperty group("-")
                 $Permissions | Add-Member NoteProperty AssociatedSiteSPGroup("-")
-                $Permissions | Add-Member NoteProperty User($RoleAssignment.Member.Title)
+                $Permissions | Add-Member NoteProperty RoleAssignment($RoleAssignment)
+                $Permissions | Add-Member NoteProperty User($RoleAssignment.Member.Title.Split('\')[$RoleAssignment.Member.Title.Split('\').Length - 1])
                 $Permissions | Add-Member NoteProperty LoginName ($RoleAssignment.Member.LoginName)
                 $Permissions | Add-Member NoteProperty Type($PermissionType)
                 $Permissions | Add-Member NoteProperty Permissions($PermissionLevels)
+                $Permissions | Add-Member NoteProperty RoleDefinitionBindings($RoleAssignment.RoleDefinitionBindings)
                 $Permissions | Add-Member NoteProperty GrantedThrough("SharePoint Group: $($RoleAssignment.Member.LoginName)")
                 $PermissionCollection += $Permissions
             }
@@ -73,16 +75,19 @@ Function Inherit_RJPermissionsFromSource {
                 $Permissions = New-Object PSObject
                 $Permissions | Add-Member NoteProperty Group($RoleAssignment.Member.Title)
                 $Permissions | Add-Member NoteProperty AssociatedSiteSPGroup($Association)
+                $Permissions | Add-Member NoteProperty RoleAssignment($RoleAssignment)
                 $Permissions | Add-Member NoteProperty User($User.Title)
                 $Permissions | Add-Member NoteProperty LoginName ($User.LoginName)
-                $Permissions | Add-Member NoteProperty Type($PermissionType)
+                $Permissions | Add-Member NoteProperty Type('User')
                 $Permissions | Add-Member NoteProperty Permissions($PermissionLevels)
+                $Permissions | Add-Member NoteProperty RoleDefinitionBindings($RoleAssignment.RoleDefinitionBindings)
                 $Permissions | Add-Member NoteProperty GrantedThrough("SharePoint Group: $($RoleAssignment.Member.LoginName)")
                 $PermissionCollection += $Permissions
             }
         }
     }
-    
+    $dstConn = Connect-PnPOnline -URL $dstSite -UseWebLogin -ErrorAction Stop -ReturnConnection
+    Write-Host "Connected to destinationSite $($dstConn.Url)" -BackgroundColor yellow
     #Now map Source permissions to destination 
     $dstList = Get-PnPList -Identity $dstlistTitle  -Connection $dstConn -Includes RoleAssignments 
     Write-Host "Map permissions to destination MU $($dstList.Title)"
@@ -90,32 +95,40 @@ Function Inherit_RJPermissionsFromSource {
     if ($settings.AssociatedGroupsOnly) {
         $PermissionCollection = $PermissionCollection | Where-Object { $_.AssociatedSiteSPGroup -in $Settings.AssoiciatedGroupMembersCopy } 
     }
-    $PermissionCollectionGrouped = $PermissionCollection | Group-Object -Property AssociatedSiteSPGroup
+    else {
+        $PermissionCollection = $PermissionCollection | Where-Object { $_.AssociatedSiteSPGroup -ne '' } 
+    }
+    $PermissionCollectionGrouped = $PermissionCollection | Group-Object -Property Group
     
     # NOT SYSTEM ACCOUNT MAPPING!
     foreach ($permgroup in $PermissionCollectionGrouped.group) {
-        if ($settings.AssociatedGroupsOnly) {
-            ForEach ($Permission in $permgroup) {
+        ForEach ($Permission in $permgroup) {
+            if ($Settings.CreateGroupsAndGroups) {
                 #Add  non existant target Users? 
-                #Set-PnPListPermission -Identity $dstList -Group $dstGroup -user $permission.LoginName
-
-                #Add non existant target  groups?
-                #Set-PnPListPermission -Identity $dstList -Group $dstGroup -user $permission.LoginName
-
-                #Check if associated Group only
-                $dstGroup = $null | out-null
-                Switch ($Permission.AssociatedSiteSPGroup) {
-                    'Visitors' { $dstGroup = Get-PnPGroup -Connection $dstConn -AssociatedVisitorGroup }
-                    'Members' { $dstGroup = Get-PnPGroup -Connection $dstConn -AssociatedMemberGroup }
-                    'Owners' { $dstGroup = Get-PnPGroup -Connection $dstConn -AssociatedOwnerGroup }
-                    default {
-                        #To do: get specific Newly created group 
+                If ($Permission.Type -eq 'user' -and $Permission.Group -eq '-') {
+                    #New User 
+                    if ((Get-PnPUser -Connection $dstConn | Where-Object { $_.Title -eq $Permission.User })) {
+                        New-PnPUser -Connection $dstConn -LoginName $Permission.User
                     }
                 }
-                #Add Users to site roles 
-                Write-Host "Add '$($permission.User)' to '$($dstGroup.Title)' on detination SC '$($dstConn.URL)'" -f green
-                Add-PnPUserToGroup -LoginName $Permission.User -Connection $dstConn -Identity $dstGroup.Title
+                elseif ($Permission.Type -eq 'SecurityGroup') {
+                    If (( Get-PnPGroup -Connection $dstConn | Where-Object { $_.Title -eq $Permission.User })) {
+                        New-PnPGroup -Connection $dstConn -Title $Permission.User
+                    }
+                    else {
+                        $if((Get-PnPGroup -Connection $dstConn | Where-Object { $_.Title -eq $Permission.User })) {
+                            New-PnPGroup -Connection $dstConn -Title $Permission.User
+                        }
+                    }
+                }
+                #Grant Site level permissions 
+                Set-PnPWebPermission -User $Permission.User -AddRole $Permission.Permissions.Name
+                #Set List Permissions
+                #Set-PnPListPermission -Identity $dstList -Group $dstGroup -user $permission.LoginName
             }
+            #Add Users to site roles 
+            Write-Host "Add '$($permission.User)' to '$($dstGroup.Title)' on detination SC '$($dstConn.URL)'" -f green
+            # Add-PnPUserToGroup -LoginName $Permission.User -Connection $dstConn -Identity $dstGroup.Title
         }
     }
     #Finally break destination List permissions 
@@ -125,6 +138,4 @@ Function Inherit_RJPermissionsFromSource {
         Write-Host "Breaking permissions for MU '$($dstList.Title)'" -ForegroundColor cyan
         Set-PnPList -Connection $dstConn -Identity $dstList.ID -BreakRoleInheritance -CopyRoleAssignments
     }
-    #To do remove user running the script?
-
 }

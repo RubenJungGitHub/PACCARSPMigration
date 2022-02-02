@@ -78,13 +78,13 @@ function Start-MtHSGMigration {
     Write-Verbose "Connected to TARGET Site Collection $($MigrationItems[0].DestinationUrl) Successfully!"
        
     $MigrationParameters = @{
-        NormalMode      = ($settings.sharegate.migrationMode -ne 'Insane')
-        Site            = $srcSite
-        DestinationSite = $dstSite
-        MappingSettings = $MappingSettings
-        NoContent       = $false
-        NoCustomPermissions =  $true  #($MigrationItems[0].ShareGateCopySettings -contains 'p')
-        CopySettings    = $copySettings
+        NormalMode          = ($settings.sharegate.migrationMode -ne 'Insane')
+        Site                = $srcSite
+        DestinationSite     = $dstSite
+        MappingSettings     = $MappingSettings
+        NoContent           = $false
+        NoCustomPermissions = $true  #($MigrationItems[0].ShareGateCopySettings -contains 'p')
+        CopySettings        = $copySettings
     }
 
     if ($migrationItems[0].Scope -eq 'list') {
@@ -143,27 +143,29 @@ function Start-MtHSGMigration {
                     #Dryrun?
                     if ($Settings.RealMigration) {
                         $result = Copy-List  -SourceSite $srcSite  -Name $SourceSiteList.Title  -ListTitleUrlSegment $ListTitleWithPrefix -ListTitle $ListTitleWithPrefix -NoWorkflows -NoWebParts -NoNintexWorkflowHistory -ForceNewListExperience -NoCustomizedListForms -WaitForImportCompletion:$Settings.WaitForImportCompletion  @MigrationParameters
+                        $MigrationresultItem = [PSCustomObject]@{
+                            Result     = $result
+                            MigUnitIDs = $List.MigUNitID 
+                        }
+                        $Results.Add($MigrationresultItem)
+                        Write-Progress "Check custom permissions required for renamed item "
+                        if ($List.UniquePermissions) {
+                            $DestinationList = Get-List -Site $dstSite -Name $ListTitleWithPrefix
+                            $result = Copy-ObjecPermissions -Source $SourceSiteList -Destination $DestinationList
+                            $MigrationresultItem = [PSCustomObject]@{
+                                Result     = $result
+                                MigUnitIDs = $List.MigUNitID
+                            }
+                            $Results.Add($MigrationresultItem)
+                        }
+                        #To Do check Inheritfromsource
                     }
-                    $MigrationresultItem = [PSCustomObject]@{
-                        Result     = $result
-                        MigUnitIDs = $List.MigUNitID 
-                    }
-                    $Results.Add($MigrationresultItem)
                     #Register related MU Id's
                     if ($Null -ne $ListTitleWithPrefix) {
                         Register-RJListID -scrSite $srcSite -dstSite  $dstSite -List $List -RenamedList $ListTitleWithPrefix
                     }
-                    Write-Progress "Check custom permissions required for renamed item "
-                    if ($List.UniquePermissions) {
-                        $DestinationList = Get-List -Site $dstSite -Name $ListTitleWithPrefix
-                        $result = Copy-ObjecPermissions -Source $SourceSiteList -Destination $DestinationList
-                        $MigrationresultItem = [PSCustomObject]@{
-                            Result     = $result
-                            MigUnitIDs = $List.MigUNitID
-                        }
-                        $Results.Add($MigrationresultItem)
-                    }
                 }
+                
                 $BatchWiseLists = $MigrationItems | Where-Object { $_.ListTitle -NotIn $renamedLists.ListTitle }
                 if ($BatchWiseLists ) {
                     #Drop renamed lists
@@ -190,27 +192,29 @@ function Start-MtHSGMigration {
                         #Dryrun?
                         if ($Settings.RealMigration) {
                             $result = Copy-List -List $toCopyBatch  -NoWorkflows -NoWebParts -NoNintexWorkflowHistory -ForceNewListExperience -NoCustomizedListForms  -WaitForImportCompletion:$Settings.WaitForImportCompletion @MigrationParameters
-                        }
-                        $MigrationresultItem = [PSCustomObject]@{
-                            Result     = $result
-                            MigUnitIDs = $MigrationItems.MigUNitID
-                        }
-                        $Results.Add($MigrationresultItem)
-                        if ($Null -ne $ToCopyBatch) { Register-RJListID -scrSite $srcSite -dstSite  $dstSite  -Lists $ToCopyBatch }
-                        Write-Progress "Check custom permissions required for batch item "
-                        #Different implementation Save for now-> Cleanup
-                        <#ForEach ($MigrationItem in $BatchWiseLists) {
-                            if ($MigrationItem.UniquePermissions) {
-                                $SourceList = Get-List -Site $SrcSite -Name $MigrationItem.ListTitle
-                                $DestinationList = Get-List -Site $dstSite -Name $MigrationItem.ListTitle
-                                $result = Copy-ObjectPermissions -Source $SourceList -Destination $DestinationList 
-                                $MigrationresultItem = [PSCustomObject]@{
-                                    Result     = $result
-                                    MigUnitIDs = $MigrationItems.MigUNitID
-                                }
-                                $Results.Add($ReMigrationresultItemsult)
+                            $MigrationresultItem = [PSCustomObject]@{
+                                Result     = $result
+                                MigUnitIDs = $MigrationItems.MigUNitID
                             }
-                        }#>
+                            $Results.Add($MigrationresultItem)
+                            if ($Null -ne $ToCopyBatch) { Register-RJListID -scrSite $srcSite -dstSite  $dstSite  -Lists $ToCopyBatch }
+                            Write-Progress "Check custom permissions required for batch item "
+                            #Different implementation Save for now-> Cleanup
+                            ForEach ($MigrationItem in $BatchWiseLists) {
+                                if ($MigrationItem.UniquePermissions) {
+                                    $SourceList = Get-List -Site $SrcSite -Name $MigrationItem.ListTitle
+                                    $DestinationList = Get-List -Site $dstSite -Name $MigrationItem.ListTitle
+                                    $result = Copy-ObjectPermissions -Source $SourceList -Destination $DestinationList 
+                                    $MigrationresultItem = [PSCustomObject]@{
+                                        Result     = $result
+                                        MigUnitIDs = $MigrationItems.MigUNitID
+                                    }
+                                    $Results.Add($ReMigrationresultItemsult)
+                                }
+                            }
+                            #To Do check Inheritfromsource
+                            
+                        }
                     }
                 }
             }

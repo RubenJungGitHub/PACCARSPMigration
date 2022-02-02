@@ -30,6 +30,7 @@ function Resolve-RJCSVItems {
             $MU.TargetLibPrefixGiven = $TSMU.'MU Prefix 1'
             $MU.DuplicateTargetLibPrefix = $TSMU.'MU Prefix 1'
             $MU.SourceURL, $MU.ListURL , $MU.ListTitle = ExtractFrom-RJSourceURL -sourceurl $TSMU.'Source 1 MUS'
+            $Mu.InheritFromSource = !!$TSMU."Inherit 1"
             $Mu.UniquePermissions = !!$TSMU."UP 1"
             $MU.MergeMUS = !!$TSMU."Merge 1"
             $Mu.Scope = $TSMU."Scope 1"
@@ -49,6 +50,7 @@ function Resolve-RJCSVItems {
             $MU.TargetLibPrefixGiven = $TSMU.'MU Prefix 2'
             $MU.DuplicateTargetLibPrefix = $TSMU.'MU Prefix 2'
             $MU.SourceURL, $MU.ListURL, $MU.ListTitle = ExtractFrom-RJSourceURL -sourceurl $TSMU.'Source 2 MUS'
+            $Mu.InheritFromSource = !!$TSMU."Inherit 2"
             $Mu.UniquePermissions = !!$TSMU."UP 2"
             $MU.MergeMUS = !!$TSMU."Merge 2"
             $Mu.Scope = $TSMU."Scope 2"
@@ -67,6 +69,7 @@ function Resolve-RJCSVItems {
             $MU.TargetLibPrefixGiven = $TSMU.'MU Prefix 3'
             $MU.DuplicateTargetLibPrefix = $TSMU.'MU Prefix 3'
             $MU.SourceURL, $MU.ListURL, $MU.ListTitle = ExtractFrom-RJSourceURL -sourceurl $TSMU.'Source 3 MUS'
+            $Mu.InheritFromSource = !!$TSMU."Inherit 3"
             $Mu.UniquePermissions = !!$TSMU."UP 3"
             $MU.MergeMUS = !!$TSMU."Merge 3"
             $Mu.Scope = $TSMU."Scope 3"

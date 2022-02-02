@@ -26,9 +26,9 @@ function New-MtHSQLMigUnit {
     #"@
     $sql = @"
         INSERT INTO MigrationUnits
-        (EnvironmentName, SourceSC, CompleteSourceURL ,SitePermissionsSource, SourceUrl, DestinationUrl, DuplicateTargetLibPrefix, TargetLibPrefixGiven, ListUrl, ListTitle, ListTitleWithPrefix,  ShareGateCopySettings, UniquePermissions, MergeMUS, Scope, MUStatus, NextAction, NodeId, CreationTime)
+        (EnvironmentName, SourceSC, CompleteSourceURL ,SitePermissionsSource, SourceUrl, DestinationUrl, DuplicateTargetLibPrefix, TargetLibPrefixGiven, ListUrl, ListTitle, ListTitleWithPrefix,  ShareGateCopySettings,InheritFromSource, UniquePermissions, MergeMUS, Scope, MUStatus, NextAction, NodeId, CreationTime)
         VALUES
-        ('$($Item.EnvironmentName)','$($Item.SourceSC)','$($Item.CompleteSourceURL)', '$($Item.SitePermissionsSource)','$($Item.SourceUrl.replace("`'","`'`'"))','$($Item.DestinationUrl.replace("`'","`'`'"))','$($Item.DuplicateTargetLibPrefix)','$($Item.TargetLibPrefixGiven)','$($Item.ListUrl.replace("`'","`'`'"))', '$($Item.ListTitle.replace("`'","`'`'"))', '$($ListTitleWithPrefix)', '$($Item.ShareGateCopySettings)','$($Item.UniquePermissions)','$($Item.MergeMUS)','$($Item.Scope)','$($Item.MUStatus)','$($Item.NextAction)', 1,  SYSDATETIME());        
+        ('$($Item.EnvironmentName)','$($Item.SourceSC)','$($Item.CompleteSourceURL)', '$($Item.SitePermissionsSource)','$($Item.SourceUrl.replace("`'","`'`'"))','$($Item.DestinationUrl.replace("`'","`'`'"))','$($Item.DuplicateTargetLibPrefix)','$($Item.TargetLibPrefixGiven)','$($Item.ListUrl.replace("`'","`'`'"))', '$($Item.ListTitle.replace("`'","`'`'"))', '$($ListTitleWithPrefix)', '$($Item.ShareGateCopySettings)','$($Item.InheritFromSource)','$($Item.UniquePermissions)','$($Item.MergeMUS)','$($Item.Scope)','$($Item.MUStatus)','$($Item.NextAction)', 1,  SYSDATETIME());        
 "@
 
     # $item | Write-SqlTableData -ServerInstance $Settings.SQLDetails.Instance -DatabaseName $Settings.SQLDetails.Database -SchemaName "dbo" -TableName MigrationUnits

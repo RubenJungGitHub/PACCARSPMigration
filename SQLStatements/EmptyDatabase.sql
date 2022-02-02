@@ -14,6 +14,7 @@ CREATE TABLE MigrationUnits
     ListTitleWithPrefix NVARCHAR(400) NULL,
     ListID VARCHAR(400) NULL,
     ItemCount INT Null,
+    InheritFromSource BIT,
     UniquePermissions BIT,
     MergeMUS BIT,
     
