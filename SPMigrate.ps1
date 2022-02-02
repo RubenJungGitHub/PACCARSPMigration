@@ -18,7 +18,7 @@ Inherit_RJPermissionsFromSource
 
 do {
     $action = ('++++++++++++++++++++++++++++++++++++++++++++++++++++++', 'Create DataBase', 'Remove DataBase', '************************************' , 'Deactivate Set of Sites and Lists in DB', 'Register Set of Sites and Lists for first migration', 'Register Set of Sites and Lists for delta migration', 'Verify SP connections (prior to migrate)', '************************************' , 'Reset runs after truncation', 'Verify lists to migrate in source', 'Migrate Real', 'Verify lists migrated in target (Verify in source FIRST)', 
-        'Delete MU-s from target', '************************************', 'Clear Navigation' ,'Create Navigation', '************************************', 'Quit') | Out-GridView -Title 'Choose Activity (Only working on dev and test env)' -PassThru
+        'Delete MU-s from target', '************************************', 'Clear Navigation' , 'Create Navigation', '************************************', 'Quit') | Out-GridView -Title 'Choose Activity (Only working on dev and test env)' -PassThru
     #Make sure the testprocedures only access Dev and test.
     switch ($action) {
         'Create DataBase' {
@@ -83,7 +83,6 @@ do {
                     $securePwd = $settings.current.EncryptedPassword | ConvertTo-SecureString
                     $cred = New-Object System.Management.Automation.PSCredential -ArgumentList $settings.current.UserNameSP2010, $securePwd
                     Connect-PnPOnline -URL $MUSource.Name -Credentials $cred -ErrorAction Stop 
-                    #                    Write-Host "Connected to source site $($MUSource.Name). Detected $($MUSource.Group.Count) Migration units $($URL)" -b green
                     ForEach ($MUGroup  in  $MUSource.Group) {
                         try {
                             $List = Get-PnPList -Identity $MUGroup.ListTitle
