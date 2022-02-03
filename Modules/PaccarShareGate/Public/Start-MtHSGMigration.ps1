@@ -160,7 +160,7 @@ function Start-MtHSGMigration {
                             $Results.Add($MigrationresultItem)
                         }
                         #Map permissions from source to target 
-                        if ($List.InheritFromSource) {
+                        if ($List.InheritFromSource -and $Settings.InheritSourceSecurityDuringMigration) {
                            # Inherit_RJPermissionsFromSource -scrSite $srcSite.URL -dstSite $dstSite.URL -scrListTitle $List.ListTitle dstListTitle $ListTitleWithPrefix
                         }
                     }
@@ -217,8 +217,8 @@ function Start-MtHSGMigration {
                                 }
                             }
                             #Filter From batchWiseLists where InheritFromParent
-                            
-                            
+                            if($Settings.InheritSourceSecurityDuringMigration)
+                            {}
                         }
                     }
                 }

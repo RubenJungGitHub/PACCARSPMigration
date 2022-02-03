@@ -7,12 +7,13 @@ function Select-RJMusForProcessing {
         [switch]$Verify
     )
     $Sql = @"
-    SELECT [EnvironmentName]
+      SELECT [EnvironmentName], SourceRoot
       ,[DestinationUrl]
     FROM [PACCARSQLO365].[dbo].[MigrationUnits]
-    Group BY EnvironmentName, DestinationURL
+    Group BY EnvironmentName, SourceRoot,  DestinationURL
+    Order by SourceRoot, DestinationURL
 "@
-    $DestinationURLS = Invoke-Sqlcmd -ServerInstance $Settings.SQLDetails.Instance -Query $Sql | Sort-Object -Property DestinationURL
+    $DestinationURLS = Invoke-Sqlcmd -ServerInstance $Settings.SQLDetails.Instance -Query $Sql 
   
     $frmMuDeletionSelector = New-Object system.Windows.Forms.Form
 
@@ -55,13 +56,16 @@ function Select-RJMusForProcessing {
     $LVSource.Columns[0].Width = 40
     [void]$LVSource.Columns.Add('EnvironmentName')
     $LVSource.Columns[1].Width = 200
+    [void]$LVSource.Columns.Add('SourceURL')
+    $LVSource.Columns[2].Width = 400
     [void]$LVSource.Columns.Add('DestinationURL')
-    $LVSource.Columns[2].Width = 650
+    $LVSource.Columns[3].Width = 450
 
     foreach ($DestinationURL  in $DestinationURLS) {
         $i++
         $LVi = New-Object System.Windows.Forms.ListViewItem($i)
         [void]$LVI.SubItems.Add($DestinationURL.EnvironmentName)
+        [void]$LVI.SubItems.Add($DestinationURL.SourceRoot)
         [void]$LVI.SubItems.Add($DestinationURL.DestinationURL)
         [void]$LVSource.Items.Add($LVI)
     }

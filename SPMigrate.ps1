@@ -15,7 +15,7 @@ Write-Verbose "NodeID = $($settings.NodeId)"
 Write-Verbose "Used Database = $($settings.SQLDetails.Name),$($settings.SQLDetails.Database)"
 #Set-Location -Path $ModulePath
 do {
-    $action = ('++++++++++++++++++++++++++++++++++++++++++++++++++++++', 'Create DataBase', 'Remove DataBase', '************************************' , 'Deactivate Set of Sites and Lists in DB', 'Register Set of Sites and Lists for first migration', 'Register Set of Sites and Lists for delta migration', 'Verify SP connections (prior to migrate)', '************************************' , 'Reset runs after truncation', 'Verify lists to migrate in source', 'Migrate Real', 'Verify lists migrated in target (Verify in source FIRST)', 
+    $action = ('++++++++++++++++++++++++++++++++++++++++++++++++++++++', 'Create DataBase', 'Remove DataBase', '************************************' , 'Update DB Rootsource', 'Deactivate Set of Sites and Lists in DB', '************************************' , 'Register Set of Sites and Lists for first migration', 'Register Set of Sites and Lists for delta migration', '************************************' , 'Reset runs after truncation', 'Verify SP connections (prior to migrate)', 'Verify lists to migrate in source', 'Migrate Real', 'Verify lists migrated in target (Verify in source FIRST)', 
         'Delete MU-s from target', '************************************', 'Clear Navigation' , 'Create Navigation', '************************************', 'Quit') | Out-GridView -Title 'Choose Activity (Only working on dev and test env)' -PassThru
     #Make sure the testprocedures only access Dev and test.
     switch ($action) {
@@ -33,6 +33,21 @@ do {
             Start-RJDBRegistrationCycle
             Register-MtHAllSitesLists 
         }
+
+        'Update DB Rootsource' {
+            $sql = @"
+            SELECT  * FROM [MigrationUnits] 
+"@   
+            $MUS = Invoke-Sqlcmd -ServerInstance $Settings.SQLDetails.Instance -Database $Settings.SQLDetails.Database -Query $sql | Resolve-MtHMUClass
+            foreach ($Mu in $MUS) {
+                $MU.SourceRoot, $MU.SourceURL, $MU.ListURL , $MU.ListTitle = ExtractFrom-RJSourceURL -sourceurl  $Mu.CompleteSourceUrl
+                $sql = @"
+            Update MigrationUnits Set SourceRoot = '$($Mu.SourceRoot)' where MigUnitID = $($Mu.MigUnitId)
+"@   
+                Invoke-Sqlcmd -ServerInstance $Settings.SQLDetails.Instance -Database $Settings.SQLDetails.Database -Query $sql 
+            }
+        }
+
         'Deactivate Set of Sites and Lists in DB' {
             #not included
             $Items = Start-RJDBRegistrationCycle -NextAction "None"
@@ -43,6 +58,7 @@ do {
                 Invoke-Sqlcmd -ServerInstance $Settings.SQLDetails.Instance -Database $Settings.SQLDetails.Database -Query $sql
             }
         }
+        
         'Register Set of Sites and Lists for first migration' {
             #not included
             $Items = Start-RJDBRegistrationCycle -NextAction "First"
@@ -69,11 +85,12 @@ do {
         'Verify lists to migrate in source' {
             $MUsForValidation = Select-RJMusForProcessing -Verify 
             foreach ($MUURL in $MUsForValidation) {
-                $URL = $MUURL.SubItems[2].Text
+                $SourceRoot = $MUURL.SubItems[2].Text
+                $DestinationURL = $MUURL.SubItems[3].Text
                 $SQL = @"
                 SELECT   *
                 FROM [PACCARSQLO365].[dbo].[MigrationUnits]
-                Where DestinationURL = '$($URL)'
+                Where SourceRoot = '$($SourceRoot)'  And DestinationURL = '$($DestinationURL)'
                 Order By DestinationURL
 "@
                 $MUSforValidation = Invoke-Sqlcmd -ServerInstance $Settings.SQLDetails.Instance -Database $Settings.SQLDetails.Database -Query $sql | Group-Object -Property SourceURL
@@ -93,11 +110,11 @@ do {
 
                             }
                             else {
-                                Write-Host "$($MUGroup.ListTitle) NOT detected in target. DB Message : $($MU.ListID) " -f red
+                                Write-Host "$($MUGroup.ListTitle) NOT detected in source $($MUGroup.SourceURL). DB Message : $($MU.ListID) " -f red
                             }                        
                         }
                         catch {
-                            Write-Host "$($MUGroup.ListTitle) NOT detected in target" -f red
+                            Write-Host "$($MUGroup.ListTitle) NOT detected in source  $($MUGroup.SourceURL)" -f red
                         }
                     }
                 }

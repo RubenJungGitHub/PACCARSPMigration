@@ -17,6 +17,8 @@ function ExtractFrom-RJSourceURL {
         $MUListURL = ""
         $Segments = $sourceurl.Split('/')
         $Segments[1..($Segments.Length)] | ForEach-Object { $MUListURL += -Join ('/', $_) }
+        $Segments[0..2] | ForEach-Object { $MUSourceRoot += -Join ('/', $_) }
+        $MUSourceRoot = -join($MUSourceURL,'/', $MUSourceRoot)
         #Extract List Root . Validate is Lists is 
         $Offset = 1
         if ($Segments[($Segments.Length - 1)] -in $Settings.SourceURLIgnoreSections) { $Offset++ }
@@ -30,7 +32,7 @@ function ExtractFrom-RJSourceURL {
             #Drop trailing slash
             If ($MUSourceURL -match '/$') { $MUSourceURL = $MUSourceURL.Substring(0, $MUSourceURL.Length - 1) }
         }
-        return $MUSourceURL, $MUListURL, $MUListitle
+        return $MUSourceRoot, $MUSourceURL, $MUListURL, $MUListitle
     }
     else {
         throw 'ConvertTo-RJListURL called with incomplete http url'

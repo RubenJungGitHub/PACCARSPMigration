@@ -5,6 +5,7 @@ CREATE TABLE MigrationUnits
     SourceSC VARCHAR(400) NOT NULL,
     CompleteSourceUrl VARCHAR(400) NOT NULL,
     SourceUrl VARCHAR(400) NOT NULL,
+    SourceRoot VARCHAR(400) NOT NULL,
     DestinationUrl VARCHAR(400) NOT NULL,
     SitePermissionsSource VARCHAR(400) NOT NULL,
     DuplicateTargetLibPrefix VARCHAR(50) NOT NULL,

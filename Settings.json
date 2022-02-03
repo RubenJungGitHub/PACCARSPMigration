@@ -13,7 +13,9 @@
     "NodeId":  1,
     "WaitForImportCompletion":  false,
     "RealMigration":  true,
+    "ListNamesFromURL" : false,
     "MigrationBatchSplitSize":  20,
+    "InheritSourceSecurityDuringMigration":  true,
     "CreateGroupsAndGroups":  true,
     "UniquePermissionsFromInheritance": false,
     "SourceURLIgnoreSections":  [

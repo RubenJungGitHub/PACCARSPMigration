@@ -1,6 +1,6 @@
-USE SGABUZ_Sharegate_Migration
+USE PACCARSQLO365
 GO
-Alter TABLE MigrationRuns ADD MigrationType VARCHAR(10) NULL  Check (MigrationType IN ('first','delta','delete', NULL))
+Alter TABLE MigrationUNits ADD SourceRoot VARCHAR(400) NULL
 GO
-EXEC sp_columns MigrationRuns;
+EXEC sp_columns MigrationUnits;
 GO
