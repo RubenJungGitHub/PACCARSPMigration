@@ -128,17 +128,18 @@ do {
         'Verify lists migrated in target (Verify in source FIRST)' {
             $MUsForValidation = Select-RJMusForProcessing -Verify 
             foreach ($MUURL in $MUsForValidation) {
-                $URL = $MUURL.SubItems[2].Text
+                $SourceRoot = $MUURL.SubItems[2].Text
+                $DestinationURL = $MUURL.SubItems[3].Text
                 #GetUniqueLists for target
                 $sql = @"
             SELECT   ListTitle, ListTitleWithPrefix, LISTID, MergeMUS, SUM(ItemCount) As ItemCount
             FROM [MigrationUnits] 
-            Where DestinationURL = '$($URL)'
+            Where DestinationURL = '$($DestinationURL)' and SourceRoot = '$($SourceRoot)'
             Group by ListTitle, ListID, MergeMUs, ListTitleWithPrefix
             Order By ListTitle
 "@      
                 $UniqueMUS = Invoke-Sqlcmd -ServerInstance $Settings.SQLDetails.Instance -Database $Settings.SQLDetails.Database -Query $sql 
-                Connect-MtHSharePoint -URL $Url | out-null
+                Connect-MtHSharePoint -URL $DestinationURL | out-null
                 Write-Host "Detected $($UniqueMUS.Count) Migration units for connected destination site $($URL)" -b green
                 foreach ($MuforValidation in $UniqueMUS) {
 
