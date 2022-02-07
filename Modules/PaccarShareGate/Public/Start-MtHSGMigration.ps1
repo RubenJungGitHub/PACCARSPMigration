@@ -161,7 +161,7 @@ function Start-MtHSGMigration {
                         }
                         #Map permissions from source to target 
                         if ($List.InheritFromSource -and $Settings.InheritSourceSecurityDuringMigration) {
-                           Inherit_RJPermissionsFromSource -scrSite $srcSite.URL -dstSite $dstSite.URL -scrListTitle $List.ListTitle dstListTitle $ListTitleWithPrefix
+                            Inherit_RJPermissionsFromSource -scrSite $srcSite.URL -dstSite $dstSite.URL -scrListTitle $List.ListTitle dstListTitle $ListTitleWithPrefix
                         }
                     }
                     #Register related MU Id's
@@ -217,8 +217,10 @@ function Start-MtHSGMigration {
                             }
                             #Filter From batchWiseLists where InheritFromParent
                             $BatchWithInherit = $BatchWiseLists | Where-Object { $_.InheritFromSource -eq $true }  
-                            ForEach ($MigrationItem in $BatchWithUP) {
-                                Inherit_RJPermissionsFromSource -scrSite $srcSite.URL -dstSite $dstSite.URL -scrListTitle $List.ListTitle dstListTitle $List.ListTitle
+                            If ($Settings.InheritSourceSecurityDuringMigration) {
+                                ForEach ($MigrationItem in $BatchWithInherit) {
+                                    Inherit_RJPermissionsFromSource -scrSite $srcSite.URL -dstSite $dstSite.URL -scrListTitle $List.ListTitle dstListTitle $List.ListTitle
+                                }
                             }
                         }
                     }
