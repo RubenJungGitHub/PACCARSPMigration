@@ -127,8 +127,8 @@ Function Inherit_RJPermissionsFromSource {
                         #Add group members
                         ForEach ($User in $PermGroup.Group) {
                             Add-PnPUserToGroup -LoginName $User.User -Connection $dstConn -Identity $User.group
-                            Set-PnPListPermission -Identity $dstList.Title -Group $User.group -AddRole $Permissions
                         }
+                        Set-PnPListPermission -Identity $dstList.Title -Group $User.group -AddRole $Permissions
                     }
                 }
             }
