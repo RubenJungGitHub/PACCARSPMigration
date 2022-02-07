@@ -3,8 +3,7 @@ Add-Type -AssemblyName System.Windows.Forms
 function Select-RJMusForProcessing {
     [CmdletBinding()]
     param(
-        [switch]$Delete,
-        [switch]$Verify
+        [parameter(mandatory = $true)] [ValidateSet('Delete', 'Verify', 'Inherit')][String] $Action
     )
     $Sql = @"
       SELECT [EnvironmentName], SourceRoot
@@ -17,16 +16,19 @@ function Select-RJMusForProcessing {
   
     $frmMuDeletionSelector = New-Object system.Windows.Forms.Form
 
-    $frmMuDeletionSelector.ClientSize = '1400,600'
-    If($Delete)
-    {
-        $frmMuDeletionSelector.text = 'Destination URL MU deletion selection  (Alter column # in d for delete)'
-    }   
-    If($Verify)
-    {
-        $frmMuDeletionSelector.text = 'Destination URL MU deletion selection  (Alter column # in v for validation)'
-    }   
+    switch ($action) {
+        'Delete' {
+            $frmMuDeletionSelector.text = 'Destination URL MU deletion selection  (Alter column # in d for delete)'
+        }
+        'Verify' {
+            $frmMuDeletionSelector.text = 'Destination URL MU verification selection  (Alter column # in v for verification)'
+        }
+        'Inherit' {
+            $frmMuDeletionSelector.text = 'Destination URL MU inherit from source selection  (Alter column # in i for validation)'
+        }
+    }
 
+    $frmMuDeletionSelector.ClientSize = '1400,600'
     
     $frmMuDeletionSelector.BackColor = '#ffffff'
     $frmMuDeletionSelector.StartPosition = 'CenterScreen'
@@ -73,16 +75,22 @@ function Select-RJMusForProcessing {
     #endregion
     # Display the form
     $Result = $frmMuDeletionSelector.ShowDialog()
-    $returnMUS = $null
     if ($Result -eq 'OK') {
-        #Return items marked with D
-        if ($Delete) {
-            $returnMUs = $LVSource.Items | Where-Object { $_.Text -eq 'D' }  | Select-Object -Property SubItems
+        #Return  marked items 
+        switch ($action) {
+            'Delete' {
+                return $LVSource.Items | Where-Object { $_.Text -eq 'D' }  | Select-Object -Property SubItems
+            }
+            'Verify' {
+                return  $LVSource.Items | Where-Object { $_.Text -eq 'V' }  | Select-Object -Property SubItems
+            }
+            'Inherit' {
+                return  $LVSource.Items | Where-Object { $_.Text -eq 'I' }  | Select-Object -Property SubItems
+            }
+            default {
+                return $null 
+            }
         }
-        If($Verify) {
-            $ReturnMUs = $LVSource.Items | Where-Object { $_.Text -eq 'V' }  | Select-Object -Property SubItems
-        }
-        return $returnMUs
     }
-    return $null
+    return $null 
 }

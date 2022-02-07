@@ -15,7 +15,7 @@ Write-Verbose "NodeID = $($settings.NodeId)"
 Write-Verbose "Used Database = $($settings.SQLDetails.Name),$($settings.SQLDetails.Database)"
 #Set-Location -Path $ModulePath
 do {
-    $action = ('++++++++++++++++++++++++++++++++++++++++++++++++++++++', 'Create DataBase', 'Remove DataBase', '************************************' , 'Update DB Rootsource', 'Deactivate Set of Sites and Lists in DB', '************************************' , 'Register Set of Sites and Lists for first migration', 'Register Set of Sites and Lists for delta migration', '************************************' , 'Reset runs after truncation', 'Verify SP connections (prior to migrate)', 'Verify lists to migrate in source', 'Migrate Real', 'Verify lists migrated in target (Verify in source FIRST)', 
+    $action = ('++++++++++++++++++++++++++++++++++++++++++++++++++++++', 'Create DataBase', 'Remove DataBase', '************************************' , 'Update DB Rootsource', 'Deactivate Set of Sites and Lists in DB', '************************************' , 'Register Set of Sites and Lists for first migration', 'Register Set of Sites and Lists for delta migration', '************************************' , 'Reset runs after truncation', 'Verify SP connections (prior to migrate)', 'Verify lists to migrate in source', 'Migrate Real', 'Verify lists migrated in target (Verify in source FIRST)', 'Inherit premissions from source', 
         'Delete MU-s from target', '************************************', 'Clear Navigation' , 'Create Navigation', '************************************', 'Quit') | Out-GridView -Title 'Choose Activity (Only working on dev and test env)' -PassThru
     #Make sure the testprocedures only access Dev and test.
     switch ($action) {
@@ -33,7 +33,6 @@ do {
             Start-RJDBRegistrationCycle
             Register-MtHAllSitesLists 
         }
-
         'Update DB Rootsource' {
             $sql = @"
             SELECT  * FROM [MigrationUnits] 
@@ -83,7 +82,7 @@ do {
             Start-MtHExecutionCycle -Fake    
         }
         'Verify lists to migrate in source' {
-            $MUsForValidation = Select-RJMusForProcessing -Verify 
+            $MUsForValidation = Select-RJMusForProcessing -Action 'Verify'
             foreach ($MUURL in $MUsForValidation) {
                 $SourceRoot = $MUURL.SubItems[2].Text
                 $DestinationURL = $MUURL.SubItems[3].Text
@@ -126,7 +125,7 @@ do {
             Write-Host "Migration completed!" -b Green 
         }
         'Verify lists migrated in target (Verify in source FIRST)' {
-            $MUsForValidation = Select-RJMusForProcessing -Verify 
+            $MUsForValidation = Select-RJMusForProcessing -Action 'Verify'
             foreach ($MUURL in $MUsForValidation) {
                 $SourceRoot = $MUURL.SubItems[2].Text
                 $DestinationURL = $MUURL.SubItems[3].Text
@@ -148,11 +147,13 @@ do {
                         if ($Null -ne $List) {
                             $ItemCountMatch = $List.ItemCount -eq $MuforValidation.ItemCount
                             Write-Host "$($List.Title) detected " -f green
-                            Write-Host "Source itemcount : $($MuforValidation.ItemCount) - Target itemcount $($List.ItemCount) -> match : $($ItemCountMatch) MUsMerged : $($MuforValidation.MergeMUS)" -f yellow 
-                        }
-                        else {
-                            Write-Host "$($MuforValidation.ListTitle) / $($MuforValidation.ListTitleWithPrefix) NOT detected in target!" -f red
-                        }                        
+                            if ($ItemCountMatch) {
+                                Write-Host "Source itemcount : $($MuforValidation.ItemCount) - Target itemcount $($List.ItemCount) -> match : $($ItemCountMatch) MUsMerged : $($MuforValidation.MergeMUS)" -f green 
+                            }
+                            else {
+                                Write-Host "Source itemcount : $($MuforValidation.ItemCount) - Target itemcount $($List.ItemCount) -> match : $($ItemCountMatch) MUsMerged : $($MuforValidation.MergeMUS)" -f yellow 
+                            }
+                        }            
                     }
                     catch {
                         Write-Host "$($MuforValidation.ListTitle) / $($MuforValidation.ListTitleWithPrefix) NOT detected in target!" -f red
@@ -161,8 +162,29 @@ do {
                 Write-Host "Validation completed!" 
             }
         }
+
+        'Inherit premissions from source' {
+            $MUsForInheritance = Select-RJMusForProcessing -Action 'Inherit'
+            #Get all MUs from DB
+            
+            foreach ($MUURL in $MUsForInheritance) {
+                $SourceRoot = $MUURL.SubItems[2].Text
+                $DestinationURL = $MUURL.SubItems[3].Text
+                #GetUniqueLists for target
+                $sql = @"
+                SELECT   ListTitle, SourceUrl, DestinationUrl, MergeMUS, SUM(ItemCount) As ItemCount, InheritFromSource
+            FROM [MigrationUnits] 
+            Where DestinationURL = '$($DestinationURL)' and SourceRoot = '$($SourceRoot)' AND InheritFromSource = 1
+            Group by  ListTitle, SourceUrl, DestinationUrl, MergeMUS, ItemCount, InheritFromSource
+            Order By ListTitle
+"@      
+                $MUS = Invoke-Sqlcmd -ServerInstance $Settings.SQLDetails.Instance -Database $Settings.SQLDetails.Database -Query $sql 
+                If ($MUS) { Inherit_RJPermissionsFromSource -scrSite $_.SourceURL -dstSite $_.DestinationURL  -scrListTitle $_.ListTitle -dstListID $_.ListID}
+            }
+        }
+
         'Delete MU-s from target' {
-            $MUsForDeletion = Select-RJMusForProcessing -Delete
+            $MUsForDeletion = Select-RJMusForProcessing -Action 'Delete'
             If ($MUsForDeletion) { Start-RJDeletionCycle $MUsForDeletion }
             Write-Host "Deletion cycle completed" -ForegroundColor Cyan
         }

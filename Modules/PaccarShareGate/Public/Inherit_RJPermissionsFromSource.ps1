@@ -4,7 +4,8 @@ Function Inherit_RJPermissionsFromSource {
         [Parameter(Mandatory = $true)][string]$scrSite,
         [Parameter(Mandatory = $true)][string]$dstSite,
         [Parameter(Mandatory = $true)][string]$scrListTitle,
-        [Parameter(Mandatory = $true)][PSCustomObject]$dstListTitle
+        [Parameter(Mandatory = $true)][PSCustomObject]$dstListTitle,
+        [Parameter(Mandatory = $false)][PSCustomObject]$dstListID
     )
     
     #GetSourceLib
@@ -93,7 +94,12 @@ Function Inherit_RJPermissionsFromSource {
     $dstConn = Connect-PnPOnline -URL $dstSite -UseWebLogin -ErrorAction Stop -ReturnConnection
     Write-Host "Connected to destinationSite $($dstConn.Url)" -BackgroundColor yellow
     #Now map Source permissions to destination 
-    $dstList = Get-PnPList -Identity $dstlistTitle  -Connection $dstConn -Includes RoleAssignments 
+    if ($dstListID) {
+        $dstList = Get-PnPList -Identity $dstListID  -Connection $dstConn -Includes RoleAssignments 
+    }
+    else {
+        $dstList = Get-PnPList -Identity $dstlistTitle  -Connection $dstConn -Includes RoleAssignments 
+    }
 
     #Initially  break destination List permissions  Depends on setting UniquePermissionsFromInheritance
     if ($Settings.UniquePermissionsFromInheritance) {
