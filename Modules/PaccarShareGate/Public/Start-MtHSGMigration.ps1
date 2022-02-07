@@ -195,7 +195,7 @@ function Start-MtHSGMigration {
                         write-Host "Migrating batch $($ToCopyBatch.Title) : REALMIGRATION? : $($Settings.RealMigration)"  -f CYAN
                         #Dryrun?
                         if ($Settings.RealMigration) {
-                            #  $result = Copy-List -List $toCopyBatch  -NoWorkflows -NoWebParts -NoNintexWorkflowHistory -ForceNewListExperience -NoCustomizedListForms  -WaitForImportCompletion:$Settings.WaitForImportCompletion @MigrationParameters
+                            $result = Copy-List -List $toCopyBatch  -NoWorkflows -NoWebParts -NoNintexWorkflowHistory -ForceNewListExperience -NoCustomizedListForms  -WaitForImportCompletion:$Settings.WaitForImportCompletion @MigrationParameters
                             $MigrationresultItem = [PSCustomObject]@{
                                 Result     = $result
                                 MigUnitIDs = $MigrationItems.MigUNitID
