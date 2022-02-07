@@ -37,66 +37,9 @@ Function Inherit_RJPermissionsFromSource {
     else {
         Write-Host "Scanning groups and permissions on MU '$($scrList.Title)' on source SC '$($scrConn.URL)'" -f green
         $PermissionCollection = Get-RJListPermissions -List $scrList
-        <#      $PermissionCollection = @()
-        $RoleAssignments = $scrList.RoleAssignments
-        Foreach ($RoleAssignment in $RoleAssignments) {
-            #Get the Permission Levels assigned and Member
-            Get-PnPProperty -ClientObject $roleAssignment -Property RoleDefinitionBindings, Member
-     
-            #Get the Principal Type: User, SP Group, AD Group
-            $PermissionType = $RoleAssignment.Member.PrincipalType
-        
-            #Get all permission levels assigned (Excluding:Limited Access)
-            $PermissionLevels = $RoleAssignment.RoleDefinitionBindings | Select-object -property Name | Where-Object { $_.Name -ne 'Limited Access' }
-            #$PermissionLevels = ($PermissionLevels | Where { $_ -ne "Limited Access" }) -join ","
+        $PermissionCollectionGrouped = $PermissionCollection | Group-Object -Property Group, Type
 
-            If ($PermissionLevels.Length -eq 0) { Continue }
-            #Write-Host "PermissionType $($PermissionType)"
-            #Get SharePoint group members
-            If ($PermissionType -in $Settings.PermissionTypes) {
-                #Get Group Members
-                if ($PermissionType -eq 'SharePointGroup') {
-                    $GroupMembers = Get-PnPGroupMembers -Identity $RoleAssignment.Member            
-                }
-                else {
-                    $Permissions = New-Object PSObject
-                    $Permissions | Add-Member NoteProperty group("-")
-                    $Permissions | Add-Member NoteProperty AssociatedSiteSPGroup("-")
-                    $Permissions | Add-Member NoteProperty RoleAssignment($RoleAssignment)
-                    $Permissions | Add-Member NoteProperty User($RoleAssignment.Member.Title.Split('\')[$RoleAssignment.Member.Title.Split('\').Length - 1])
-                    $Permissions | Add-Member NoteProperty LoginName ($RoleAssignment.Member.LoginName)
-                    $Permissions | Add-Member NoteProperty Type($PermissionType)
-                    $Permissions | Add-Member NoteProperty Permissions($PermissionLevels)
-                    $Permissions | Add-Member NoteProperty RoleDefinitionBindings($RoleAssignment.RoleDefinitionBindings)
-                    $Permissions | Add-Member NoteProperty GrantedThrough("SharePoint Group: $($RoleAssignment.Member.LoginName)")
-                    $PermissionCollection += $Permissions
-                }
-                #Leave Empty Groups
-                If ($GroupMembers.count -eq 0) { Continue }
-     
-                ForEach ($User in $GroupMembers) {
-                    #Add the Data to Object
-                    $Association = ''
-                    Switch ($RoleAssignment.member.Title) {
-                        $scrSPGroups[0].Title { $Association = 'Visitors' }
-                        $scrSPGroups[1].Title { $Association = 'Members' }
-                        $scrSPGroups[2].Title { $Association = 'Owners' }
-                    }
-                    $Permissions = New-Object PSObject
-                    $Permissions | Add-Member NoteProperty Group($RoleAssignment.Member.Title.Split('\')[$RoleAssignment.Member.Title.Split('\').Length - 1])
-                    $Permissions | Add-Member NoteProperty AssociatedSiteSPGroup($Association)
-                    $Permissions | Add-Member NoteProperty RoleAssignment($RoleAssignment)
-                    $Permissions | Add-Member NoteProperty User($User.Title.Split('\')[$User.Title.Split('\').Length - 1])
-                    $Permissions | Add-Member NoteProperty LoginName ($User.LoginName)
-                    $Permissions | Add-Member NoteProperty Type($PermissionType)
-                    $Permissions | Add-Member NoteProperty Permissions($PermissionLevels)
-                    $Permissions | Add-Member NoteProperty RoleDefinitionBindings($RoleAssignment.RoleDefinitionBindings)
-                    $Permissions | Add-Member NoteProperty GrantedThrough("SharePoint Group: $($RoleAssignment.Member.LoginName)")
-                    $PermissionCollection += $Permissions
-                }
-            }
-        }
-        #>
+
         $dstConn = Connect-PnPOnline -URL $dstSite -UseWebLogin -ErrorAction Stop -ReturnConnection
         Write-Host "Connected to destinationSite $($dstConn.Url)" -BackgroundColor yellow
         #Now map Source permissions to destination 
@@ -119,7 +62,7 @@ Function Inherit_RJPermissionsFromSource {
                 }
             }
             #Drop associated groups
-            $DestinationPermissisonCollection = $PermissionCollection = Get-RJListPermissions -List $dstList | Where-Object {$_.Group -ne  (Get-PnPGroup -Connection $dstConn -AssociatedOwnerGroup).title -and $_.Group -ne  (Get-PnPGroup -Connection $dstConn -AssociatedMemberGroup).title -and $_.Group -ne  (Get-PnPGroup -Connection $dstConn -AssociatedVisitorGroup).title}
+            $DestinationPermissisonCollection =  Get-RJListPermissions -List $dstList -ForPermissionRemoval | Where-Object {$_.Group -ne  (Get-PnPGroup -Connection $dstConn -AssociatedOwnerGroup).title -and $_.Group -ne  (Get-PnPGroup -Connection $dstConn -AssociatedMemberGroup).title -and $_.Group -ne  (Get-PnPGroup -Connection $dstConn -AssociatedVisitorGroup).title}
 
             #Clear permissions on target
             foreach ($permission  in $DestinationPermissisonCollection) { 
@@ -143,7 +86,8 @@ Function Inherit_RJPermissionsFromSource {
                 # NOT SYSTEM ACCOUNT MAPPING!
                 $PermissionCollection = $PermissionCollection | Where-Object { $_.Group -ne '' -and $_.LoginName -ne 'SHAREPOINT\SYSTEM' } 
             }
-            $PermissionCollectionGrouped = $PermissionCollection | Group-Object -Property Group, Type
+
+
         
             foreach ($permgroup in $PermissionCollectionGrouped) {
                 if ($Settings.CreateGroupsAndGroups) {

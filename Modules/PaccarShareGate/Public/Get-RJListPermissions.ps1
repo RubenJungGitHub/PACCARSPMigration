@@ -2,7 +2,8 @@
 function Get-RJListPermissions {
     [CmdletBinding()]
     param(
-        [parameter(Mandatory = $true)][PSCustomObject]$List
+        [parameter(Mandatory = $true)][PSCustomObject]$List,
+        [Switch]$ForPermissionRemoval
     )
     $PermissionCollection = @()
     $RoleAssignments = $List.RoleAssignments
@@ -24,6 +25,7 @@ function Get-RJListPermissions {
                 $GroupMembers = Get-PnPGroupMembers -Identity $RoleAssignment.Member            
             }
             else {
+                $GroupMembers = $null
                 $Permissions = New-Object PSObject
                 $Permissions | Add-Member NoteProperty group("-")
                 $Permissions | Add-Member NoteProperty AssociatedSiteSPGroup("-")
@@ -36,9 +38,25 @@ function Get-RJListPermissions {
                 $Permissions | Add-Member NoteProperty GrantedThrough("SharePoint Group: $($RoleAssignment.Member.LoginName)")
                 $PermissionCollection += $Permissions
             }
+
+            If ($ForPermissionRemoval -and $GroupMembers.Count -eq 0) 
+            {
+                #Register Group for removal
+                $Permissions = New-Object PSObject
+                $Permissions | Add-Member NoteProperty Group($RoleAssignment.Member.Title.Split('\')[$RoleAssignment.Member.Title.Split('\').Length - 1])
+                $Permissions | Add-Member NoteProperty AssociatedSiteSPGroup($Association)
+                $Permissions | Add-Member NoteProperty RoleAssignment($RoleAssignment)
+                $Permissions | Add-Member NoteProperty User($User.Title.Split('\')[$User.Title.Split('\').Length - 1])
+                $Permissions | Add-Member NoteProperty LoginName ($User.LoginName)
+                $Permissions | Add-Member NoteProperty Type($PermissionType)
+                $Permissions | Add-Member NoteProperty Permissions($PermissionLevels)
+                $Permissions | Add-Member NoteProperty RoleDefinitionBindings($RoleAssignment.RoleDefinitionBindings)
+                $Permissions | Add-Member NoteProperty GrantedThrough("SharePoint Group: $($RoleAssignment.Member.LoginName)")
+                $PermissionCollection += $Permissions
+            }
+
             #Leave Empty Groups
             If ($GroupMembers.count -eq 0) { Continue }
- 
             ForEach ($User in $GroupMembers) {
                 #Add the Data to Object
                 $Association = ''
