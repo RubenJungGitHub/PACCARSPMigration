@@ -101,7 +101,7 @@ Function Inherit_RJPermissionsFromSource {
                             }
                             #Grant user permissions on Site level
                             Set-PnPWebPermission -User $Permission.User -AddRole $Permission.Permissions.Name
-                            Set-PnPListPermission -Identity $dstList.Title -User $Permission.User -AddRole $Permissions.Permissions.Name
+                            Set-PnPListPermission -Identity $dstList.Title -User $Permission.User -AddRole $Permission.Permissions.Name
                         }
                     }
                     elseif ($permgroup.name -match ', SecurityGroup') {
