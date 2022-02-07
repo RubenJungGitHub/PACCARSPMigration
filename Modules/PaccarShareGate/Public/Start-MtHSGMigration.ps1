@@ -161,7 +161,7 @@ function Start-MtHSGMigration {
                         }
                         #Map permissions from source to target 
                         if ($List.InheritFromSource -and $Settings.InheritSourceSecurityDuringMigration) {
-                            Inherit_RJPermissionsFromSource -scrSite $srcSite.URL -dstSite $dstSite.URL -scrListTitle $List.ListTitle dstListTitle $ListTitleWithPrefix
+                            Inherit_RJPermissionsFromSource -scrSite $MigrationItems[0].SourceURL -dstSite $MigrationItems[0].DestinationUrl -scrListTitle $List.ListTitle dstListTitle $ListTitleWithPrefix
                         }
                     }
                     #Register related MU Id's
@@ -195,7 +195,7 @@ function Start-MtHSGMigration {
                         write-Host "Migrating batch $($ToCopyBatch.Title) : REALMIGRATION? : $($Settings.RealMigration)"  -f CYAN
                         #Dryrun?
                         if ($Settings.RealMigration) {
-                            $result = Copy-List -List $toCopyBatch  -NoWorkflows -NoWebParts -NoNintexWorkflowHistory -ForceNewListExperience -NoCustomizedListForms  -WaitForImportCompletion:$Settings.WaitForImportCompletion @MigrationParameters
+                          #  $result = Copy-List -List $toCopyBatch  -NoWorkflows -NoWebParts -NoNintexWorkflowHistory -ForceNewListExperience -NoCustomizedListForms  -WaitForImportCompletion:$Settings.WaitForImportCompletion @MigrationParameters
                             $MigrationresultItem = [PSCustomObject]@{
                                 Result     = $result
                                 MigUnitIDs = $MigrationItems.MigUNitID
@@ -218,9 +218,7 @@ function Start-MtHSGMigration {
                             #Filter From batchWiseLists where InheritFromParent
                             $BatchWithInherit = $BatchWiseLists | Where-Object { $_.InheritFromSource -eq $true }  
                             If ($Settings.InheritSourceSecurityDuringMigration) {
-                                ForEach ($MigrationItem in $BatchWithInherit) {
-                                    Inherit_RJPermissionsFromSource -scrSite $srcSite.URL -dstSite $dstSite.URL -scrListTitle $List.ListTitle dstListTitle $List.ListTitle
-                                }
+                                $BatchWithInherit | ForEach-Object { Inherit_RJPermissionsFromSource -scrSite $MigrationItems[0].SourceURL -dstSite $MigrationItems[0].DestinationUrl -scrListTitle $_.ListTitle dstListTitle $_.ListTitle }
                             }
                         }
                     }

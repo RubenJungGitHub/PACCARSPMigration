@@ -17,7 +17,7 @@
     "MigrationBatchSplitSize":  20,
     "InheritSourceSecurityDuringMigration":  true,
     "CreateGroupsAndGroups":  true,
-    "UniquePermissionsFromInheritance": false,
+    "UniquePermissionsFromInheritance": true,
     "SourceURLIgnoreSections":  [
                                     "Lists",
                                     "Lijsten"

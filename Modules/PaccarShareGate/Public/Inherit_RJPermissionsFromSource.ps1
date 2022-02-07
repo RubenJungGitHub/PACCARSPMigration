@@ -35,8 +35,9 @@ Function Inherit_RJPermissionsFromSource {
         Write-Host "List '$($dstListTitle)' not detected in source" -ForegroundColor red
     }
     else {
-                Write-Host "Scanning groups and permissions on MU '$($scrList.Title)' on source SC '$($scrConn.URL)'" -f green
-        $PermissionCollection = @()
+        Write-Host "Scanning groups and permissions on MU '$($scrList.Title)' on source SC '$($scrConn.URL)'" -f green
+        $PermissionCollection = Get-RJListPermissions -List $scrList
+        <#      $PermissionCollection = @()
         $RoleAssignments = $scrList.RoleAssignments
         Foreach ($RoleAssignment in $RoleAssignments) {
             #Get the Permission Levels assigned and Member
@@ -82,10 +83,10 @@ Function Inherit_RJPermissionsFromSource {
                         $scrSPGroups[2].Title { $Association = 'Owners' }
                     }
                     $Permissions = New-Object PSObject
-                    $Permissions | Add-Member NoteProperty Group($RoleAssignment.Member.Title)
+                    $Permissions | Add-Member NoteProperty Group($RoleAssignment.Member.Title.Split('\')[$RoleAssignment.Member.Title.Split('\').Length - 1])
                     $Permissions | Add-Member NoteProperty AssociatedSiteSPGroup($Association)
                     $Permissions | Add-Member NoteProperty RoleAssignment($RoleAssignment)
-                    $Permissions | Add-Member NoteProperty User($User.Title)
+                    $Permissions | Add-Member NoteProperty User($User.Title.Split('\')[$User.Title.Split('\').Length - 1])
                     $Permissions | Add-Member NoteProperty LoginName ($User.LoginName)
                     $Permissions | Add-Member NoteProperty Type($PermissionType)
                     $Permissions | Add-Member NoteProperty Permissions($PermissionLevels)
@@ -95,6 +96,7 @@ Function Inherit_RJPermissionsFromSource {
                 }
             }
         }
+        #>
         $dstConn = Connect-PnPOnline -URL $dstSite -UseWebLogin -ErrorAction Stop -ReturnConnection
         Write-Host "Connected to destinationSite $($dstConn.Url)" -BackgroundColor yellow
         #Now map Source permissions to destination 
@@ -108,14 +110,30 @@ Function Inherit_RJPermissionsFromSource {
             Write-Host "List '$($dstListTitle)' with ID '$($dstListID)' not detected in target" -ForegroundColor red
         }
         else {
-            #Initially  break destination List permissions  Depends on setting UniquePermissionsFromInheritance
+            #Initially  break destination List permissions  Depends on setting UniquePermissionsFromInheritance and remove all groups having access before granting  access
             if ($Settings.UniquePermissionsFromInheritance) {
                 $hasUniquePermissions = Get-PnPProperty -ClientObject $dstList -Property "HasUniqueRoleAssignments"
                 if (-Not $hasUniquePermissions) {
-                    Write-Host "Breaking permissions for MU '$($dstList.Title)'" -ForegroundColor cyan
+                    Write-Host "Breaking permissions for MU '$($dstList.Title)' and clear current permissions" -ForegroundColor cyan
                     Set-PnPList -Connection $dstConn -Identity $dstList.ID -BreakRoleInheritance -CopyRoleAssignments
                 }
             }
+            #Drop associated groups
+            $DestinationPermissisonCollection = $PermissionCollection = Get-RJListPermissions -List $dstList | Where-Object {$_.Group -ne  (Get-PnPGroup -Connection $dstConn -AssociatedOwnerGroup).title -and $_.Group -ne  (Get-PnPGroup -Connection $dstConn -AssociatedMemberGroup).title -and $_.Group -ne  (Get-PnPGroup -Connection $dstConn -AssociatedVisitorGroup).title}
+
+            #Clear permissions on target
+            foreach ($permission  in $DestinationPermissisonCollection) { 
+                If($Permission.Group -eq '-')
+                {
+                    Set-PnPListPermission -Identity $dstList.Title -User $Permission.User -RemoveRole $Permission.Permissions.Name
+                }
+                else 
+                {
+                    Set-PnPListPermission -Identity $dstList.Title -Group $Permission.Group -RemoveRole $Permission.Permissions.Name
+                }
+            }
+            #$DestinationPermissisonCollection | ForEach-Object {$a = 1}
+
             Write-Host "Map permissions to destination MU $($dstList.Title)"
             #Check Only Associated Lists to be synchronized 
             if ($settings.AssociatedGroupsOnly) {
@@ -131,33 +149,43 @@ Function Inherit_RJPermissionsFromSource {
                 if ($Settings.CreateGroupsAndGroups) {
                     #Add  non existant target objects 
                     Write-Host "Processing $($permgroup.Name)" -f green
-                    If ($permgroup.name -match 'user') {
+                    If ($permgroup.name -match ', user') {
                         #New Users 
                         foreach ($Permission in $permgroup.group) {
                             if ((Get-PnPUser -Connection $dstConn | Where-Object { $_.Title -eq $Permission.User })) {
                                 New-PnPUser -Connection $dstConn -LoginName $Permission.User
                             }
+                            #Grant user permissions on Site level
                             Set-PnPWebPermission -User $Permission.User -AddRole $Permission.Permissions.Name
+                            Set-PnPListPermission -Identity $dstList.Title -User $Permission.User -AddRole $Permissions.Permissions.Name
                         }
                     }
-                    elseif ($permgroup.name -match 'SecurityGroup') {
+                    elseif ($permgroup.name -match ', SecurityGroup') {
+                        #New securitygroup
                         foreach ($Permission in $permgroup.Group) {
                             If (-Not (Get-PnPGroup -Connection $dstConn | Where-Object { $_.Title -eq $Permission.User })) {
                                 New-PnPGroup -Connection $dstConn -Title $Permission.User
                             }
-                            Set-PnPWebPermission -User $Permission.User -AddRole $Permission.Permissions.Name
-                            Set-PnPListPermission -Identity $dstList.Title -Group $Permission.User -AddRole $Permission.Permissions.Name
+                            if ($Permission.Group -eq '-') {
+                                Dont map Group users. ONly actual AD users
+                                Set-PnPWebPermission -User $Permission.User -AddRole $Permission.Permissions.Name
+                                Set-PnPListPermission -Identity $dstList.Title -Group $Permission.User -AddRole $Permission.Permissions.Name
+                            }
                         }
                     }
                     else {
+                        #New Sharepointgroup 
                         If (-Not (Get-PnPGroup -Connection $dstConn | Where-Object { $_.Title -eq $permgroup.group[0].group })) {
                             New-PnPGroup -Connection $dstConn -Title $Permission.Group
                         }
                         $Permissions = ($PermissionCollection | Where-Object { $_.Group -eq $permgroup.group[0].group })[0].Permissions.Name
                         Set-PnPWebPermission -Group $permgroup.group[0].group -AddRole  $Permissions
                         #Add group members
-                        $permgroup.group |  ForEach-Object { Add-PnPUserToGroup -LoginName $_.User -Connection $dstConn -Identity $_.group }
-                        Set-PnPListPermission -Identity $dstList.Title -Group $permgroup.group[0].group -AddRole $Permissions
+                        ForEach ($User in $PermGroup.Group) {
+                            Set-PnPListPermission -Identity $dstList.Title -Group $User.group -AddRole $Permissions
+                        }
+                        #$permgroup.group |  ForEach-Object { Add-PnPUserToGroup -LoginName $_.User -Connection $dstConn -Identity $_.group }
+                        #Set-PnPListPermission -Identity $dstList.Title -Group $permgroup.group[0].group -AddRole $Permissions
                     }
                 }
             }
