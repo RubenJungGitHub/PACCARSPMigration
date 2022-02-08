@@ -15,7 +15,7 @@
     "RealMigration":  true,
     "ListNamesFromURL" : false,
     "MigrationBatchSplitSize":  3,
-    "InheritSourceSecurityDuringMigration":  true,
+    "InheritSourceSecurityDuringMigration":  false,
     "CreateGroupsAndGroups":  true,
     "UniquePermissionsFromInheritance": true,
     "SourceURLIgnoreSections":  [
