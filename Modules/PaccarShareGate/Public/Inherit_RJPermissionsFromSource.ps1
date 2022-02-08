@@ -39,13 +39,14 @@ Function Inherit_RJPermissionsFromSource {
         }
         else {
             #Initially  break destination List permissions  Depends on setting UniquePermissionsFromInheritance and remove all groups having access before granting  access
+            Write-Host "Breaking permissions for MU '$($dstList.Title)' and clear current permissions" -ForegroundColor cyan
             Set-PnPList -Connection $dstConn -Identity $dstList.ID -BreakRoleInheritance -CopyRoleAssignments
-            if ($Settings.UniquePermissionsFromInheritance) {
+            <#if ($Settings.UniquePermissionsFromInheritance) {
                 $hasUniquePermissions = Get-PnPProperty -ClientObject $dstList -Property "HasUniqueRoleAssignments"
                 if (-Not $hasUniquePermissions) {
                     Write-Host "Breaking permissions for MU '$($dstList.Title)' and clear current permissions" -ForegroundColor cyan
                     Set-PnPList -Connection $dstConn -Identity $dstList.ID -BreakRoleInheritance -CopyRoleAssignments
-                }
+                }#>
             }
             #Drop associated groups
             $DestinationPermissisonCollection = Get-RJListPermissions -List $dstList -ForPermissionRemoval | Where-Object { $_.Group -ne (Get-PnPGroup -Connection $dstConn -AssociatedOwnerGroup).title -and $_.Group -ne (Get-PnPGroup -Connection $dstConn -AssociatedMemberGroup).title -and $_.Group -ne (Get-PnPGroup -Connection $dstConn -AssociatedVisitorGroup).title }
