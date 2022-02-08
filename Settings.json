@@ -16,12 +16,13 @@
     "ListNamesFromURL" : false,
     "MigrationBatchSplitSize":  3,
     "InheritSourceSecurityDuringMigration":  false,
-    "CreateGroupsAndGroups":  true,
+    "CreateUsersAndGroups":  true,
     "UniquePermissionsFromInheritance": true,
     "SourceURLIgnoreSections":  [
                                     "Lists",
                                     "Lijsten"
                                 ],
+    "ConvertSourceUserToTargetGroup" : ["zzDAFEHVCSPSiteAdmin"],
     "AssociatedGroupsOnly":  false,
     "AssoiciatedGroupMembersCopy":  [
                                         "Owners",

@@ -61,7 +61,7 @@ Function Inherit_RJPermissionsFromSource {
                 }
             }#>
             #Remove user running the script 
-            Set-PnPListPermission -Identity $dstList.Title -User $Settings.Current.UserName  -RemoveRole 'Full Control'
+            Set-PnPListPermission -Identity $dstList.Title -User $Settings.Current.UserName  -RemoveRole 'Full Control' -ErrorAction SilentlyContinue
             Write-Host "Map permissions to destination MU $($dstList.Title)"
             #Check Only Associated Lists to be synchronized 
             if ($settings.AssociatedGroupsOnly) {
@@ -73,7 +73,7 @@ Function Inherit_RJPermissionsFromSource {
             }
 
             foreach ($permgroup in $PermissionCollectionGrouped) {
-                if ($Settings.CreateGroupsAndGroups) {
+                if ($Settings.CreateUsersAndGroups) {
                     #Add  non existant target objects 
                     Write-Host "Processing $($permgroup.Name)" -f green
                     If ($permgroup.group[0].Type -eq 'user') {

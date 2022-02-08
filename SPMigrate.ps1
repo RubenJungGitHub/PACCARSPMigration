@@ -117,7 +117,7 @@ do {
                         }
                     }
                 }
-                Write-Host "Validation completed!" 
+                Write-Host "Verification completed!" 
             }
         }
         'Migrate Real' {
@@ -159,7 +159,7 @@ do {
                         Write-Host "$($MuforValidation.ListTitle) / $($MuforValidation.ListTitleWithPrefix) NOT detected in target!" -f red
                     }
                 }
-                Write-Host "Validation completed!" 
+                Write-Host "Verification completed!" 
             }
         }
 
@@ -181,6 +181,7 @@ do {
                 $MUS = Invoke-Sqlcmd -ServerInstance $Settings.SQLDetails.Instance -Database $Settings.SQLDetails.Database -Query $sql 
                 $MUS | ForEach-Object {Inherit_RJPermissionsFromSource -scrSite $_.SourceURL -dstSite $_.DestinationURL  -scrListTitle $_.ListTitle -dstListID $_.ListID}
             }
+            Write-Host "Inheritance permission process completed!" 
         }
 
         'Delete MU-s from target' {

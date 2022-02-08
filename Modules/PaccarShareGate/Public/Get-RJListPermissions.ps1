@@ -42,13 +42,22 @@ function Get-RJListPermissions {
             }
             else {
                 $GroupMembers = $null
+                #Because some members Like(zzDAFEHVCSPSiteAdmin) is a user on the source and a sharepoint group in the target we need to manipulate 
+                $User = $RoleAssignment.Member.Title.Split('\')[$RoleAssignment.Member.Title.Split('\').Length - 1]
+                $Group = '-'
+                $Type = $PermissionType
+                if($User -in $Settings.ConvertSourceUserToTargetGroup)
+                {
+                        $Type = 'SharePointGroup'
+                        $Group = $User
+                }
                 $Permissions = New-Object PSObject
-                $Permissions | Add-Member NoteProperty group("-")
+                $Permissions | Add-Member NoteProperty group($Group)
                 $Permissions | Add-Member NoteProperty AssociatedSiteSPGroup("-")
                 $Permissions | Add-Member NoteProperty RoleAssignment($RoleAssignment)
-                $Permissions | Add-Member NoteProperty User($RoleAssignment.Member.Title.Split('\')[$RoleAssignment.Member.Title.Split('\').Length - 1])
+                $Permissions | Add-Member NoteProperty User($User)
                 $Permissions | Add-Member NoteProperty LoginName ($RoleAssignment.Member.LoginName)
-                $Permissions | Add-Member NoteProperty Type($PermissionType)
+                $Permissions | Add-Member NoteProperty Type($Type)
                 $Permissions | Add-Member NoteProperty Permissions($PermissionLevels)
                 $Permissions | Add-Member NoteProperty RoleDefinitionBindings($RoleAssignment.RoleDefinitionBindings)
                 $Permissions | Add-Member NoteProperty GrantedThrough("SharePoint Group: $($RoleAssignment.Member.LoginName)")
