@@ -14,22 +14,7 @@ Function Inherit_RJPermissionsFromSource {
     $scrConn = Connect-PnPOnline -URL $scrSite -Credentials $cred -ErrorAction Stop -ReturnConnection
     Write-Host "Connected to sourcesite $($scrConn.Url)" -BackgroundColor Green
 
-    $scrSPGroups = [System.Collections.Generic.List[PSObject]]::new()
-    $dstSPGroups = [System.Collections.Generic.List[PSObject]]::new()
-    #if only associated groups (AssociatedGroupsOnly = true) need to be migrated file collections, else use SourceGroupMembersCopy from settings to populate collections
-    if ($settings.AssociatedGroupsOnly) {
-        #Keep this order!
-        $scrSPGroups.Add((Get-PnPGroup -Connection $scrConn -AssociatedVisitorGroup))
-        $scrSPGroups.Add((Get-PnPGroup -Connection $scrConn -AssociatedMemberGroup))
-        $scrSPGroups.Add((Get-PnPGroup -Connection $scrConn -AssociatedOwnerGroup))
-        $dstSPGroups.Add((Get-PnPGroup -Connection $dstConn -AssociatedVisitorGroup))
-        $dstSPGroups.Add((Get-PnPGroup -Connection $dstConn -AssociatedMemberGroup))
-        $dstSPGroups.Add((Get-PnPGroup -Connection $dstConn -AssociatedOwnerGroup))
-    }
-    Else {
-        $scrSPGroups = Get-PnPGroup -Connection $scrConn | Where-Object { $_.Title -match $Settings.SourceGroupMembersCopy }
-        $dstSPGroups = Get-PnPGroup -Connection $dstConn | Where-Object { $_.Title -match $Settings.SourceGroupMembersCopy }
-    }
+
     $scrList = Get-PnPList -Identity $scrListTitle   -Connection $scrConn -Includes RoleAssignments
     if ($NUll -eq $scrListTitle) {
         Write-Host "List '$($dstListTitle)' not detected in source" -ForegroundColor red
@@ -54,6 +39,7 @@ Function Inherit_RJPermissionsFromSource {
         }
         else {
             #Initially  break destination List permissions  Depends on setting UniquePermissionsFromInheritance and remove all groups having access before granting  access
+            Set-PnPList -Connection $dstConn -Identity $dstList.ID -BreakRoleInheritance -CopyRoleAssignments
             if ($Settings.UniquePermissionsFromInheritance) {
                 $hasUniquePermissions = Get-PnPProperty -ClientObject $dstList -Property "HasUniqueRoleAssignments"
                 if (-Not $hasUniquePermissions) {
@@ -62,16 +48,14 @@ Function Inherit_RJPermissionsFromSource {
                 }
             }
             #Drop associated groups
-            $DestinationPermissisonCollection =  Get-RJListPermissions -List $dstList -ForPermissionRemoval | Where-Object {$_.Group -ne  (Get-PnPGroup -Connection $dstConn -AssociatedOwnerGroup).title -and $_.Group -ne  (Get-PnPGroup -Connection $dstConn -AssociatedMemberGroup).title -and $_.Group -ne  (Get-PnPGroup -Connection $dstConn -AssociatedVisitorGroup).title}
+            $DestinationPermissisonCollection = Get-RJListPermissions -List $dstList -ForPermissionRemoval | Where-Object { $_.Group -ne (Get-PnPGroup -Connection $dstConn -AssociatedOwnerGroup).title -and $_.Group -ne (Get-PnPGroup -Connection $dstConn -AssociatedMemberGroup).title -and $_.Group -ne (Get-PnPGroup -Connection $dstConn -AssociatedVisitorGroup).title }
 
             #Clear permissions on target
             foreach ($permission  in $DestinationPermissisonCollection) { 
-                If($Permission.Group -eq '-')
-                {
+                If ($Permission.Group -eq '-') {
                     Set-PnPListPermission -Identity $dstList.Title -User $Permission.User -RemoveRole $Permission.Permissions.Name
                 }
-                else 
-                {
+                else {
                     Set-PnPListPermission -Identity $dstList.Title -Group $Permission.Group -RemoveRole $Permission.Permissions.Name
                 }
             }
@@ -87,8 +71,7 @@ Function Inherit_RJPermissionsFromSource {
                 $PermissionCollection = $PermissionCollection | Where-Object { $_.Group -ne '' -and $_.LoginName -ne 'SHAREPOINT\SYSTEM' } 
             }
 
-
-        
+       
             foreach ($permgroup in $PermissionCollectionGrouped) {
                 if ($Settings.CreateGroupsAndGroups) {
                     #Add  non existant target objects 
@@ -96,39 +79,64 @@ Function Inherit_RJPermissionsFromSource {
                     If ($permgroup.group[0].Type -eq 'user') {
                         #New Users 
                         foreach ($Permission in $permgroup.group) {
-                            if ((Get-PnPUser -Connection $dstConn | Where-Object { $_.Title -eq $Permission.User })) {
-                                New-PnPUser -Connection $dstConn -LoginName $Permission.User
+                            try {
+                                if ((Get-PnPUser -Connection $dstConn | Where-Object { $_.Title -eq $Permission.User })) {
+                                    New-PnPUser -Connection $dstConn -LoginName $Permission.User
+                                }
+                                #Grant user permissions on Site level
+                                Set-PnPWebPermission -User $Permission.User -AddRole $Permission.Permissions.Name -ErrorAction Stop
+                                Set-PnPListPermission -Identity $dstList.Title -User $Permission.User -AddRole $Permission.Permissions.Name -ErrorAction Stop
                             }
-                            #Grant user permissions on Site level
-                            Set-PnPWebPermission -User $Permission.User -AddRole $Permission.Permissions.Name
-                            Set-PnPListPermission -Identity $dstList.Title -User $Permission.User -AddRole $Permission.Permissions.Name
+                            catch {
+                                Write-Host "$($_.ErrorDetails)" -BackgroundColor red
+                            }
                         }
                     }
-                    elseif ($permgroup.group[0].Type -eq  'SecurityGroup') {
+                    elseif ($permgroup.group[0].Type -eq 'SecurityGroup') {
                         #New securitygroup
                         foreach ($Permission in $permgroup.Group) {
-                            If (-Not (Get-PnPGroup -Connection $dstConn | Where-Object { $_.Title -eq $Permission.User })) {
-                                New-PnPGroup -Connection $dstConn -Title $Permission.User
+                            try {
+                                If (-Not (Get-PnPGroup -Connection $dstConn | Where-Object { $_.Title -eq $Permission.User })) {
+                                    New-PnPGroup -Connection $dstConn -Title $Permission.User
+                                }
+                                if ($Permission.Group -eq '-') {
+                                    #Dont map Group users. ONly actual AD users
+                                    Set-PnPWebPermission -User $Permission.User -AddRole $Permission.Permissions.Name  -ErrorAction Stop
+                                    Set-PnPListPermission -Identity $dstList.Title -Group ($Permission.User.ToUpper()) -AddRole $Permission.Permissions.Name  -ErrorAction Stop
+                                }
                             }
-                            if ($Permission.Group -eq '-') {
-                                Dont map Group users. ONly actual AD users
-                                Set-PnPWebPermission -User $Permission.User -AddRole $Permission.Permissions.Name
-                                Set-PnPListPermission -Identity $dstList.Title -Group ($Permission.User.ToUpper()) -AddRole $Permission.Permissions.Name
+                            catch {
+                                Write-Host "$($_.ErrorDetails)" -BackgroundColor red
                             }
                         }
                     }
                     else {
                         #New Sharepointgroup 
-                        If (-Not (Get-PnPGroup -Connection $dstConn | Where-Object { $_.Title -eq $permgroup.group[0].group })) {
-                            New-PnPGroup -Connection $dstConn -Title  $permgroup.group[0].group
+                        try {
+                            If (-Not (Get-PnPGroup -Connection $dstConn | Where-Object { $_.Title -eq $permgroup.group[0].group })) {
+                                New-PnPGroup -Connection $dstConn -Title  $permgroup.group[0].group
+                            }
+                            $Permissions = ($PermissionCollection | Where-Object { $_.Group -eq $permgroup.group[0].group })[0].Permissions.Name
+                            Set-PnPWebPermission -Group $permgroup.group[0].group -AddRole  $Permissions  -ErrorAction Stop
+                            #Add group members
                         }
-                        $Permissions = ($PermissionCollection | Where-Object { $_.Group -eq $permgroup.group[0].group })[0].Permissions.Name
-                        Set-PnPWebPermission -Group $permgroup.group[0].group -AddRole  $Permissions
-                        #Add group members
+                        catch {
+                            Write-Host "$($_.ErrorDetails)" -BackgroundColor red
+                        }
                         ForEach ($User in $PermGroup.Group) {
-                            Add-PnPUserToGroup -LoginName $User.User -Connection $dstConn -Identity $User.group
+                            try {
+                                Add-PnPUserToGroup -LoginName $User.User -Connection $dstConn -Identity $User.group  -ErrorAction Stop
+                            }
+                            catch {
+                                Write-Host "$($_.ErrorDetails)" -BackgroundColor red
+                            }
                         }
-                        Set-PnPListPermission -Identity $dstList.Title -Group $User.group -AddRole $Permissions
+                        try {
+                            Set-PnPListPermission -Identity $dstList.Title -Group $User.group -AddRole $Permissions  -ErrorAction Stop
+                        }
+                        catch {
+                            Write-Host "$($_.ErrorDetails)" -BackgroundColor red
+                        }
                     }
                 }
             }

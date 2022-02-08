@@ -6,6 +6,22 @@ function Get-RJListPermissions {
         [Switch]$ForPermissionRemoval
     )
     $PermissionCollection = @()
+    $scrSPGroups = [System.Collections.Generic.List[PSObject]]::new()
+    $dstSPGroups = [System.Collections.Generic.List[PSObject]]::new()
+    #if only associated groups (AssociatedGroupsOnly = true) need to be migrated file collections, else use SourceGroupMembersCopy from settings to populate collections
+    if ($settings.AssociatedGroupsOnly) {
+        #Keep this order!
+        $scrSPGroups.Add((Get-PnPGroup -Connection $scrConn -AssociatedVisitorGroup))
+        $scrSPGroups.Add((Get-PnPGroup -Connection $scrConn -AssociatedMemberGroup))
+        $scrSPGroups.Add((Get-PnPGroup -Connection $scrConn -AssociatedOwnerGroup))
+        $dstSPGroups.Add((Get-PnPGroup -Connection $dstConn -AssociatedVisitorGroup))
+        $dstSPGroups.Add((Get-PnPGroup -Connection $dstConn -AssociatedMemberGroup))
+        $dstSPGroups.Add((Get-PnPGroup -Connection $dstConn -AssociatedOwnerGroup))
+    }
+    Else {
+        $scrSPGroups = Get-PnPGroup -Connection $scrConn | Where-Object { $_.Title -match $Settings.SourceGroupMembersCopy }
+        $dstSPGroups = Get-PnPGroup -Connection $dstConn | Where-Object { $_.Title -match $Settings.SourceGroupMembersCopy }
+    }
     $RoleAssignments = $List.RoleAssignments
     Foreach ($RoleAssignment in $RoleAssignments) {
         #Get the Permission Levels assigned and Member
