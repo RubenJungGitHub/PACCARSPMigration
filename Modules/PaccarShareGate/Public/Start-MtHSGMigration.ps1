@@ -195,7 +195,7 @@ function Start-MtHSGMigration {
                         write-Host "Migrating batch $($ToCopyBatch.Title) : REALMIGRATION? : $($Settings.RealMigration)"  -f CYAN
                         #Dryrun?
                         if ($Settings.RealMigration) {
-                            $result = Copy-List -List $toCopyBatch  -NoWorkflows -NoWebParts -NoNintexWorkflowHistory -ForceNewListExperience -NoCustomizedListForms  -WaitForImportCompletion:$Settings.WaitForImportCompletion @MigrationParameters
+                            #$result = Copy-List -List $toCopyBatch  -NoWorkflows -NoWebParts -NoNintexWorkflowHistory -ForceNewListExperience -NoCustomizedListForms  -WaitForImportCompletion:$Settings.WaitForImportCompletion @MigrationParameters
                             $MigrationresultItem = [PSCustomObject]@{
                                 Result     = $result
                                 MigUnitIDs = $MigrationItems.MigUNitID
@@ -206,7 +206,7 @@ function Start-MtHSGMigration {
                             #Only process MU's  permissions when nextaction is first 
                             if ($MigrationItems[0].NextAction -eq 'first') {
                                 #Filter From batchWiseLists where UNiquePermission
-                                $BatchWithUP = $BatchWiseLists | Where-Object { $_.UniquePermissions -eq $true }  
+                                $BatchWithUP = $BatchWiseLists | Where-Object { $_.UniquePermissions -eq $true  -and $_.ListTitle -in $ToCopyBatch.Title}  
                                 ForEach ($MigrationItem in $BatchWithUP) {
                                     $SourceList = Get-List -Site $SrcSite -Name $MigrationItem.ListTitle
                                     $DestinationList = Get-List -Site $dstSite -Name $MigrationItem.ListTitle
@@ -218,7 +218,7 @@ function Start-MtHSGMigration {
                                     $Results.Add($ReMigrationresultItemsult)
                                 }
                                 #Filter From batchWiseLists where InheritFromParent
-                                $BatchWithInherit = $BatchWiseLists | Where-Object { $_.InheritFromSource -eq $true }  
+                                $BatchWithInherit = $BatchWiseLists | Where-Object { $_.InheritFromSource -eq $true  -and $_.ListTitle -in $ToCopyBatch.Title}  
                                 If ($Settings.InheritSourceSecurityDuringMigration) {
                                     $BatchWithInherit | ForEach-Object { Inherit_RJPermissionsFromSource -scrSite $MigrationItems[0].SourceURL -dstSite $MigrationItems[0].DestinationUrl -scrListTitle $_.ListTitle dstListTitle $_.ListTitle }
                                 }

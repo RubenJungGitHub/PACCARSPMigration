@@ -14,8 +14,8 @@
     "WaitForImportCompletion":  false,
     "RealMigration":  true,
     "ListNamesFromURL" : false,
-    "MigrationBatchSplitSize":  20,
-    "InheritSourceSecurityDuringMigration":  true,
+    "MigrationBatchSplitSize":  3,
+    "InheritSourceSecurityDuringMigration":  false,
     "CreateGroupsAndGroups":  true,
     "UniquePermissionsFromInheritance": true,
     "SourceURLIgnoreSections":  [
@@ -39,7 +39,7 @@
                                 "Name":  "O365",
                                 "Instance":  "DAFEHVLPP99304\\SQLExpress",
                                 "Database":  "PACCARSQLO365",
-                                "DeleteDB":  true
+                                "DeleteDB":  false
                             },
                             {
                                 "Name":  "TestonO365",
