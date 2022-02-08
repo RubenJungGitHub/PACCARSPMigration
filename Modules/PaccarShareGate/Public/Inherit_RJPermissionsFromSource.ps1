@@ -24,6 +24,7 @@ Function Inherit_RJPermissionsFromSource {
         $PermissionCollection = Get-RJListPermissions -List $scrList
         $PermissionCollectionGrouped = $PermissionCollection | Group-Object -Property Group, Type
 
+
         $dstConn = Connect-PnPOnline -URL $dstSite -UseWebLogin -ErrorAction Stop -ReturnConnection
         Write-Host "Connected to destinationSite $($dstConn.Url)" -BackgroundColor yellow
         #Now map Source permissions to destination 
@@ -44,23 +45,23 @@ Function Inherit_RJPermissionsFromSource {
                 $hasUniquePermissions = Get-PnPProperty -ClientObject $dstList -Property "HasUniqueRoleAssignments"
                 if (-Not $hasUniquePermissions) {
                     Write-Host "Breaking permissions for MU '$($dstList.Title)' and clear current permissions" -ForegroundColor cyan
-                    Set-PnPList -Connection $dstConn -Identity $dstList.ID -BreakRoleInheritance -CopyRoleAssignments
-                }#>
+                    Set-PnPList -Connection $dstConn -Identity $dstList.ID -BreakRoleInheritance
+                }
             }
             #Drop associated groups
             $DestinationPermissisonCollection = Get-RJListPermissions -List $dstList -ForPermissionRemoval | Where-Object { $_.Group -ne (Get-PnPGroup -Connection $dstConn -AssociatedOwnerGroup).title -and $_.Group -ne (Get-PnPGroup -Connection $dstConn -AssociatedMemberGroup).title -and $_.Group -ne (Get-PnPGroup -Connection $dstConn -AssociatedVisitorGroup).title }
-
+#>
             #Clear permissions on target
-            foreach ($permission  in $DestinationPermissisonCollection) { 
+            <#      foreach ($permission  in $DestinationPermissisonCollection) { 
                 If ($Permission.Group -eq '-') {
                     Set-PnPListPermission -Identity $dstList.Title -User $Permission.User -RemoveRole $Permission.Permissions.Name
                 }
                 else {
                     Set-PnPListPermission -Identity $dstList.Title -Group $Permission.Group -RemoveRole $Permission.Permissions.Name
                 }
-            }
-            #$DestinationPermissisonCollection | ForEach-Object {$a = 1}
-
+            }#>
+            #Remove user running the script 
+            Set-PnPListPermission -Identity $dstList.Title -User $Settings.Current.UserName  -RemoveRole 'Full Control'
             Write-Host "Map permissions to destination MU $($dstList.Title)"
             #Check Only Associated Lists to be synchronized 
             if ($settings.AssociatedGroupsOnly) {
@@ -71,7 +72,6 @@ Function Inherit_RJPermissionsFromSource {
                 $PermissionCollection = $PermissionCollection | Where-Object { $_.Group -ne '' -and $_.LoginName -ne 'SHAREPOINT\SYSTEM' } 
             }
 
-       
             foreach ($permgroup in $PermissionCollectionGrouped) {
                 if ($Settings.CreateGroupsAndGroups) {
                     #Add  non existant target objects 
