@@ -24,7 +24,6 @@ Function Inherit_RJPermissionsFromSource {
         $PermissionCollection = Get-RJListPermissions -List $scrList
         $PermissionCollectionGrouped = $PermissionCollection | Group-Object -Property Group, Type
 
-
         $dstConn = Connect-PnPOnline -URL $dstSite -UseWebLogin -ErrorAction Stop -ReturnConnection
         Write-Host "Connected to destinationSite $($dstConn.Url)" -BackgroundColor yellow
         #Now map Source permissions to destination 
@@ -40,7 +39,7 @@ Function Inherit_RJPermissionsFromSource {
         else {
             #Initially  break destination List permissions  Depends on setting UniquePermissionsFromInheritance and remove all groups having access before granting  access
             Write-Host "Breaking permissions for MU '$($dstList.Title)' and clear current permissions" -ForegroundColor cyan
-            Set-PnPList -Connection $dstConn -Identity $dstList.ID -BreakRoleInheritance -CopyRoleAssignments
+            Set-PnPList -Connection $dstConn -Identity $dstList.ID -BreakRoleInheritance 
             <#if ($Settings.UniquePermissionsFromInheritance) {
                 $hasUniquePermissions = Get-PnPProperty -ClientObject $dstList -Property "HasUniqueRoleAssignments"
                 if (-Not $hasUniquePermissions) {
