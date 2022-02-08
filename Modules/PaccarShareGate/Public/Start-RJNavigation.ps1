@@ -44,6 +44,7 @@ function Start-RJNavigation {
                         $NavItem = $NavGroup.Group[0]
                     }
                     Write-Host "Create parent node $($NavItem.Parent)" -ForegroundColor Green
+                    if('' -eq $NavItem.ParentNavigation){$NavItem.ParentNavigation ='http://linkless.header/'}
                     $ParentTL = Add-PnPNavigationNode -Title $NavItem.Parent -Url $NavItem.ParentNavigation -Location "QuickLaunch"  -Parent $Parent.ID  -first                 
 
                     #Get and create sublevel 1    
@@ -55,6 +56,7 @@ function Start-RJNavigation {
                             $NavItem = $Navslgroup.Group[0]
                         }
                         Write-Host "Create sublevel 1 node $($ParentTL) / $($NavItem.SubLevel1)" -ForegroundColor Green
+                        if('' -eq $NavItem.SubLevel1Navigation){$NavItem.SubLevel1Navigation ='http://linkless.header/'}
                         $ParentSL1 = Add-PnPNavigationNode -Title $NavItem.SubLevel1 -Url $NavItem.SubLevel1Navigation -Location "QuickLaunch" -Parent $ParentTL.ID  -first
                    
                         #Get and create sublevel 2
@@ -63,6 +65,7 @@ function Start-RJNavigation {
                         ForEach ($Navsl2group in $NavSL2ItemsGrouped) {
                             Write-Host "Create sublevel 2 node $($ParentTL) / $($NavItem.SubLevel1) / $($Navsl2group.Group.SubLevel2)" -ForegroundColor Green
                             if ($Navsl2group.Group.SubLevel2 -ne '') {
+                                if('' -eq $Navsl2group.Group.SubLevel2Navigation ){$Navsl2group.Group.SubLevel2Navigation  ='http://linkless.header/'}
                                 Add-PnPNavigationNode -Title $Navsl2group.Group.SubLevel2 -Url $Navsl2group.Group.SubLevel2Navigation -Location "QuickLaunch" -Parent $ParentSL1.ID  -first     | out-null
                             }
                         }
