@@ -140,7 +140,7 @@ function Start-MtHSGMigration {
                         }
                     }
                     #Find original source list Title and copy MU
-                    $SourceSiteList = $ToCopy | where-Object { $_.RootFolder.SubString(0, $_.RootFolder.Length - 1) -eq $List.ListURL }
+                    $SourceSiteList = $ToCopy | where-Object { $_.RootFolder.SubString(0, $_.RooxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxtFolder.Length - 1) -eq $List.ListURL }
                     #Dryrun?
                     if ($Settings.RealMigration) {
                        # $result = Copy-List  -SourceSite $srcSite  -Name $SourceSiteList.Title  -ListTitleUrlSegment $ListTitleWithPrefix -ListTitle $ListTitleWithPrefix -NoWorkflows -NoWebParts -NoNintexWorkflowHistory -ForceNewListExperience -NoCustomizedListForms -WaitForImportCompletion:$Settings.WaitForImportCompletion  @MigrationParameters
@@ -161,6 +161,7 @@ function Start-MtHSGMigration {
                         }
                         #Map permissions from source to target 
                         if ($List.InheritFromSource -and $Settings.InheritSourceSecurityDuringMigration -and $MigrationItems[0].NextAction -eq 'first') {
+                            Write-Progress "Process inherit permissions from source "
                             Inherit_RJPermissionsFromSource -scrSite $MigrationItems[0].SourceURL -dstSite $MigrationItems[0].DestinationUrl -scrListTitle $List.ListTitle dstListTitle $ListTitleWithPrefix
                         }
                     }
@@ -220,6 +221,7 @@ function Start-MtHSGMigration {
                                 #Filter From batchWiseLists where InheritFromParent
                                 $BatchWithInherit = $BatchWiseLists | Where-Object { $_.InheritFromSource -eq $true  -and $_.ListTitle -in $ToCopyBatch.Title}  
                                 If ($Settings.InheritSourceSecurityDuringMigration) {
+                                    Write-Progress "Process inherit permissions from source "
                                     $BatchWithInherit | ForEach-Object { Inherit_RJPermissionsFromSource -scrSite $MigrationItems[0].SourceURL -dstSite $MigrationItems[0].DestinationUrl -scrListTitle $_.ListTitle dstListTitle $_.ListTitle }
                                 }
                             }
