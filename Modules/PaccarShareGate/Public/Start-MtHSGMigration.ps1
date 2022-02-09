@@ -143,7 +143,7 @@ function Start-MtHSGMigration {
                     $SourceSiteList = $ToCopy | where-Object { $_.RootFolder.SubString(0, $_.RootFolder.Length - 1) -eq $List.ListURL }
                     #Dryrun?
                     if ($Settings.RealMigration) {
-                       # $result = Copy-List  -SourceSite $srcSite  -Name $SourceSiteList.Title  -ListTitleUrlSegment $ListTitleWithPrefix -ListTitle $ListTitleWithPrefix -NoWorkflows -NoWebParts -NoNintexWorkflowHistory -ForceNewListExperience -NoCustomizedListForms -WaitForImportCompletion:$Settings.WaitForImportCompletion  @MigrationParameters
+                        $result = Copy-List  -SourceSite $srcSite  -Name $SourceSiteList.Title  -ListTitleUrlSegment $ListTitleWithPrefix -ListTitle $ListTitleWithPrefix -NoWorkflows -NoWebParts -NoNintexWorkflowHistory -ForceNewListExperience -NoCustomizedListForms -WaitForImportCompletion:$Settings.WaitForImportCompletion  @MigrationParameters
                         $MigrationresultItem = [PSCustomObject]@{
                             Result     = $result
                             MigUnitIDs = $List.MigUNitID 
