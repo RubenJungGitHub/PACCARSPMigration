@@ -52,7 +52,7 @@ do {
             $Items = Start-RJDBRegistrationCycle -NextAction "None"
             ForEach ($Item in $Items) {
                 $sql = @"
-                Update MigrationUnits SET NextAction ='none' where CompleteSourceURL = '$($Item.CompleteSourceURL)' 
+                Update MigrationUnits SET NextAction ='none' where CompleteSourceURL = '$($Item.CompleteSourceURL)' and DestinationURL = '$($Item.DestinationUrl)' 
 "@
                 Invoke-Sqlcmd -ServerInstance $Settings.SQLDetails.Instance -Database $Settings.SQLDetails.Database -Query $sql
             }
