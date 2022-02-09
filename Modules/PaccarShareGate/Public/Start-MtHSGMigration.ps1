@@ -152,7 +152,7 @@ function Start-MtHSGMigration {
                         Write-Progress "Check custom permissions required for renamed item "
                         if ($List.UniquePermissions -and $MigrationItems[0].NextAction -eq 'first') {
                             $DestinationList = Get-List -Site $dstSite -Name $ListTitleWithPrefix
-                            $result = Copy-ObjecPermissions -Source $SourceSiteList -Destination $DestinationList
+                            $result = Copy-ObjectPermissions -Source $SourceSiteList -Destination $DestinationList
                             $MigrationresultItem = [PSCustomObject]@{
                                 Result     = $result
                                 MigUnitIDs = $List.MigUNitID
