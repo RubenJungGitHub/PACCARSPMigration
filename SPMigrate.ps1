@@ -143,10 +143,14 @@ do {
                 foreach ($MuforValidation in $UniqueMUS) {
 
                     try {
-                        $List = Get-PnPList -Identity $MuforValidation.ListID
+                        $List = Get-PnPList -Identity $MuforValidation.ListID -ErrorAction Stop
                         if ($Null -ne $List) {
+                            if ($MuForValidation.ListTitle -ne $List.Title) {
+                                Write-Host "Double check this MU. The name in the DB is $($MuforValidation.ListTitle) but based on the ListID $($List.RootFolder.ServerRelativeUrl) the target site returns $($List.Title) " -BackgroundColor Red
+                            }
+
                             $ItemCountMatch = $List.ItemCount -eq $MuforValidation.ItemCount
-                            Write-Host "$($List.Title) detected " -f green
+                            Write-Host "$($List.Title) ID $($List.ID) detected in $($List.RootFolder.ServerRelativeUrl)" -f green
                             if ($ItemCountMatch) {
                                 Write-Host "Source itemcount : $($MuforValidation.ItemCount) - Target itemcount $($List.ItemCount) -> match : $($ItemCountMatch) MUsMerged : $($MuforValidation.MergeMUS)" -f green 
                             }
@@ -179,7 +183,7 @@ do {
             Order By ListTitle
 "@      
                 $MUS = Invoke-Sqlcmd -ServerInstance $Settings.SQLDetails.Instance -Database $Settings.SQLDetails.Database -Query $sql 
-                $MUS | ForEach-Object {Inherit_RJPermissionsFromSource -scrSite $_.SourceURL -dstSite $_.DestinationURL  -scrListTitle $_.ListTitle -dstListID $_.ListID}
+                $MUS | ForEach-Object { Inherit_RJPermissionsFromSource -scrSite $_.SourceURL -dstSite $_.DestinationURL  -scrListTitle $_.ListTitle -dstListID $_.ListID }
             }
             Write-Host "Inheritance permission process completed!" 
         }
