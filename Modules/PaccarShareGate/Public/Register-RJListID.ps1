@@ -27,7 +27,7 @@ function Register-RJListID {
         $sql = @"
         UPDATE MigrationUnits
         SET ListID = CASE WHEN ('$($pnplst.ID)' IS NULL) THEN 'NOT DETECTED IN TARGET' WHEN ('$($pnplst.ID)' = '') THEN 'NOT DETECTED IN TARGET' ELSE '$($pnplst.ID)' END
-        WHERE ListURL = '$($ListRelPath)'
+        WHERE ListURL = '$($ListRelPath)' AND DestinationURL = '$($dstSite)'
 "@
         Invoke-Sqlcmd -ServerInstance $Settings.SQLDetails.Instance -Database $Settings.SQLDetails.Database -Query $sql
     }

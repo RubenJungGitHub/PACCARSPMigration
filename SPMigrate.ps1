@@ -96,7 +96,7 @@ do {
                 ForEach ($MUSource  in  $MUSforValidation) {
                     $securePwd = $settings.current.EncryptedPassword | ConvertTo-SecureString
                     $cred = New-Object System.Management.Automation.PSCredential -ArgumentList $settings.current.UserNameSP2010, $securePwd
-                    Connect-PnPOnline -URL $MUSource.Name -Credentials $cred -ErrorAction Stop 
+                    Connect-PnPOnline -URL $MUSource.Name -Credentials $cred -ErrorAction SilentlyContinue
                     ForEach ($MUGroup  in  $MUSource.Group) {
                         try {
                             $List = Get-PnPList -Identity $MUGroup.ListTitle

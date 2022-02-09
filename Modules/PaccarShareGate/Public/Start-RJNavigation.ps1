@@ -35,7 +35,8 @@ function Start-RJNavigation {
             #Now create new menu
             #Drop home on toplevel, naming conventions questionable
             if ($create) {
-                $NavTLItemsGrouped = $NavItemsTLGrouped | Where-Object { $_.Name -Notlike 'Home*' } | sort-Object -Property Name -Descending
+                #$NavTLItemsGrouped = $NavItemsTLGrouped | Where-Object { $_.Name -Notlike 'Home*' } | sort-Object -Property Name -Descending
+                $NavTLItemsGrouped = $NavItemsTLGrouped | Where-Object { $_.Name -Notlike 'Home*' } 
                 foreach ($navgroup in $NavTLItemsGrouped) {
 
                     #Get and create top level 

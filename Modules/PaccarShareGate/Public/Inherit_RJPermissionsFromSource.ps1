@@ -84,7 +84,8 @@ Function Inherit_RJPermissionsFromSource {
                                     New-PnPUser -Connection $dstConn -LoginName $Permission.User
                                 }
                                 #Grant user permissions on Site level
-                                Set-PnPWebPermission -User $Permission.User -AddRole $Permission.Permissions.Name -ErrorAction Stop
+                                #no permissiomns on site level
+                                #Set-PnPWebPermission -User $Permission.User -AddRole $Permission.Permissions.Name -ErrorAction Stop
                                 Set-PnPListPermission -Identity $dstList.Title -User $Permission.User -AddRole $Permission.Permissions.Name -ErrorAction Stop
                             }
                             catch {
@@ -101,7 +102,8 @@ Function Inherit_RJPermissionsFromSource {
                                 }
                                 if ($Permission.Group -eq '-') {
                                     #Dont map Group users. ONly actual AD users
-                                    Set-PnPWebPermission -User $Permission.User -AddRole $Permission.Permissions.Name  -ErrorAction Stop
+                                    #no permissiomns on site level
+                                    #Set-PnPWebPermission -User $Permission.User -AddRole $Permission.Permissions.Name  -ErrorAction Stop
                                     Set-PnPListPermission -Identity $dstList.Title -Group ($Permission.User.ToUpper()) -AddRole $Permission.Permissions.Name  -ErrorAction Stop
                                 }
                             }
@@ -117,7 +119,8 @@ Function Inherit_RJPermissionsFromSource {
                                 New-PnPGroup -Connection $dstConn -Title  $permgroup.group[0].group
                             }
                             $Permissions = ($PermissionCollection | Where-Object { $_.Group -eq $permgroup.group[0].group })[0].Permissions.Name
-                            Set-PnPWebPermission -Group $permgroup.group[0].group -AddRole  $Permissions  -ErrorAction Stop
+                            #no permissiomns on site level
+                           # Set-PnPWebPermission -Group $permgroup.group[0].group -AddRole  $Permissions  -ErrorAction Stop
                             #Add group members
                         }
                         catch {
