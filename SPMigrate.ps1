@@ -145,7 +145,7 @@ do {
                     try {
                         $List = Get-PnPList -Identity $MuforValidation.ListID -ErrorAction Stop
                         if ($Null -ne $List) {
-                            if ($MuForValidation.ListTitle -ne $List.Title) {
+                            if ($MuForValidation.ListTitle -ne $List.Title -and $MuForValidation.ListTitleWithPrefix -ne $List.Title) {
                                 Write-Host "Double check this MU. The name in the DB is $($MuforValidation.ListTitle) but based on the ListID $($List.RootFolder.ServerRelativeUrl) the target site returns $($List.Title) " -BackgroundColor Red
                             }
 
