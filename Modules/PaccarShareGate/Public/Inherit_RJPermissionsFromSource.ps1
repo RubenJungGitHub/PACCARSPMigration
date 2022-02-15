@@ -75,25 +75,22 @@ Function Inherit_RJPermissionsFromSource {
             foreach ($permgroup in $PermissionCollectionGrouped) {
                 if ($Settings.CreateUsersAndGroups) {
                     #Add  non existant target objects 
-                    Write-Host "Processing $($permgroup.Name)" -f green
-                    If ($permgroup.group[0].Type -eq 'user') {
+                    Write-Host "Processing '$($permgroup.Name)'" -f green
+                    If ($permgroup.group[0].Type -eq 'user' -or $permgroup.group[0].Type -eq 'SecurityGroup') {
                         #New Users 
                         foreach ($Permission in $permgroup.group) {
                             try {
                                 if ((Get-PnPUser -Connection $dstConn | Where-Object { $_.Title -eq $Permission.User })) {
                                     New-PnPUser -Connection $dstConn -LoginName $Permission.User
                                 }
-                                #Grant user permissions on Site level
-                                #no permissiomns on site level
-                                #Set-PnPWebPermission -User $Permission.User -AddRole $Permission.Permissions.Name -ErrorAction Stop
                                 Set-PnPListPermission -Identity $dstList.Title -User $Permission.User -AddRole $Permission.Permissions.Name -ErrorAction Stop
                             }
                             catch {
-                                Write-Host "$($_.ErrorDetails)" -BackgroundColor red
+                                Write-Host "User '$($Permission.User)' in group  '$($Permission.Type)   $($Permission.Group)'  :  $($_.ErrorDetails)" -BackgroundColor red
                             }
                         }
                     }
-                    elseif ($permgroup.group[0].Type -eq 'SecurityGroup') {
+                    <#   elseif ($permgroup.group[0].Type -eq 'SecurityGroup') {
                         #New securitygroup
                         foreach ($Permission in $permgroup.Group) {
                             try {
@@ -111,7 +108,7 @@ Function Inherit_RJPermissionsFromSource {
                                 Write-Host "$($_.ErrorDetails)" -BackgroundColor red
                             }
                         }
-                    }
+                    } #>
                     else {
                         #New Sharepointgroup 
                         try {
@@ -119,9 +116,6 @@ Function Inherit_RJPermissionsFromSource {
                                 New-PnPGroup -Connection $dstConn -Title  $permgroup.group[0].group
                             }
                             $Permissions = ($PermissionCollection | Where-Object { $_.Group -eq $permgroup.group[0].group })[0].Permissions.Name
-                            #no permissiomns on site level
-                           # Set-PnPWebPermission -Group $permgroup.group[0].group -AddRole  $Permissions  -ErrorAction Stop
-                            #Add group members
                         }
                         catch {
                             Write-Host "$($_.ErrorDetails)" -BackgroundColor red
@@ -135,7 +129,8 @@ Function Inherit_RJPermissionsFromSource {
                             }
                         }
                         try {
-                            Set-PnPListPermission -Identity $dstList.Title -Group $User.group -AddRole $Permissions  -ErrorAction Stop
+                            #It is not possible to grant limited access on user level 
+                            Set-PnPListPermission -Identity $dstList.Title-Group $User.group -AddRole  ($Permissions | Where-Object { $_ -ne 'Limited Access' } ) -ErrorAction Stop
                         }
                         catch {
                             Write-Host "$($_.ErrorDetails)" -BackgroundColor red
