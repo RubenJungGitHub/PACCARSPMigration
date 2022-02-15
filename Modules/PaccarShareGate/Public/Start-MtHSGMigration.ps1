@@ -211,7 +211,7 @@ function Start-MtHSGMigration {
                                 ForEach ($MigrationItem in $BatchWithUP) {
                                     $SourceList = Get-List -Site $SrcSite -Name $MigrationItem.ListTitle
                                     $DestinationList = Get-List -Site $dstSite -Name $MigrationItem.ListTitle
-                                    $result = Copy-ObjectPermissions -Source $SourceList -Destination $DestinationList 
+                                  #  $result = Copy-ObjectPermissions -Source $SourceList -Destination $DestinationList 
                                     $MigrationresultItem = [PSCustomObject]@{
                                         Result     = $result
                                         MigUnitIDs = $MigrationItems.MigUNitID
