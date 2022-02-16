@@ -13,10 +13,11 @@ function Connect-MtHSharePoint {
         $params.add('AccessToken', $token)
     }
     elseif ($settings.current.LoginType -eq 'Current') {
-        if ($settings.current.SPVersion -ne 'SharePointOnline') {
+        if ($settings.current.SPVersion -ne 'SharePointOnline' -or $Settings.UseCurrentCredentials) {
             $params.Add('CurrentCredentials', $true)
         }
         else {
+            #$params.Add('Current', $true)  
             $params.Add('Current', $true)  
         }
     }

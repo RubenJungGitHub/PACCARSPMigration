@@ -96,6 +96,7 @@ do {
                 ForEach ($MUSource  in  $MUSforValidation) {
                     $securePwd = $settings.current.EncryptedPassword | ConvertTo-SecureString
                     $cred = New-Object System.Management.Automation.PSCredential -ArgumentList $settings.current.UserNameSP2010, $securePwd
+                    #Connect-MtHSharePoint -URL $MuSource.Name
                     Connect-PnPOnline -URL $MUSource.Name -Credentials $cred -ErrorAction SilentlyContinue
                     ForEach ($MUGroup  in  $MUSource.Group) {
                         try {
@@ -138,12 +139,11 @@ do {
             Order By ListTitle
 "@      
                 $UniqueMUS = Invoke-Sqlcmd -ServerInstance $Settings.SQLDetails.Instance -Database $Settings.SQLDetails.Database -Query $sql 
-                Connect-MtHSharePoint -URL $DestinationURL | out-null
+                Connect-MtHSharePoint -URL $DestinationURL -ErrorAction Stop
                 Write-Host "Detected $($UniqueMUS.Count) Migration units for connected destination site $($URL)" -b green
                 foreach ($MuforValidation in $UniqueMUS) {
-
                     try {
-                        $List = Get-PnPList -Identity $MuforValidation.ListID -ErrorAction Stop
+                        $List = Get-PnPList -Connection $Conn  -Identity $MuforValidation.ListID -ErrorAction Stop
                         if ($Null -ne $List) {
                             if ($MuForValidation.ListTitle -ne $List.Title -and $MuForValidation.ListTitleWithPrefix -ne $List.Title) {
                                 Write-Host "Double check this MU. The name in the DB is $($MuforValidation.ListTitle) but based on the ListID $($List.RootFolder.ServerRelativeUrl) the target site returns $($List.Title) " -BackgroundColor Red

@@ -152,7 +152,8 @@ function Start-MtHSGMigration {
                         Write-Progress "Check custom permissions required for renamed item "
                         if ($List.UniquePermissions -and $MigrationItems[0].NextAction -eq 'first') {
                             $DestinationList = Get-List -Site $dstSite -Name $ListTitleWithPrefix
-                            $result = Copy-ObjectPermissions -Source $SourceSiteList -Destination $DestinationList
+                            #Disable SG appears to perform obscure actions
+                            #$result = Copy-ObjectPermissions -Source $SourceSiteList -Destination $DestinationList
                             $MigrationresultItem = [PSCustomObject]@{
                                 Result     = $result
                                 MigUnitIDs = $List.MigUNitID
@@ -211,7 +212,8 @@ function Start-MtHSGMigration {
                                 ForEach ($MigrationItem in $BatchWithUP) {
                                     $SourceList = Get-List -Site $SrcSite -Name $MigrationItem.ListTitle
                                     $DestinationList = Get-List -Site $dstSite -Name $MigrationItem.ListTitle
-                                  #  $result = Copy-ObjectPermissions -Source $SourceList -Destination $DestinationList 
+                                    #Disable SG appears to perform obscure actions
+                                    #$result = Copy-ObjectPermissions -Source $SourceList -Destination $DestinationList 
                                     $MigrationresultItem = [PSCustomObject]@{
                                         Result     = $result
                                         MigUnitIDs = $MigrationItems.MigUNitID

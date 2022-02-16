@@ -13,17 +13,20 @@
     "NodeId":  1,
     "WaitForImportCompletion":  true,
     "RealMigration":  true,
-    "ListNamesFromURL" : false,
-    "MigrationBatchSplitSize":  3,
+    "ListNamesFromURL":  false,
+    "MigrationBatchSplitSize":  10,
     "InheritEmptyGroups":  false,
+    "UseCurrentCredentials":  false,
     "InheritSourceSecurityDuringMigration":  false,
     "CreateUsersAndGroups":  true,
-    "UniquePermissionsFromInheritance": true,
+    "UniquePermissionsFromInheritance":  true,
     "SourceURLIgnoreSections":  [
                                     "Lists",
                                     "Lijsten"
                                 ],
-    "ConvertSourceUserToTargetGroup" : ["zzDAFEHVCSPSiteAdmin"],
+    "ConvertSourceUserToTargetGroup":  [
+                                           "zzDAFEHVCSPSiteAdmin"
+                                       ],
     "AssociatedGroupsOnly":  false,
     "AssoiciatedGroupMembersCopy":  [
                                         "Owners",
@@ -87,7 +90,7 @@
                                    "ComputerNames":  [
                                                          "DAFEHVLPP99304"
                                                      ],
-                                   "EncryptedPassword":  "01000000d08c9ddf0115d1118c7a00c04fc297eb01000000f6bb826111d78d4997e9b7c56f9432ea0000000002000000000003660000c000000010000000de6fd52f013e36050ed0036b58f9adde0000000004800000a000000010000000ed8f1651a2344fdbb88759fad489be3420000000bf8ce4a5234ef4290529d481943642e2ef08f040ec56ea4ccfaebdb4ca1958c91400000075a6a46e087495d32bb0dd70343307cdec93db71"
+                                   "EncryptedPassword":  "01000000d08c9ddf0115d1118c7a00c04fc297eb01000000f6bb826111d78d4997e9b7c56f9432ea0000000002000000000003660000c000000010000000d4d5125f873aff047eb16c654d2e2f210000000004800000a000000010000000be13217990e62579384379f079dea06520000000495da7e74a14d6e49028a96d580c03312e36ceb5b2aac4893906bbabccdc232d1400000093f8809d8ce77636200825c564381ceee1497646"
                                }
                            ],
     "StartUp":  {

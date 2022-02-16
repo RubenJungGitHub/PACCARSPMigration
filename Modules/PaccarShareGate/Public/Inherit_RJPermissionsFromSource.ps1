@@ -12,6 +12,8 @@ Function Inherit_RJPermissionsFromSource {
     $securePwd = $settings.current.EncryptedPassword | ConvertTo-SecureString
     $cred = New-Object System.Management.Automation.PSCredential -ArgumentList $settings.current.UserNameSP2010, $securePwd
     $scrConn = Connect-PnPOnline -URL $scrSite -Credentials $cred -ErrorAction Stop -ReturnConnection
+    #$scrConn = Connect-MtHSharePoint -URL $scrSite -ReturnConnection
+
     Write-Host "Connected to sourcesite $($scrConn.Url)" -BackgroundColor Green
 
 
