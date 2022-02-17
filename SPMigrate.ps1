@@ -140,11 +140,11 @@ do {
             Order By ListTitle
 "@      
                 $UniqueMUS = Invoke-Sqlcmd -ServerInstance $Settings.SQLDetails.Instance -Database $Settings.SQLDetails.Database -Query $sql 
-                Connect-MtHSharePoint -URL $DestinationURL -ErrorAction Stop
-                Write-Host "Detected $($UniqueMUS.Count) Migration units for connected destination site $($URL)" -b green
+                $scrconn = Connect-MtHSharePoint -URL $DestinationURL -returnconnection -ErrorAction Stop
+                Write-Host "Connected to $($DestinationURL) : Detected $($UniqueMUS.Count) Migration units in DB for connected destination" -b green
                 foreach ($MuforValidation in $UniqueMUS) {
                     try {
-                        $List = Get-PnPList -Connection $Conn  -Identity $MuforValidation.ListID -ErrorAction Stop
+                        $List = Get-PnPList -Connection $scrconn[1]   -Identity $MuforValidation.ListID -ErrorAction Stop
                         if ($Null -ne $List) {
                             if ($MuForValidation.ListTitle -ne $List.Title -and $MuForValidation.ListTitleWithPrefix -ne $List.Title) {
                                 Write-Host "Double check this MU. The name in the DB is $($MuforValidation.ListTitle) but based on the ListID $($List.RootFolder.ServerRelativeUrl) the target site returns $($List.Title) " -BackgroundColor Red
@@ -162,7 +162,7 @@ do {
                         }            
                     }
                     catch {
-                        $ListsWithIssues.Add(-join($MuforValidation.ListTitle),'/' , $($MuforValidation.ListTitleWithPrefix), 'NOT detected in target!')    
+                        $ListsWithIssues.Add(-join($MuforValidation.ListTitle,' / ' , $MuforValidation.ListTitleWithPrefix , ' -> NOT detected in target!'))
                         Write-Host "$($MuforValidation.ListTitle) / $($MuforValidation.ListTitleWithPrefix) NOT detected in target!" -f red
 
                     }
