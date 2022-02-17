@@ -126,16 +126,17 @@ do {
             Write-Host "Migration completed!" -b Green 
         }
         'Verify lists migrated in target (Verify in source FIRST)' {
+            $ListsWithIssues = [System.Collections.Generic.List[PSCustomObject]]::new()
             $MUsForValidation = Select-RJMusForProcessing -Action 'Verify'
-            foreach ($MUURL in $MUsForValidation) {
+                foreach ($MUURL in $MUsForValidation) {
                 $SourceRoot = $MUURL.SubItems[2].Text
                 $DestinationURL = $MUURL.SubItems[3].Text
                 #GetUniqueLists for target
                 $sql = @"
-            SELECT   ListTitle, ListTitleWithPrefix, LISTID, MergeMUS, SUM(ItemCount) As ItemCount
+            SELECT   ListTitle, ListTitleWithPrefix, ListURL, LISTID, MergeMUS, SUM(ItemCount) As ItemCount
             FROM [MigrationUnits] 
             Where DestinationURL = '$($DestinationURL)' and SourceRoot = '$($SourceRoot)'
-            Group by ListTitle, ListID, MergeMUs, ListTitleWithPrefix
+            Group by ListTitle, ListID, MergeMUs, ListTitleWithPrefix, ListURL
             Order By ListTitle
 "@      
                 $UniqueMUS = Invoke-Sqlcmd -ServerInstance $Settings.SQLDetails.Instance -Database $Settings.SQLDetails.Database -Query $sql 
@@ -155,14 +156,18 @@ do {
                                 Write-Host "Source itemcount : $($MuforValidation.ItemCount) - Target itemcount $($List.ItemCount) -> match : $($ItemCountMatch) MUsMerged : $($MuforValidation.MergeMUS)" -f green 
                             }
                             else {
+                                $ListsWithIssues.Add(-Join ('Source list ',  $MuForValidation.ListTitle, " " , $MuForValidation.ListURL , ' | Target list ',  $List.Title, " " , $List.RootFolder.ServerRelativeUrl , ' ', ' Itemcount mismatch  ->  SOurceItemCount : ' , $MUForValidation.ItemCount, '- TargetItemCount : ' , $List.ItemCount, ' Merged : ', $MUForValidation.MergeMUS))   
                                 Write-Host "Source itemcount : $($MuforValidation.ItemCount) - Target itemcount $($List.ItemCount) -> match : $($ItemCountMatch) MUsMerged : $($MuforValidation.MergeMUS)" -f yellow 
                             }
                         }            
                     }
                     catch {
+                        $ListsWithIssues.Add(-join($MuforValidation.ListTitle),'/' , $($MuforValidation.ListTitleWithPrefix), 'NOT detected in target!')    
                         Write-Host "$($MuforValidation.ListTitle) / $($MuforValidation.ListTitleWithPrefix) NOT detected in target!" -f red
+
                     }
                 }
+                $ListsWithIssues | ForEach-Object{Write-Host "Checklist $($_)" -f Yellow}
                 Write-Host "Verification completed!" 
             }
         }

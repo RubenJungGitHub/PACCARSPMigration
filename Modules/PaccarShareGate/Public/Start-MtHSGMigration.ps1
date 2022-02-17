@@ -77,13 +77,14 @@ function Start-MtHSGMigration {
     $TSConnectTarget = New-TimeSpan -Start $TargetConnectStart -End (Get-Date)
     Write-Verbose "Connected to TARGET Site Collection $($MigrationItems[0].DestinationUrl) Successfully!"
        
+    #For truckfactory no Custom permissions to be copied
     $MigrationParameters = @{
         NormalMode          = ($settings.sharegate.migrationMode -ne 'Insane')
         Site                = $srcSite
         DestinationSite     = $dstSite
         MappingSettings     = $MappingSettings
         NoContent           = $false
-        NoCustomPermissions = $true  #($MigrationItems[0].ShareGateCopySettings -contains 'p')
+        NoCustomPermissions = ($MIgrationItems[0].SourceURL -match 'ops-ta')
         CopySettings        = $copySettings
     }
 
