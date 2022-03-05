@@ -43,7 +43,7 @@ function Start-MtHSGMigration {
     }
 
     $TSLoadMappings = New-TimeSpan -Start $MigrationStart -End (Get-Date)
-    Write-Verbose 'Completed mappings and copy settings load' 
+    Write-Verbose 'Completed mappings and copy settings load : CopySettings : $($MigrationItems[0].NextAction)' 
 
     #different Site, List and Library options executed
     #reporting to adapt ....???
@@ -104,7 +104,7 @@ function Start-MtHSGMigration {
     }
     else {
         Write-Host "============================================================================="  
-        Write-Host "MIGRATE  source $($srcSite) to Destination $($dstSite)"  -ForegroundColor yellow
+        Write-Host "$($MigrationItems[0].NextAction) MIGRATE  source $($srcSite) to Destination $($dstSite)"  -ForegroundColor yellow
         $ActualMigrationStart = Get-Date
         if ($MigrateSitePermissions) {
             #Tricky Opens up complete site

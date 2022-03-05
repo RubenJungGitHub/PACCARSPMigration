@@ -5,6 +5,7 @@ function Get-RJListPermissions {
         [parameter(Mandatory = $true)][PSCustomObject]$List,
         [Switch]$ForPermissionRemoval
     )
+    $MapAllAuthenticatedUsers = $settings.AllAuthenticatedUsersMapping.SPlit('-')
     $PermissionCollection = @()
     $scrSPGroups = [System.Collections.Generic.List[PSObject]]::new()
     $dstSPGroups = [System.Collections.Generic.List[PSObject]]::new()
@@ -26,30 +27,37 @@ function Get-RJListPermissions {
     Foreach ($RoleAssignment in $RoleAssignments) {
         #Get the Permission Levels assigned and Member
         Get-PnPProperty -ClientObject $roleAssignment -Property RoleDefinitionBindings, Member
-       # Write-Host "Collect information for $($RoleAssignment.Member.Title)" -f Green
-        if ($RoleAssignment.Member.Title -eq 'OPS - Logistics Operations Owners') { 
-            $a = 1 
-        }
+        # Write-Host "Collect information for $($RoleAssignment.Member.Title)" -f Green
         #Get the Principal Type: User, SP Group, AD Group
+
         $PermissionType = $RoleAssignment.Member.PrincipalType
     
         #Get all permission levels assigned (Excluding:Limited Access)
         #$PermissionLevels = $RoleAssignment.RoleDefinitionBindings 
         $PermissionLevels = $RoleAssignment.RoleDefinitionBindings | Select-object -property Name | Where-Object { $_.Name -ne 'Limited Access' }
-
         If ($PermissionLevels.Length -eq 0) { Continue }
         #Get SharePoint group members
         If ($PermissionType -in $Settings.PermissionTypes) {
             #Get Group Members
             $GroupMembers = $null
+            $Group = $RoleAssignment.Member.Title.Split('\')[$RoleAssignment.Member.Title.Split('\').Length - 1]
+            Write-Progress "Processing $Group"
+            if ($Group -eq $MapAllAuthenticatedUsers[0]) {
+                $Group = $MapAllAuthenticatedUsers[1]
+                $PermissionType = "SharePointGroup"
+            }
             if ($PermissionType -eq 'SharePointGroup') {
                 #$GroupMembers =Get-PnPGroupMembers -Identity $RoleAssignment.Member
-                #Loose System account
-                $GroupMembers =Get-PnPGroupMembers -Identity $RoleAssignment.Member | Where-Object {$_.LoginName  -ne 'Sharepoint\System'}
+
+                #Loose System account, make exception for All authenticated users : 
+                if ($Group -ne $MapAllAuthenticatedUsers[1]) {
+                    $GroupMembers = Get-PnPGroupMembers -Identity $RoleAssignment.Member | Where-Object { $_.LoginName -ne 'Sharepoint\System' }
+                }
                 #Leave Empty Groups if not configured
-                If ($GroupMembers.count -eq 0 -And $Settings.InheritEmptyGroups -and $Permissions.Type -ne 'User') {
+                If ($GroupMembers.count -eq 0 -And ($Settings.InheritEmptyGroups -or $Group -eq $MapAllAuthenticatedUsers[1])-and $Permissions.Type -ne 'User') {
                     $Permissions = New-Object PSObject
-                    $Permissions | Add-Member NoteProperty Group($RoleAssignment.Member.Title.Split('\')[$RoleAssignment.Member.Title.Split('\').Length - 1])
+                    #  $Permissions | Add-Member NoteProperty Group($RoleAssignment.Member.Title.Split('\')[$RoleAssignment.Member.Title.Split('\').Length - 1])
+                    $Permissions | Add-Member NoteProperty Group($Group)
                     $Permissions | Add-Member NoteProperty AssociatedSiteSPGroup($Association)
                     $Permissions | Add-Member NoteProperty RoleAssignment($RoleAssignment)
                     $Permissions | Add-Member NoteProperty User('')
@@ -58,7 +66,7 @@ function Get-RJListPermissions {
                     $Permissions | Add-Member NoteProperty Permissions($PermissionLevels)
                     $Permissions | Add-Member NoteProperty RoleDefinitionBindings($RoleAssignment.RoleDefinitionBindings)
                     $Permissions | Add-Member NoteProperty GrantedThrough("SharePoint Group: $($RoleAssignment.Member.LoginName)")
-                   # Write-Host "Add Permissions  Group :  $($Permissions.Group)  User :  $($Permissions.User) $($Permissions.Permissions.Name)" -f Green
+                    # Write-Host "Add Permissions  Group :  $($Permissions.Group)  User :  $($Permissions.User) $($Permissions.Permissions.Name)" -f Green
                     $PermissionCollection += $Permissions
                 }
 
@@ -71,7 +79,7 @@ function Get-RJListPermissions {
                         $scrSPGroups[2].Title { $Association = 'Owners' }
                     }
                     $Permissions = New-Object PSObject
-                    $Permissions | Add-Member NoteProperty Group($RoleAssignment.Member.Title.Split('\')[$RoleAssignment.Member.Title.Split('\').Length - 1])
+                    $Permissions | Add-Member NoteProperty Group($Group)
                     $Permissions | Add-Member NoteProperty AssociatedSiteSPGroup($Association)
                     $Permissions | Add-Member NoteProperty RoleAssignment($RoleAssignment)
                     $Permissions | Add-Member NoteProperty User($User.Title.Split('\')[$User.Title.Split('\').Length - 1])
@@ -80,7 +88,7 @@ function Get-RJListPermissions {
                     $Permissions | Add-Member NoteProperty Permissions($PermissionLevels)
                     $Permissions | Add-Member NoteProperty RoleDefinitionBindings($RoleAssignment.RoleDefinitionBindings)
                     $Permissions | Add-Member NoteProperty GrantedThrough("SharePoint Group: $($RoleAssignment.Member.LoginName)")
-                   # Write-Host "Add Permissions  Group :  $($Permissions.Group)  User :  $($Permissions.User) $($Permissions.Permissions.Name)" -f Green
+                    # Write-Host "Add Permissions  Group :  $($Permissions.Group)  User :  $($Permissions.User) $($Permissions.Permissions.Name)" -f Green
                     $PermissionCollection += $Permissions
                 }       
             }
@@ -103,7 +111,7 @@ function Get-RJListPermissions {
                 $Permissions | Add-Member NoteProperty Permissions($PermissionLevels)
                 $Permissions | Add-Member NoteProperty RoleDefinitionBindings($RoleAssignment.RoleDefinitionBindings)
                 $Permissions | Add-Member NoteProperty GrantedThrough("SharePoint Group: $($RoleAssignment.Member.LoginName)")
-               # Write-Host "Add Permissions  Group :  $($Permissions.Group)  User :  $($Permissions.User) $($Permissions.Permissions.Name)" -f Green
+                # Write-Host "Add Permissions  Group :  $($Permissions.Group)  User :  $($Permissions.User) $($Permissions.Permissions.Name)" -f Green
                 $PermissionCollection += $Permissions
             }
 
@@ -119,7 +127,7 @@ function Get-RJListPermissions {
                 $Permissions | Add-Member NoteProperty Permissions($PermissionLevels)
                 $Permissions | Add-Member NoteProperty RoleDefinitionBindings($RoleAssignment.RoleDefinitionBindings)
                 $Permissions | Add-Member NoteProperty GrantedThrough("SharePoint Group: $($RoleAssignment.Member.LoginName)")
-               # Write-Host "Add Permissions  Group :  $($Permissions.Group)  User :  $($Permissions.User) $($Permissions.Permissions.Name)" -f Green
+                # Write-Host "Add Permissions  Group :  $($Permissions.Group)  User :  $($Permissions.User) $($Permissions.Permissions.Name)" -f Green
                 $PermissionCollection += $Permissions
             }
         }

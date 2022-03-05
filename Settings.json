@@ -17,6 +17,7 @@
     "MigrationBatchSplitSize":  10,
     "InheritEmptyGroups":  false,
     "UseCurrentCredentials":  false,
+    "AllAuthenticatedUsersMapping" : "All Authenticated users-Iedereen behalve externe gebruikers",
     "InheritSourceSecurityDuringMigration":  false,
     "CreateUsersAndGroups":  true,
     "UniquePermissionsFromInheritance":  true,

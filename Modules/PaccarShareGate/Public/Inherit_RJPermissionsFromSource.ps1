@@ -16,7 +16,6 @@ Function Inherit_RJPermissionsFromSource {
 
     Write-Host "Connected to sourcesite $($scrConn.Url)" -BackgroundColor Green
 
-
     $scrList = Get-PnPList -Identity $scrListTitle   -Connection $scrConn -Includes RoleAssignments
     if ($NUll -eq $scrListTitle) {
         Write-Host "List '$($dstListTitle)' not detected in source" -ForegroundColor red
@@ -25,7 +24,6 @@ Function Inherit_RJPermissionsFromSource {
         Write-Host "Scanning groups and permissions on MU '$($scrList.Title)' on source SC '$($scrConn.URL)'" -f green
         $PermissionCollection = Get-RJListPermissions -List $scrList
         $PermissionCollectionGrouped = $PermissionCollection | Group-Object -Property Group, Type
-
 
         $dstConn = Connect-PnPOnline -URL $dstSite -UseWebLogin -ErrorAction Stop -ReturnConnection
         Write-Host "Connected to destinationSite $($dstConn.Url)" -BackgroundColor yellow
@@ -132,7 +130,10 @@ Function Inherit_RJPermissionsFromSource {
                         }
                         try {
                             #It is not possible to grant limited access on user level 
-                            Set-PnPListPermission -Identity $dstList.Title-Group $User.group -AddRole  ($Permissions | Where-Object { $_ -ne 'Limited Access' } ) -ErrorAction Stop
+                            #Set-PnPListPermission -Identity $dstList.Title-Group $User.group -AddRole  ($Permissions | Where-Object { $_ -ne 'Limited Access' } ) -ErrorAction Stop
+                            foreach ($permission in $permissions) {
+                                Set-PnPListPermission -Identity $dstList.Title-Group $User.group -AddRole  ($permission | Where-Object { $_ -ne 'Limited Access' } ) -ErrorAction Stop
+                            }
                         }
                         catch {
                             Write-Host "$($_.ErrorDetails)" -BackgroundColor red
