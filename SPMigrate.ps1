@@ -85,7 +85,7 @@ do {
         }
         'Gather lookuplist information' {
             $MUsForValidation = Select-RJMusForProcessing -Action 'LookupListInfo'
-            $ResultList  = [System.Collections.Generic.List[PSObject]]::new()
+            $ResultList = [System.Collections.Generic.List[PSObject]]::new()
             foreach ($MUURL in $MUsForValidation) {
                 $SourceRoot = $MUURL.SubItems[2].Text
                 $DestinationURL = $MUURL.SubItems[3].Text
@@ -104,7 +104,7 @@ do {
                     Write-Host "Connected to : $($MUSource.Name)"
                     ForEach ($MUGroup  in  $MUSource.Group) {
                         $List = Get-PnPList -Identity $MUGroup.ListTitle
-                        $ListFields = Get-PnPField -List $List | Where-Object {$_.Title -notin $Settings.LookuplijstIgnoreFields}
+                        $ListFields = Get-PnPField -List $List | Where-Object { $_.Title -notin $Settings.LookuplijstIgnoreFields }
                         Write-Host "Analyzing list : $($List.Title) " -f Yellow
                         foreach ($Field in $ListFields) {
                             $FieldHidden = $Field | Select-Object -property 'Hidden'
@@ -116,7 +116,7 @@ do {
                                     Write-Host "Field Schema Lookuplist ID  : $($schemaXml.Field.Attributes["List"].Value)" -f Magenta
                                     Write-Host "Field Schema Lookuplist Name   : $( $schemaXml.Field.Attributes["Name"].Value)" -f Magenta
                                     Write-Host "Field Schema LookupField  : $($schemaXml.Field.Attributes["ShowField"].Value)" -f Magenta
-                                    $LookupField  = New-Object PSObject
+                                    $LookupField = New-Object PSObject
                                     $LookupField | Add-Member NoteProperty SourceURL($MUSource.Name)
                                     $LookupField | Add-Member NoteProperty ParentListID($List.ID)
                                     $LookupField | Add-Member NoteProperty ParentListTitle($MUGroup.ListTitle)
@@ -130,10 +130,10 @@ do {
                         }
                     }
                 }
-                $LookUpFieldsExportFileName = -Join($Settings.FilePath.Logging, '/LookUpFieldsAnalysisExport' , (Get-Date -Format "ddmmyyyy"),'.csv')
-                $ResultList | Export-CSV -Path $LookUpFieldsExportFileName 
-                Write-Host "Lookup column gathering completed!" -f Cyan
             }
+            $LookUpFieldsExportFileName = -Join ($Settings.FilePath.Logging, '/LookUpFieldsAnalysisExport' , (Get-Date -Format "ddmmyyyy"), '.csv')
+            $ResultList | Export-CSV -Path $LookUpFieldsExportFileName 
+            Write-Host "Lookup column gathering completed!" -f Cyan
         }
 
         'Verify lists to migrate in source' {
