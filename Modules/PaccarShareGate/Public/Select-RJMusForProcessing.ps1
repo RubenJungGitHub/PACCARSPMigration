@@ -3,7 +3,7 @@ Add-Type -AssemblyName System.Windows.Forms
 function Select-RJMusForProcessing {
     [CmdletBinding()]
     param(
-        [parameter(mandatory = $true)] [ValidateSet('Delete', 'Verify', 'Inherit')][String] $Action
+        [parameter(mandatory = $true)] [ValidateSet('Delete', 'Verify', 'LookupListInfo', 'Inherit')][String] $Action
     )
     $Sql = @"
       SELECT [EnvironmentName], SourceRoot
@@ -25,6 +25,9 @@ function Select-RJMusForProcessing {
         }
         'Inherit' {
             $frmMuDeletionSelector.text = 'Destination URL MU inherit from source selection  (Alter column # in i for validation)'
+        }
+        'LookupListInfo' {
+            $frmMuDeletionSelector.text = 'Destination URL MU for lookuplistINfo from source selection  (Alter column # in g for gathering information)'
         }
     }
 
@@ -86,6 +89,9 @@ function Select-RJMusForProcessing {
             }
             'Inherit' {
                 return  $LVSource.Items | Where-Object { $_.Text -eq 'I' }  | Select-Object -Property SubItems
+            }
+            'LookupListInfo' {
+                return  $LVSource.Items | Where-Object { $_.Text -eq 'G' }  | Select-Object -Property SubItems
             }
             default {
                 return $null 

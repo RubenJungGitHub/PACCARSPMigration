@@ -15,7 +15,9 @@ Write-Verbose "NodeID = $($settings.NodeId)"
 Write-Verbose "Used Database = $($settings.SQLDetails.Name),$($settings.SQLDetails.Database)"
 #Set-Location -Path $ModulePath
 do {
-    $action = ('++++++++++++++++++++++++++++++++++++++++++++++++++++++', 'Create DataBase', 'Remove DataBase', '************************************' , 'Update DB Rootsource', 'Deactivate Set of Sites and Lists in DB', '************************************' , 'Register Set of Sites and Lists for first migration', 'Register Set of Sites and Lists for delta migration', '************************************' , 'Reset runs after truncation', 'Verify SP connections (prior to migrate)', 'Verify lists to migrate in source', 'Migrate Real', 'Verify lists migrated in target (Verify in source FIRST)', 'Inherit premissions from source (Migrate FIRST!)', 
+    $action = ('++++++++++++++++++++++++++++++++++++++++++++++++++++++', 'Create DataBase', 'Remove DataBase', '************************************' , 'Update DB Rootsource', 'Deactivate Set of Sites and Lists in DB', '************************************' ,
+        'Register Set of Sites and Lists for first migration', 'Register Set of Sites and Lists for delta migration', '************************************' , 'Reset runs after truncation', 'Gather lookuplist information' , 'Verify SP connections (prior to migrate)', 'Verify lists to migrate in source',
+        'Migrate Real', 'Verify lists migrated in target (Verify in source FIRST)', 'Inherit premissions from source (Migrate FIRST!)', 
         'Delete MU-s from target', '************************************', 'Clear Navigation' , 'Create Navigation', '************************************', 'Quit') | Out-GridView -Title 'Choose Activity (Only working on dev and test env)' -PassThru
     #Make sure the testprocedures only access Dev and test.
     switch ($action) {
@@ -81,6 +83,59 @@ do {
         'Migrate Fake' {
             Start-MtHExecutionCycle -Fake    
         }
+        'Gather lookuplist information' {
+            $MUsForValidation = Select-RJMusForProcessing -Action 'LookupListInfo'
+            $ResultList  = [System.Collections.Generic.List[PSObject]]::new()
+            foreach ($MUURL in $MUsForValidation) {
+                $SourceRoot = $MUURL.SubItems[2].Text
+                $DestinationURL = $MUURL.SubItems[3].Text
+                $SQL = @"
+                SELECT   *
+                FROM [PACCARSQLO365].[dbo].[MigrationUnits]
+                Where SourceRoot = '$($SourceRoot)'  And DestinationURL = '$($DestinationURL)'
+                Order By DestinationURL
+"@
+                $MUSforValidation = Invoke-Sqlcmd -ServerInstance $Settings.SQLDetails.Instance -Database $Settings.SQLDetails.Database -Query $sql | Group-Object -Property SourceURL
+                ForEach ($MUSource  in  $MUSforValidation) {
+                    $securePwd = $settings.current.EncryptedPassword | ConvertTo-SecureString
+                    $cred = New-Object System.Management.Automation.PSCredential -ArgumentList $settings.current.UserNameSP2010, $securePwd
+                    #Connect-MtHSharePoint -URL $MuSource.Name
+                    Connect-PnPOnline -URL $MUSource.Name -Credentials $cred -ErrorAction SilentlyContinue
+                    Write-Host "Connected to : $($MUSource.Name)"
+                    ForEach ($MUGroup  in  $MUSource.Group) {
+                        $List = Get-PnPList -Identity $MUGroup.ListTitle
+                        $ListFields = Get-PnPField -List $List | Where-Object {$_.Title -notin $Settings.LookuplijstIgnoreFields}
+                        Write-Host "Analyzing list : $($List.Title) " -f Yellow
+                        foreach ($Field in $ListFields) {
+                            $FieldHidden = $Field | Select-Object -property 'Hidden'
+                            if ($false -eq $FieldHidden.Hidden) {
+                                [xml]$schemaXml = $field.SchemaXml
+                                If ($null -ne $schemaXml.Field.Attributes["List"].Value) {
+                                    Write-Host "Detected lookupfield  : $($Field.Title)" -f green
+                                    #Write-Host "Field Schema XML  : $($Schema)" -f Magenta
+                                    Write-Host "Field Schema Lookuplist ID  : $($schemaXml.Field.Attributes["List"].Value)" -f Magenta
+                                    Write-Host "Field Schema Lookuplist Name   : $( $schemaXml.Field.Attributes["Name"].Value)" -f Magenta
+                                    Write-Host "Field Schema LookupField  : $($schemaXml.Field.Attributes["ShowField"].Value)" -f Magenta
+                                    $LookupField  = New-Object PSObject
+                                    $LookupField | Add-Member NoteProperty SourceURL($MUSource.Name)
+                                    $LookupField | Add-Member NoteProperty ParentListID($List.ID)
+                                    $LookupField | Add-Member NoteProperty ParentListTitle($MUGroup.ListTitle)
+                                    $LookupField | Add-Member NoteProperty ParentListLookUpListFieldName($Field.Title)
+                                    $LookupField | Add-Member NoteProperty LookUpListID($schemaXml.Field.Attributes["List"].Value)
+                                    $LookupField | Add-Member NoteProperty LookUpListName($schemaXml.Field.Attributes["Name"].Value)
+                                    $LookupField | Add-Member NoteProperty LookUpListFieldName($schemaXml.Field.Attributes["ShowField"].Value)
+                                    $ResultList.Add($LookupField)
+                                }  
+                            }
+                        }
+                    }
+                }
+                $LookUpFieldsExportFileName = -Join($Settings.FilePath.Logging, '/LookUpFieldsAnalysisExport' , (Get-Date -Format "ddmmyyyy"),'.csv')
+                $ResultList | Export-CSV -Path $LookUpFieldsExportFileName 
+                Write-Host "Lookup column gathering completed!" -f Cyan
+            }
+        }
+
         'Verify lists to migrate in source' {
             $MUsForValidation = Select-RJMusForProcessing -Action 'Verify'
             foreach ($MUURL in $MUsForValidation) {
@@ -128,7 +183,7 @@ do {
         'Verify lists migrated in target (Verify in source FIRST)' {
             $ListsWithIssues = [System.Collections.Generic.List[PSCustomObject]]::new()
             $MUsForValidation = Select-RJMusForProcessing -Action 'Verify'
-                foreach ($MUURL in $MUsForValidation) {
+            foreach ($MUURL in $MUsForValidation) {
                 $SourceRoot = $MUURL.SubItems[2].Text
                 $DestinationURL = $MUURL.SubItems[3].Text
                 #GetUniqueLists for target
@@ -156,18 +211,18 @@ do {
                                 Write-Host "Source itemcount : $($MuforValidation.ItemCount) - Target itemcount $($List.ItemCount) -> match : $($ItemCountMatch) MUsMerged : $($MuforValidation.MergeMUS)" -f green 
                             }
                             else {
-                                $ListsWithIssues.Add(-Join ('Source list ',  $MuForValidation.ListTitle, " " , $MuForValidation.ListURL , ' | Target list ',  $List.Title, " " , $List.RootFolder.ServerRelativeUrl , ' ', ' Itemcount mismatch  ->  SOurceItemCount : ' , $MUForValidation.ItemCount, '- TargetItemCount : ' , $List.ItemCount, ' Merged : ', $MUForValidation.MergeMUS))   
+                                $ListsWithIssues.Add( -Join ('Source list ', $MuForValidation.ListTitle, " " , $MuForValidation.ListURL , ' | Target list ', $List.Title, " " , $List.RootFolder.ServerRelativeUrl , ' ', ' Itemcount mismatch  ->  SOurceItemCount : ' , $MUForValidation.ItemCount, '- TargetItemCount : ' , $List.ItemCount, ' Merged : ', $MUForValidation.MergeMUS))   
                                 Write-Host "Source itemcount : $($MuforValidation.ItemCount) - Target itemcount $($List.ItemCount) -> match : $($ItemCountMatch) MUsMerged : $($MuforValidation.MergeMUS)" -f yellow 
                             }
                         }            
                     }
                     catch {
-                        $ListsWithIssues.Add(-join($MuforValidation.ListTitle,' / ' , $MuforValidation.ListTitleWithPrefix , ' -> NOT detected in target!'))
+                        $ListsWithIssues.Add( -join ($MuforValidation.ListTitle, ' / ' , $MuforValidation.ListTitleWithPrefix , ' -> NOT detected in target!'))
                         Write-Host "$($MuforValidation.ListTitle) / $($MuforValidation.ListTitleWithPrefix) NOT detected in target!" -f red
 
                     }
                 }
-                $ListsWithIssues | ForEach-Object{Write-Host "Checklist $($_)" -f Yellow}
+                $ListsWithIssues | ForEach-Object { Write-Host "Checklist $($_)" -f Yellow }
                 Write-Host "Verification completed!" 
             }
         }
