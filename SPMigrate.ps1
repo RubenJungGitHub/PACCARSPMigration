@@ -132,7 +132,7 @@ do {
                 }
             }
             $LookUpFieldsExportFileName = -Join ($Settings.FilePath.Logging, '/LookUpFieldsAnalysisExport' , (Get-Date -Format "ddmmyyyy"), '.csv')
-            $ResultList | Export-CSV -Path $LookUpFieldsExportFileName 
+            $ResultList | Export-CSV -Path $LookUpFieldsExportFileName -NoTypeInformation
             Write-Host "Lookup column gathering completed!" -f Cyan
         }
 
