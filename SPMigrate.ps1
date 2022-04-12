@@ -121,6 +121,7 @@ do {
                                     $LookupField | Add-Member NoteProperty ParentListID($List.ID)
                                     $LookupField | Add-Member NoteProperty ParentListTitle($MUGroup.ListTitle)
                                     $LookupField | Add-Member NoteProperty ParentListLookUpListFieldName($Field.Title)
+                                    $LookupField | Add-Member NoteProperty ParentListLookUpListInternalFieldName($Field.InternalName)
                                     $LookupField | Add-Member NoteProperty LookUpListID($schemaXml.Field.Attributes["List"].Value)
                                     $LookupField | Add-Member NoteProperty LookUpListName($schemaXml.Field.Attributes["Name"].Value)
                                     $LookupField | Add-Member NoteProperty LookUpListFieldName($schemaXml.Field.Attributes["ShowField"].Value)
