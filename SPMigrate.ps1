@@ -95,38 +95,53 @@ do {
                 Where SourceRoot = '$($SourceRoot)'  And DestinationURL = '$($DestinationURL)'
                 Order By DestinationURL
 "@
-                $MUSforValidation = Invoke-Sqlcmd -ServerInstance $Settings.SQLDetails.Instance -Database $Settings.SQLDetails.Database -Query $sql | Group-Object -Property SourceURL
-                ForEach ($MUSource  in  $MUSforValidation) {
-                    $securePwd = $settings.current.EncryptedPassword | ConvertTo-SecureString
-                    $cred = New-Object System.Management.Automation.PSCredential -ArgumentList $settings.current.UserNameSP2010, $securePwd
-                    #Connect-MtHSharePoint -URL $MuSource.Name
-                    Connect-PnPOnline -URL $MUSource.Name -Credentials $cred -ErrorAction SilentlyContinue
-                    Write-Host "Connected to : $($MUSource.Name)"
-                    ForEach ($MUGroup  in  $MUSource.Group) {
-                        $List = Get-PnPList -Identity $MUGroup.ListTitle
-                        $ListFields = Get-PnPField -List $List | Where-Object { $_.Title -notin $Settings.LookuplijstIgnoreFields }
-                        Write-Host "Analyzing list : $($List.Title) " -f Yellow
-                        foreach ($Field in $ListFields) {
-                            $FieldHidden = $Field | Select-Object -property 'Hidden'
-                            if ($false -eq $FieldHidden.Hidden) {
-                                [xml]$schemaXml = $field.SchemaXml
-                                If ($null -ne $schemaXml.Field.Attributes["List"].Value) {
-                                    Write-Host "Detected lookupfield  : $($Field.Title)" -f green
-                                    #Write-Host "Field Schema XML  : $($Schema)" -f Magenta
-                                    Write-Host "Field Schema Lookuplist ID  : $($schemaXml.Field.Attributes["List"].Value)" -f Magenta
-                                    Write-Host "Field Schema Lookuplist Name   : $( $schemaXml.Field.Attributes["Name"].Value)" -f Magenta
-                                    Write-Host "Field Schema LookupField  : $($schemaXml.Field.Attributes["ShowField"].Value)" -f Magenta
-                                    $LookupField = New-Object PSObject
-                                    $LookupField | Add-Member NoteProperty SourceURL($MUSource.Name)
-                                    $LookupField | Add-Member NoteProperty ParentListID($List.ID)
-                                    $LookupField | Add-Member NoteProperty ParentListTitle($MUGroup.ListTitle)
-                                    $LookupField | Add-Member NoteProperty ParentListLookUpListFieldName($Field.Title)
-                                    $LookupField | Add-Member NoteProperty ParentListLookUpListInternalFieldName($Field.InternalName)
-                                    $LookupField | Add-Member NoteProperty LookUpListID($schemaXml.Field.Attributes["List"].Value)
-                                    $LookupField | Add-Member NoteProperty LookUpListName($schemaXml.Field.Attributes["Name"].Value)
-                                    $LookupField | Add-Member NoteProperty LookUpListFieldName($schemaXml.Field.Attributes["ShowField"].Value)
-                                    $ResultList.Add($LookupField)
-                                }  
+                FOR ($SiteLoop = 1; $SiteLoop -le 2; $SiteLoop++) {
+                    if ($SiteLoop -eq 1) {
+                        #Scan Destination
+                        $MUSforValidation = Invoke-Sqlcmd -ServerInstance $Settings.SQLDetails.Instance -Database $Settings.SQLDetails.Database -Query $sql | Group-Object -Property DestinationURL 
+                    }
+                    else {
+                        #Scan Source
+                        $MUSforValidation = Invoke-Sqlcmd -ServerInstance $Settings.SQLDetails.Instance -Database $Settings.SQLDetails.Database -Query $sql | Group-Object -Property SourceURL 
+                    }
+                    ForEach ($MUSource  in  $MUSforValidation) {
+                        $securePwd = $settings.current.EncryptedPassword | ConvertTo-SecureString
+                        $cred = New-Object System.Management.Automation.PSCredential -ArgumentList $settings.current.UserNameSP2010, $securePwd
+                        #Connect-MtHSharePoint -URL $MuSource.Name
+                        if ($SiteLoop -eq 1) { 
+                            $scrconn = Connect-MtHSharePoint -URL $MUSource.Name -returnconnection -ErrorAction Stop 
+                        }
+                        else { 
+                            Connect-PnPOnline -URL $MUSource.Name -Credentials $cred -ErrorAction SilentlyContinue 
+                        }
+    
+                        Write-Host "Connected to : $($MUSource.Name)" -BackgroundColor green
+                        ForEach ($MUGroup  in  $MUSource.Group) {
+                            $List = Get-PnPList -Identity $MUGroup.ListTitle
+                            $ListFields = Get-PnPField -List $List | Where-Object { $_.Title -notin $Settings.LookuplijstIgnoreFields }
+                            Write-Host "Analyzing list : $($List.Title) " -f Yellow
+                            foreach ($Field in $ListFields) {
+                                $FieldHidden = $Field | Select-Object -property 'Hidden'
+                                if ($false -eq $FieldHidden.Hidden) {
+                                    [xml]$schemaXml = $field.SchemaXml
+                                    If ($null -ne $schemaXml.Field.Attributes["List"].Value) {
+                                        Write-Host "Detected lookupfield  : $($Field.Title)" -f green
+                                        #Write-Host "Field Schema XML  : $($Schema)" -f Magenta
+                                        Write-Host "Field Schema Lookuplist ID  : $($schemaXml.Field.Attributes["List"].Value)" -f Magenta
+                                        Write-Host "Field Schema Lookuplist Name   : $( $schemaXml.Field.Attributes["Name"].Value)" -f Magenta
+                                        Write-Host "Field Schema LookupField  : $($schemaXml.Field.Attributes["ShowField"].Value)" -f Magenta
+                                        $LookupField = New-Object PSObject
+                                        $LookupField | Add-Member NoteProperty SourceURL($MUSource.Name)
+                                        $LookupField | Add-Member NoteProperty ParentListID($List.ID)
+                                        $LookupField | Add-Member NoteProperty ParentListTitle($MUGroup.ListTitle)
+                                        $LookupField | Add-Member NoteProperty ParentListLookUpListFieldName($Field.Title)
+                                        $LookupField | Add-Member NoteProperty ParentListLookUpListInternalFieldName($Field.InternalName)
+                                        $LookupField | Add-Member NoteProperty LookUpListID($schemaXml.Field.Attributes["List"].Value)
+                                        $LookupField | Add-Member NoteProperty LookUpListName($schemaXml.Field.Attributes["Name"].Value)
+                                        $LookupField | Add-Member NoteProperty LookUpListFieldName($schemaXml.Field.Attributes["ShowField"].Value)
+                                        $ResultList.Add($LookupField)
+                                    }  
+                                }
                             }
                         }
                     }
@@ -153,7 +168,7 @@ do {
                     $securePwd = $settings.current.EncryptedPassword | ConvertTo-SecureString
                     $cred = New-Object System.Management.Automation.PSCredential -ArgumentList $settings.current.UserNameSP2010, $securePwd
                     #Connect-MtHSharePoint -URL $MuSource.Name
-                    Connect-PnPOnline -URL $MUSource.Name -Credentials $cred -ErrorAction SilentlyContinue
+                    Connect-PnPOnline -URL $MUSource.Name -Credentials $cred -ErrorAction SilentlyContinue 
                     ForEach ($MUGroup  in  $MUSource.Group) {
                         try {
                             $List = Get-PnPList -Identity $MUGroup.ListTitle

@@ -40,6 +40,16 @@ Function Inherit_RJPermissionsFromSource {
         else {
             #Initially  break destination List permissions  Depends on setting UniquePermissionsFromInheritance and remove all groups having access before granting  access
             Write-Host "Breaking permissions for MU '$($dstList.Title)' and clear current permissions" -ForegroundColor cyan
+            $DestinationhasUniquePermissions = Get-PnPProperty -ClientObject $dstList -Property "HasUniqueRoleAssignments"
+            If($DestinationhasUniquePermissions)
+            {
+                write-Host  "Destination list $($dstList.Title) already has uniwue permissions" -ForegroundColor red
+            }
+            else
+            {
+                write-Host  "Destination list $($dstList.Title) inherits permissions" -ForegroundColor green
+            }
+            
             Set-PnPList -Connection $dstConn -Identity $dstList.ID -BreakRoleInheritance 
             <#if ($Settings.UniquePermissionsFromInheritance) {
                 $hasUniquePermissions = Get-PnPProperty -ClientObject $dstList -Property "HasUniqueRoleAssignments"
