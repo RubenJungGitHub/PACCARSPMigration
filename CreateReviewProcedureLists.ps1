@@ -13,7 +13,7 @@ try {
     $AdminPriorityFieldChoices  = @("(1) High", "(2) Normal", "(3) Low")
 
         
-    $ProcessOwnertatusFieldChoices = @("Actual", "Need Update", "Expired(archive)")
+    $ProcessOwnertatusFieldChoices = @("Review","Actual", "Need Update", "Expired(archive)")
 
     $connection = Connect-PnPOnline @Params -ErrorAction Stop -ReturnConnection    
     #Remove list if existant 
@@ -45,7 +45,7 @@ try {
     $FieldXML = "<Field Type='DateTime' Name='Due Date' ID='$([GUID]::NewGuid())' DisplayName='Due Date' Required ='TRUE' Format='DateOnly' FriendlyDisplayFormat='Disabled' Viewable='TRUE'></Field>"
     Add-PnPFieldFromXml -FieldXml $FieldXML -List $List | Out-Null
     
-    Set-PnPView -List $List  -Identity "All Items" -Fields "Title","Status","Priority","Assigned To", "Description", "Start Date", "Due Date" | out-null
+    Set-PnPView -List $List  -Identity "All Items" -Fields "Title","Status","Priority","Assigned To", "Description", "Start Date", "Due Date","RelatedProcID" | out-null
 
     #Remove list if existant 
     Remove-PnPList -Identity $ProcessOwnerTaskList -force  -ErrorAction SilentlyContinue
@@ -76,7 +76,7 @@ try {
     #Add Due date field 
     $FieldXML = "<Field Type='DateTime' Name='Due Date' ID='$([GUID]::NewGuid())' DisplayName='Due Date' Required ='TRUE' Format='DateOnly' FriendlyDisplayFormat='Disabled' Viewable='TRUE'></Field>"
     Add-PnPFieldFromXml -FieldXml $FieldXML -List $List | Out-Null
-    Set-PnPView -List $List  -Identity "All Items" -Fields "Title","Status","Priority","Assigned To", "Description", "Start Date", "Due Date" | out-null
+    Set-PnPView -List $List  -Identity "All Items" -Fields "Title","Status","Priority","Assigned To", "Description", "Start Date", "Due Date","RelatedProcID" | out-null
 
 
 
