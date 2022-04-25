@@ -80,7 +80,7 @@ try {
     #Add Due date field 
     $FieldXML = "<Field Type='DateTime' Name='Due Date' ID='$([GUID]::NewGuid())' DisplayName='Due Date' Required ='TRUE' Format='DateOnly' FriendlyDisplayFormat='Disabled' Viewable='TRUE'></Field>"
     Add-PnPFieldFromXml -FieldXml $FieldXML -List $List | Out-Null
-    Set-PnPView -List $List  -Identity "All Items" -Fields "Title", "Status", "Priority", "Assigned To", "Description", "Start Date", "Due Date", "RelatedProcID" | out-null
+    Set-PnPView -List $List  -Identity "All Items" -Fields "Title", "Status", "Priority", "Assigned To", "Description","Comments", "Start Date", "Due Date", "RelatedProcID" | out-null
 
 
 
