@@ -13,7 +13,7 @@ try {
     $AdminPriorityFieldChoices = @("(1) High", "(2) Normal", "(3) Low")
 
         
-    $ProcessOwnertatusFieldChoices = @("Review", "Actual", "Need Update", "Expired(archive)")
+    $ProcessOwnertatusFieldChoices = @("Review", "Actual", "Need Update", "Expired (archive)")
 
     $connection = Connect-PnPOnline @Params -ErrorAction Stop -ReturnConnection    
     #Remove list if existant 
