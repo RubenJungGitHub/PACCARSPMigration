@@ -10,10 +10,10 @@ try {
     $ProcessOwnerTaskList = "ProcessOwner-Tasks"
     
     $AdminStatusFieldChoices = @("Not Started", "In Progress", "Completed")
-    $AdminPriorityFieldChoices  = @("(1) High", "(2) Normal", "(3) Low")
+    $AdminPriorityFieldChoices = @("(1) High", "(2) Normal", "(3) Low")
 
         
-    $ProcessOwnertatusFieldChoices = @("Review","Actual", "Need Update", "Expired(archive)")
+    $ProcessOwnertatusFieldChoices = @("Review", "Actual", "Need Update", "Expired(archive)")
 
     $connection = Connect-PnPOnline @Params -ErrorAction Stop -ReturnConnection    
     #Remove list if existant 
@@ -45,7 +45,7 @@ try {
     $FieldXML = "<Field Type='DateTime' Name='Due Date' ID='$([GUID]::NewGuid())' DisplayName='Due Date' Required ='TRUE' Format='DateOnly' FriendlyDisplayFormat='Disabled' Viewable='TRUE'></Field>"
     Add-PnPFieldFromXml -FieldXml $FieldXML -List $List | Out-Null
     
-    Set-PnPView -List $List  -Identity "All Items" -Fields "Title","Status","Priority","Assigned To", "Description", "Start Date", "Due Date","RelatedProcID" | out-null
+    Set-PnPView -List $List  -Identity "All Items" -Fields "Title", "Status", "Priority", "Assigned To", "Description", "Start Date", "Due Date", "RelatedProcID" | out-null
 
     #Remove list if existant 
     Remove-PnPList -Identity $ProcessOwnerTaskList -force  -ErrorAction SilentlyContinue
@@ -62,7 +62,7 @@ try {
     #Add Priority Field 
     Add-PnPField -List $List -DisplayName "Priority" -InternalName "Priority" -Type Choice -AddToDefaultView -Choices $AdminPriorityFieldChoices -Required | Out-Null
 
-        #Add Procedure Number field 
+    #Add Procedure Number field 
     Add-PnPField -List $List -DisplayName "RelatedProcID" -InternalName "RelatedProcID" -Type Number -AddToDefaultView -Required | Out-Null
 
     
@@ -70,13 +70,17 @@ try {
     Add-PnPField -List $List -DisplayName "Assigned To" -InternalName "Assigne To" -Type user -AddToDefaultView  -Required | Out-Null
     #Add description Field 
     Add-PnPField -List $List -DisplayName "Description" -InternalName "Description" -Type Note -AddToDefaultView  -Required | Out-Null
+
+    #Add comments Field 
+    Add-PnPField -List $List -DisplayName "Comments" -InternalName "Comments" -Type Note -AddToDefaultView  -Required | Out-Null
+
     #Add start date field  (Date only)
     $FieldXML = "<Field Type='DateTime' Name='Start Date' ID='$([GUID]::NewGuid())' DisplayName='Start Date' Required ='TRUE' Format='DateOnly' FriendlyDisplayFormat='Disabled' Viewable='TRUE'></Field>" 
     Add-PnPFieldFromXml -FieldXml $FieldXML -List $List | Out-Null
     #Add Due date field 
     $FieldXML = "<Field Type='DateTime' Name='Due Date' ID='$([GUID]::NewGuid())' DisplayName='Due Date' Required ='TRUE' Format='DateOnly' FriendlyDisplayFormat='Disabled' Viewable='TRUE'></Field>"
     Add-PnPFieldFromXml -FieldXml $FieldXML -List $List | Out-Null
-    Set-PnPView -List $List  -Identity "All Items" -Fields "Title","Status","Priority","Assigned To", "Description", "Start Date", "Due Date","RelatedProcID" | out-null
+    Set-PnPView -List $List  -Identity "All Items" -Fields "Title", "Status", "Priority", "Assigned To", "Description", "Start Date", "Due Date", "RelatedProcID" | out-null
 
 
 
