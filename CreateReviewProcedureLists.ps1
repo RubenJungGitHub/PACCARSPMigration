@@ -81,7 +81,7 @@ try {
     Add-PnPField -List $List -DisplayName "Description" -InternalName "Description" -Type Note -AddToDefaultView  -Required | Out-Null
 
     #Add comments Field 
-    Add-PnPField -List $List -DisplayName "Comments" -InternalName "Comments" -Type Note -AddToDefaultView  -Required | Out-Null
+    Add-PnPField -List $List -DisplayName "Comments" -InternalName "Comments" -Type Text -AddToDefaultView  -Required | Out-Null
 
     #Add start date field  (Date only)
     $FieldXML = "<Field Type='DateTime' Name='Start Date' ID='$([GUID]::NewGuid())' DisplayName='Start Date' Required ='TRUE' Format='DateOnly' FriendlyDisplayFormat='Disabled' Viewable='TRUE'></Field>" 
