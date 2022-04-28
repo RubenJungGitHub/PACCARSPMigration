@@ -144,6 +144,7 @@ function Start-MtHSGMigration {
                     $SourceSiteList = $ToCopy | where-Object { $_.RootFolder.SubString(0, $_.RootFolder.Length - 1) -eq $List.ListURL }
                     #Dryrun?
                     if ($Settings.RealMigration) {
+                        #To do Copy content if Delta migration
                         $result = Copy-List  -SourceSite $srcSite  -Name $SourceSiteList.Title  -ListTitleUrlSegment $ListTitleWithPrefix -ListTitle $ListTitleWithPrefix -NoWorkflows -NoWebParts -NoNintexWorkflowHistory -ForceNewListExperience -NoCustomizedListForms -WaitForImportCompletion:$Settings.WaitForImportCompletion  @MigrationParameters
                         $MigrationresultItem = [PSCustomObject]@{
                             Result     = $result
@@ -198,6 +199,7 @@ function Start-MtHSGMigration {
                         write-Host "Migrating batch $($ToCopyBatch.Title) : REALMIGRATION? : $($Settings.RealMigration)"  -f CYAN
                         #Dryrun?
                         if ($Settings.RealMigration) {
+                            #To do Copy content if Delta migration
                             $result = Copy-List -List $toCopyBatch  -NoWorkflows -NoWebParts -NoNintexWorkflowHistory -ForceNewListExperience -NoCustomizedListForms  -WaitForImportCompletion:$Settings.WaitForImportCompletion @MigrationParameters
                             $MigrationresultItem = [PSCustomObject]@{
                                 Result     = $result
