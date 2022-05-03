@@ -16,7 +16,7 @@ try {
     $ProcessOwnertatusFieldChoices = @("Review", "Actual", "Need Update", "Expired (archive)")
     $ProgressStatusChoices = @("Not Started", "In Progress", "Completed")
 
-    $TaskTypeChoices = @("Request data", "Escalate")
+    $TaskTypeChoices = @("Init", "Request data", "Escalate")
 
 
     $connection = Connect-PnPOnline @Params -ErrorAction Stop -ReturnConnection    
