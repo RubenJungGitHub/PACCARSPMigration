@@ -16,9 +16,9 @@ try {
     $ProcessOwnertatusFieldChoices = @("Review", "Actual", "Need Update", "Expired (archive)")
     $ProgressStatusChoices = @("Not Started", "In Progress", "Completed")
 
-    $TaskTypeChoices = @("Init", "Request data", "Escalate")
+    $TaskTypeChoices = @("Init", "Request data", "Escalate","Approve")
 
-
+    
     $connection = Connect-PnPOnline @Params -ErrorAction Stop -ReturnConnection    
     #Remove list if existant 
     Remove-PnPList -Identity $AdminTaskList -force  -ErrorAction SilentlyContinue
