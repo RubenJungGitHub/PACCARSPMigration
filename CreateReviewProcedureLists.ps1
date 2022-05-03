@@ -16,6 +16,9 @@ try {
     $ProcessOwnertatusFieldChoices = @("Review", "Actual", "Need Update", "Expired (archive)")
     $ProgressStatusChoices = @("Not Started", "In Progress", "Completed")
 
+    $TaskTypeChoices = @("Request data", "Escalate")
+
+
     $connection = Connect-PnPOnline @Params -ErrorAction Stop -ReturnConnection    
     #Remove list if existant 
     Remove-PnPList -Identity $AdminTaskList -force  -ErrorAction SilentlyContinue
@@ -33,6 +36,9 @@ try {
     Add-PnPField -List $List -DisplayName "Progress" -InternalName "Progress" -Type Choice -AddToDefaultView -Choices $ProgressStatusChoices -Required | Out-Null
     Set-PnPDefaultColumnValues -List $List -Field "Progress" -Value  $ProgressStatusChoices[0] | Out-Null
 
+    #Add task type field 
+    Add-PnPField -List $List -DisplayName "TaskType" -InternalName "TaskType" -Type Choice -AddToDefaultView -Choices $TaskTypeChoices  | Out-Null
+  
     #Add Priority Field 
     Add-PnPField -List $List -DisplayName "Priority" -InternalName "Priority" -Type Choice -AddToDefaultView -Choices $AdminPriorityFieldChoices -Required | Out-Null
 
@@ -64,10 +70,13 @@ try {
     Add-PnPField -List $List -DisplayName "Status" -InternalName "Status" -Type Choice -AddToDefaultView -Choices $ProcessOwnertatusFieldChoices -Required | Out-Null
     Set-PnPDefaultColumnValues -List $List -Field "Status" -Value  $ProcessOwnertatusFieldChoices[0] | Out-Null
 
+    #Add progress field
     Add-PnPField -List $List -DisplayName "Progress" -InternalName "Progress" -Type Choice -AddToDefaultView -Choices $ProgressStatusChoices -Required | Out-Null
     Set-PnPDefaultColumnValues -List $List -Field "Progress" -Value  $ProgressStatusChoices[0] | Out-Null
 
-
+    #Add task type field 
+    Add-PnPField -List $List -DisplayName "TaskType" -InternalName "TaskType" -Type Choice -AddToDefaultView -Choices $TaskTypeChoices  | Out-Null
+    
     #Add Priority Field 
     Add-PnPField -List $List -DisplayName "Priority" -InternalName "Priority" -Type Choice -AddToDefaultView -Choices $AdminPriorityFieldChoices -Required | Out-Null
 
