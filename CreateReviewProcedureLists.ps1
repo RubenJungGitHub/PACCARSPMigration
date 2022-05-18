@@ -45,6 +45,9 @@ try {
     #Add Procedure Number field 
     Add-PnPField -List $List -DisplayName "RelatedProcID" -InternalName "RelatedProcID" -Type Number -AddToDefaultView -Required | Out-Null
 
+    #Add comments Field 
+    Add-PnPField -List $List -DisplayName "Comments" -InternalName "Comments" -Type Text -AddToDefaultView  -Required | Out-Null
+
     #Add Assigned to field 
     Add-PnPField -List $List -DisplayName "Assigned To" -InternalName "Assigne To" -Type user -AddToDefaultView  -Required | Out-Null
     #Add description Field 
