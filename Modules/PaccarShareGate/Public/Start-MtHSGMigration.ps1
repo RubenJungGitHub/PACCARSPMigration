@@ -144,28 +144,35 @@ function Start-MtHSGMigration {
                     $SourceSiteList = $ToCopy | where-Object { $_.RootFolder.SubString(0, $_.RootFolder.Length - 1) -eq $List.ListURL }
                     #Dryrun?
                     if ($Settings.RealMigration) {
-                        #To do Copy content if Delta migration
-                        $result = Copy-List  -SourceSite $srcSite  -Name $SourceSiteList.Title  -ListTitleUrlSegment $ListTitleWithPrefix -ListTitle $ListTitleWithPrefix -NoWorkflows -NoWebParts -NoNintexWorkflowHistory -ForceNewListExperience -NoCustomizedListForms -WaitForImportCompletion:$Settings.WaitForImportCompletion  @MigrationParameters
-                        $MigrationresultItem = [PSCustomObject]@{
-                            Result     = $result
-                            MigUnitIDs = $List.MigUNitID 
-                        }
-                        $Results.Add($MigrationresultItem)
-                        Write-Progress "Check custom permissions required for renamed item "
-                        if ($List.UniquePermissions -and $MigrationItems[0].NextAction -eq 'first') {
-                            $DestinationList = Get-List -Site $dstSite -Name $ListTitleWithPrefix
-                            #Disable SG appears to perform obscure actions
-                            #$result = Copy-ObjectPermissions -Source $SourceSiteList -Destination $DestinationList
-                            $MigrationresultItem = [PSCustomObject]@{
-                                Result     = $result
-                                MigUnitIDs = $List.MigUNitID
-                            }
+                        if ($MigrationItems[0].NextAction -eq 'Delta') {
+                            $SourceList = Get-List -Name $SourceSiteList.Title -Site $SrcSite
+                            $DestList = Get-List -Name $ListTitleWithPrefix -Site $dstSite
+                            $Result = Copy-Content -SourceList $SourceList -DestinationList $DestList
                             $Results.Add($MigrationresultItem)
                         }
-                        #Map permissions from source to target 
-                        if ($List.InheritFromSource -and $Settings.InheritSourceSecurityDuringMigration -and $MigrationItems[0].NextAction -eq 'first') {
-                            Write-Progress "Process inherit permissions from source "
-                            Inherit_RJPermissionsFromSource -scrSite $MigrationItems[0].SourceURL -dstSite $MigrationItems[0].DestinationUrl -scrListTitle $List.ListTitle dstListTitle $ListTitleWithPrefix
+                        else {
+                            $result = Copy-List  -SourceSite $srcSite  -Name $SourceSiteList.Title  -ListTitleUrlSegment $ListTitleWithPrefix -ListTitle $ListTitleWithPrefix -NoWorkflows -NoWebParts -NoNintexWorkflowHistory -ForceNewListExperience -NoCustomizedListForms -WaitForImportCompletion:$Settings.WaitForImportCompletion  @MigrationParameters
+                            $MigrationresultItem = [PSCustomObject]@{
+                                Result     = $result
+                                MigUnitIDs = $List.MigUNitID 
+                            }
+                            $Results.Add($MigrationresultItem)
+                            Write-Progress "Check custom permissions required for renamed item "
+                            if ($List.UniquePermissions -and $MigrationItems[0].NextAction -eq 'first') {
+                                $DestinationList = Get-List -Site $dstSite -Name $ListTitleWithPrefix
+                                #Disable SG appears to perform obscure actions
+                                #$result = Copy-ObjectPermissions -Source $SourceSiteList -Destination $DestinationList
+                                $MigrationresultItem = [PSCustomObject]@{
+                                    Result     = $result
+                                    MigUnitIDs = $List.MigUNitID
+                                }
+                                $Results.Add($MigrationresultItem)
+                            }
+                            #Map permissions from source to target 
+                            if ($List.InheritFromSource -and $Settings.InheritSourceSecurityDuringMigration -and $MigrationItems[0].NextAction -eq 'first') {
+                                Write-Progress "Process inherit permissions from source "
+                                Inherit_RJPermissionsFromSource -scrSite $MigrationItems[0].SourceURL -dstSite $MigrationItems[0].DestinationUrl -scrListTitle $List.ListTitle dstListTitle $ListTitleWithPrefix
+                            }
                         }
                     }
                     #Register related MU Id's
@@ -178,7 +185,7 @@ function Start-MtHSGMigration {
                 if ($BatchWiseLists ) {
                     #Drop renamed lists
                     $toCopyBatchAll = Get-List -Site $srcSite | Where-Object { ($_.Title -in $BatchWiseLists.ListTitle -or $_.Title -in $MigrationItems.ListTitle.replace(' ', '' )) -and $_. Title -NotIn $renamedLists.ListTitle } 
-                    if ($NUll -eq $toCopyBatchAll) {
+                   if ($NUll -eq $toCopyBatchAll) {
                         Write-Host  "Eror detecting MU-s batch  to copy not detected:  MUs passed :  $($BatchWiseLists.CompleteSourceUrl)   "-BackgroundColor red
                     }
                     #For Throttling reasons limit number of lists to 5 and split 
@@ -200,34 +207,45 @@ function Start-MtHSGMigration {
                         #Dryrun?
                         if ($Settings.RealMigration) {
                             #To do Copy content if Delta migration
-                            $result = Copy-List -List $toCopyBatch  -NoWorkflows -NoWebParts -NoNintexWorkflowHistory -ForceNewListExperience -NoCustomizedListForms  -WaitForImportCompletion:$Settings.WaitForImportCompletion @MigrationParameters
-                            $MigrationresultItem = [PSCustomObject]@{
-                                Result     = $result
-                                MigUnitIDs = $MigrationItems.MigUNitID
-                            }
-                            $Results.Add($MigrationresultItem)
-                            if ($Null -ne $ToCopyBatch) { Register-RJListID -scrSite $srcSite -dstSite  $dstSite  -Lists $ToCopyBatch }
-                            Write-Progress "Check custom permissions required for batch item "
-                            #Only process MU's  permissions when nextaction is first 
-                            if ($MigrationItems[0].NextAction -eq 'first') {
-                                #Filter From batchWiseLists where UNiquePermission
-                                $BatchWithUP = $BatchWiseLists | Where-Object { $_.UniquePermissions -eq $true  -and $_.ListTitle -in $ToCopyBatch.Title}  
-                                ForEach ($MigrationItem in $BatchWithUP) {
-                                    $SourceList = Get-List -Site $SrcSite -Name $MigrationItem.ListTitle
-                                    $DestinationList = Get-List -Site $dstSite -Name $MigrationItem.ListTitle
-                                    #Disable SG appears to perform obscure actions
-                                    #$result = Copy-ObjectPermissions -Source $SourceList -Destination $DestinationList 
-                                    $MigrationresultItem = [PSCustomObject]@{
-                                        Result     = $result
-                                        MigUnitIDs = $MigrationItems.MigUNitID
-                                    }
-                                    $Results.Add($ReMigrationresultItemsult)
+                            if ($MigrationItems[0].NextAction -eq 'Delta') {
+                                foreach ($List in $ToCopyBatch)
+                                {
+                                    $SourceList = Get-List -Name $List.Title -Site $SrcSite
+                                    $DestList = Get-List -Name $List.Title -Site $dstSite
+                                    $MigrationresultItem = Copy-Content -SourceList $SourceList -DestinationList  $DestList
+                                    $Results.Add($MigrationresultItem)
                                 }
-                                #Filter From batchWiseLists where InheritFromParent
-                                $BatchWithInherit = $BatchWiseLists | Where-Object { $_.InheritFromSource -eq $true  -and $_.ListTitle -in $ToCopyBatch.Title}  
-                                If ($Settings.InheritSourceSecurityDuringMigration) {
-                                    Write-Progress "Process inherit permissions from source "
-                                    $BatchWithInherit | ForEach-Object { Inherit_RJPermissionsFromSource -scrSite $MigrationItems[0].SourceURL -dstSite $MigrationItems[0].DestinationUrl -scrListTitle $_.ListTitle dstListTitle $_.ListTitle }
+                            }
+                            Else {
+                                $result = Copy-List -List $toCopyBatch  -NoWorkflows -NoWebParts -NoNintexWorkflowHistory -ForceNewListExperience -NoCustomizedListForms  -WaitForImportCompletion:$Settings.WaitForImportCompletion @MigrationParameters
+                                $MigrationresultItem = [PSCustomObject]@{
+                                    Result     = $result
+                                    MigUnitIDs = $MigrationItems.MigUNitID
+                                }
+                                $Results.Add($MigrationresultItem)
+                                if ($Null -ne $ToCopyBatch) { Register-RJListID -scrSite $srcSite -dstSite  $dstSite  -Lists $ToCopyBatch }
+                                Write-Progress "Check custom permissions required for batch item "
+                                #Only process MU's  permissions when nextaction is first 
+                                if ($MigrationItems[0].NextAction -eq 'first') {
+                                    #Filter From batchWiseLists where UNiquePermission
+                                    $BatchWithUP = $BatchWiseLists | Where-Object { $_.UniquePermissions -eq $true -and $_.ListTitle -in $ToCopyBatch.Title }  
+                                    ForEach ($MigrationItem in $BatchWithUP) {
+                                        $SourceList = Get-List -Site $SrcSite -Name $MigrationItem.ListTitle
+                                        $DestinationList = Get-List -Site $dstSite -Name $MigrationItem.ListTitle
+                                        #Disable SG appears to perform obscure actions
+                                        #$result = Copy-ObjectPermissions -Source $SourceList -Destination $DestinationList 
+                                        $MigrationresultItem = [PSCustomObject]@{
+                                            Result     = $result
+                                            MigUnitIDs = $MigrationItems.MigUNitID
+                                        }
+                                        $Results.Add($ReMigrationresultItemsult)
+                                    }
+                                    #Filter From batchWiseLists where InheritFromParent
+                                    $BatchWithInherit = $BatchWiseLists | Where-Object { $_.InheritFromSource -eq $true -and $_.ListTitle -in $ToCopyBatch.Title }  
+                                    If ($Settings.InheritSourceSecurityDuringMigration) {
+                                        Write-Progress "Process inherit permissions from source "
+                                        $BatchWithInherit | ForEach-Object { Inherit_RJPermissionsFromSource -scrSite $MigrationItems[0].SourceURL -dstSite $MigrationItems[0].DestinationUrl -scrListTitle $_.ListTitle dstListTitle $_.ListTitle }
+                                    }
                                 }
                             }
                         }
