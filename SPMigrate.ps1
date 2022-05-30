@@ -204,10 +204,10 @@ do {
                 $DestinationURL = $MUURL.SubItems[3].Text
                 #GetUniqueLists for target
                 $sql = @"
-            SELECT   ListTitle, ListTitleWithPrefix, ListURL, LISTID, MergeMUS, SUM(ItemCount) As ItemCount
+            SELECT SourceURL,  ListTitle, ListTitleWithPrefix, ListURL, LISTID, MergeMUS, SUM(ItemCount) As ItemCount
             FROM [MigrationUnits] 
             Where DestinationURL = '$($DestinationURL)' and SourceRoot = '$($SourceRoot)'
-            Group by ListTitle, ListID, MergeMUs, ListTitleWithPrefix, ListURL
+            Group by SourceURL, ListTitle, ListID, MergeMUs, ListTitleWithPrefix, ListURL
             Order By ListTitle
 "@      
                 $UniqueMUS = Invoke-Sqlcmd -ServerInstance $Settings.SQLDetails.Instance -Database $Settings.SQLDetails.Database -Query $sql 
@@ -227,8 +227,23 @@ do {
                                 Write-Host "Source itemcount : $($MuforValidation.ItemCount) - Target itemcount $($List.ItemCount) -> match : $($ItemCountMatch) MUsMerged : $($MuforValidation.MergeMUS)" -f green 
                             }
                             else {
-                                $ListsWithIssues.Add( -Join ('Source list ', $MuForValidation.ListTitle, " " , $MuForValidation.ListURL , ' | Target list ', $List.Title, " " , $List.RootFolder.ServerRelativeUrl , ' ', ' Itemcount mismatch  ->  SOurceItemCount : ' , $MUForValidation.ItemCount, '- TargetItemCount : ' , $List.ItemCount, ' Merged : ', $MUForValidation.MergeMUS))   
-                                Write-Host "Source itemcount : $($MuforValidation.ItemCount) - Target itemcount $($List.ItemCount) -> match : $($ItemCountMatch) MUsMerged : $($MuforValidation.MergeMUS)" -f yellow 
+                                #Double check
+                                #Find differences
+                                $Fields = Get-PnPField -List $List -Identity 'FileLeafRef' -ErrorAction SilentlyContinue
+                                try {
+                                    $DestinationFiles = (Get-PnPListItem -List $List -Fields $Fields).FieldValues 
+                                }
+                                catch {}
+                                $SourceFiles = Compare-RJSourceAndTarget -ScrSite $MUForValidation.SourceURL -scrListTitle $MuforValidation.ListTitle  
+                                $Diff = Compare-Object -ReferenceObject $SourceFiles -DifferenceObject $DestinationFiles  -Property FileLeafRef -ErrorAction SilentlyContinue
+                                if ($null -ne $diff) {
+                                    $ListsWithIssues.Add( -Join ('Source list ', $MuForValidation.ListTitle, " " , $MuForValidation.ListURL , ' | Target list ', $List.Title, " " , $List.RootFolder.ServerRelativeUrl , ' ', ' Itemcount mismatch  ->  SOurceItemCount : ' , $MUForValidation.ItemCount, '- TargetItemCount : ' , $List.ItemCount, ' Merged : ', $MUForValidation.MergeMUS))   
+                                    Write-Host "Source itemcount : $($MuforValidation.ItemCount) - Target itemcount $($List.ItemCount) -> match : $($ItemCountMatch) MUsMerged : $($MuforValidation.MergeMUS)" -f yellow 
+                                    Write-Host "$($Diff)" -f yellow 
+                                }
+                                else {
+                                    Write-Host "Source itemcount : $($SourceFiles.Count) - Target itemcount $($DestinationFiles.Count) -> match : $($ItemCountMatch) MUsMerged : $($MuforValidation.MergeMUS)" -f green    
+                                }
                             }
                         }            
                     }

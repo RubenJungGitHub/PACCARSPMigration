@@ -91,7 +91,7 @@ FunctionsToExport = 'Compare-MtHdiff', 'Connect-MtHSharePoint',
                'Distribute-RJSiteCollectionsOverNodes','Start-RJDBRegistrationCycle',
                'Resolve-RJCSVItems','ExtractFrom-RJSourceURL','Rename-RJListsTitlePrefix',
                "Select-RJMusForProcessing","Register-RJListID","Start-RJNavigation",
-               "Inherit_RJPermissionsFromSource","Get-RJListPermissions"
+               "Inherit_RJPermissionsFromSource","Get-RJListPermissions",'Compare-RJSourceAndTarget'
 
 # Cmdlets to export from this module, for best performance, do not use wildcards and do not delete the entry, use an empty array if there are no cmdlets to export.
 CmdletsToExport = @()
