@@ -233,7 +233,9 @@ do {
                                 try {
                                     $DestinationFiles = (Get-PnPListItem -List $List -Fields $Fields).FieldValues 
                                 }
-                                catch {}
+                                catch {
+                                    $a=1
+                                }
                                 $SourceFiles = Compare-RJSourceAndTarget -ScrSite $MUForValidation.SourceURL -scrListTitle $MuforValidation.ListTitle  
                                 $Diff = Compare-Object -ReferenceObject $SourceFiles -DifferenceObject $DestinationFiles  -Property FileLeafRef -ErrorAction SilentlyContinue
                                 if ($null -ne $diff) {

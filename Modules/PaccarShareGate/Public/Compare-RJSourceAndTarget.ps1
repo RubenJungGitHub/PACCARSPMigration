@@ -17,6 +17,8 @@ function Compare-RJSourceAndTarget {
     try {
         $SourceFiles = (Get-PnPListItem -List $SourceList -Fields $Fields).FieldValues
     }
-    catch {}
+    catch {
+        $a = 1
+    }
     return $SourceFiles
 }
