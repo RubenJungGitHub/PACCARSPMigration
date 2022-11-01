@@ -147,7 +147,7 @@ function Start-MtHSGMigration {
                         if ($MigrationItems[0].NextAction -eq 'Delta') {
                             $SourceList = Get-List -Name $SourceSiteList.Title -Site $SrcSite
                             $DestList = Get-List -Name $ListTitleWithPrefix -Site $dstSite
-                            $Result = Copy-Content -SourceList $SourceList -DestinationList $DestList
+                            $Result = Copy-Content -SourceList $SourceList -DestinationList $DestList -WaitForImportCompletion:$Settings.WaitForImportCompletion  
                             $Results.Add($MigrationresultItem)
                         }
                         else {
@@ -212,8 +212,9 @@ function Start-MtHSGMigration {
                                 {
                                     $SourceList = Get-List -Name $List.Title -Site $SrcSite
                                     $DestList = Get-List -Name $List.Title -Site $dstSite
-                                    $MigrationresultItem = Copy-Content -SourceList $SourceList -DestinationList  $DestList
+                                    $MigrationresultItem = Copy-Content -SourceList $SourceList -DestinationList  $DestList -WaitForImportCompletion:$Settings.WaitForImportCompletion  
                                     $Results.Add($MigrationresultItem)
+                                    Register-RJListID -scrSite $srcSite -dstSite  $dstSite -List $List -RenamedList $List.Title
                                 }
                             }
                             Else {
@@ -225,7 +226,7 @@ function Start-MtHSGMigration {
                                 $Results.Add($MigrationresultItem)
                                 if ($Null -ne $ToCopyBatch) { Register-RJListID -scrSite $srcSite -dstSite  $dstSite  -Lists $ToCopyBatch }
                                 Write-Progress "Check custom permissions required for batch item "
-                                #Only process MU's  permissions when nextaction is first 
+                                #Only process MU's  permissions when nextaction is first
                                 if ($MigrationItems[0].NextAction -eq 'first') {
                                     #Filter From batchWiseLists where UNiquePermission
                                     $BatchWithUP = $BatchWiseLists | Where-Object { $_.UniquePermissions -eq $true -and $_.ListTitle -in $ToCopyBatch.Title }  
@@ -238,7 +239,7 @@ function Start-MtHSGMigration {
                                             Result     = $result
                                             MigUnitIDs = $MigrationItems.MigUNitID
                                         }
-                                        $Results.Add($ReMigrationresultItemsult)
+                                        $Results.Add($MigrationresultItem)
                                     }
                                     #Filter From batchWiseLists where InheritFromParent
                                     $BatchWithInherit = $BatchWiseLists | Where-Object { $_.InheritFromSource -eq $true -and $_.ListTitle -in $ToCopyBatch.Title }  

@@ -23,7 +23,7 @@ function Start-MtHExecutionCycle {
     #$totalitems = $items.Count
     if (-Not $TestSPConnections) {
         $i = 0
-        $siteparts = $items | Group-Object -Property NextAction, SourceURL, DestinationURL, NextAction, MUStatus | Sort-Object { $_.SourceURL, $_.ListTitle }
+        $siteparts = $items | Group-Object -Property NextAction, SourceURL, DestinationURL, MUStatus | Sort-Object { $_.SourceURL, $_.ListTitle }
         $siteparts = $siteparts | Sort-Object  $_.$NextAction -Descending
         $Activity = 'Processing execution cycle : '
         foreach ($part in $siteparts) {
@@ -52,16 +52,16 @@ function Start-MtHExecutionCycle {
             foreach ($result in $results) {
                 $MigRunResults = $MigRunIDS | Where-object { $_.MigUnitID -in $Result.MigUNitIDs }
                 #put result back into SQL database
-                if ($result.result.Errors -eq 0) {
+                if ($result.Errors -eq 0) {
                     # Migration went well
                     $MigRunResults | ForEach-Object { Register-MtHSQLMigRunResults -MigRunId $_.MigRunID -Result 'success' -SGSessionId "$($env:COMPUTERNAME.Substring(7, 4))-$($result.Result.SessionId)" -RunTimeInSec $timediff.TotalSeconds }
                 }
                 else {
                     # Migration went wrong
                     #Export Error Report
-                    $SGErrorReports = -join ($script:SGErrorReports, '\SharegateErrorReport_', $result.result.SessionID, '.xlsx')
+                    $SGErrorReports = -join ($Settings.Filepath.SGErrorReports, '\SharegateErrorReport_', $result.SessionID, '.xlsx')
                     if (!(Test-Path -path SGErrorReports)) {               
-                        Export-Report -SessionId $result.result.SessionID -Path $SGErrorReports -overwrite
+                        Export-Report -SessionId $result.Result.SessionID -Path $SGErrorReports -overwrite
                     }
                     $MigRunResults | ForEach-Object { Register-MtHSQLMigRunResults -MigRunId $_.MigRunID -Result 'failed' -SGSessionId "$($env:COMPUTERNAME.Substring(7, 4))-$($result.Result.SessionId)" -RunTimeInSec $timediff.TotalSeconds }
                 }
