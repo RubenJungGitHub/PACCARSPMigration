@@ -4,13 +4,19 @@ function Compare-RJSourceAndTarget {
     [CmdletBinding()]
     Param(        
         [parameter(mandatory = $true)] [String]$scrSite,
-        [parameter(mandatory = $true)] [String]$scrListTitle
+        [parameter(mandatory = $true)] [String]$scrListTitle,
+        [switch]$UseWebLogin
     )
     #QUick and dirty. The sourceRoot has to many slashes. To be fixed properly
     $scrSite = $scrSite.Replace('////', '//')
     $securePwd = $settings.current.EncryptedPassword | ConvertTo-SecureString
     $cred = New-Object System.Management.Automation.PSCredential -ArgumentList $settings.current.UserNameSP2010, $securePwd
-    Connect-PnPOnline -URL $scrSite -Credentials $cred -ErrorAction Stop 
+    if ($UseWebLogin.IsPresent) {
+        Connect-PnPOnline -URL $scrSite -UseWebLogin -ErrorAction Stop 
+    }
+    else {
+        Connect-PnPOnline -URL $scrSite -Credentials $cred -ErrorAction Stop 
+    }
     Write-Host "Double check Source : Connected to sourcesite  $($scrSite)" -b yellow
     $SourceList = Get-PnPList -Identity $scrListTitle
     $Fields = Get-PnPField -List $SourceList -Identity 'FileLeafRef' -ErrorAction SilentlyContinue
