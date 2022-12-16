@@ -229,25 +229,33 @@ do {
                             else {
                                 #Double check
                                 #Find differences
-                             #   $Fields = Get-PnPField -List $List -Identity 'FileLeafRef' -ErrorAction SilentlyContinue
-                             #   try {
-                             #       $DestinationFiles = (Get-PnPListItem -List $List -Fields $Fields).FieldValues 
-                             #   }
-                             #   catch {
-                             #       $a=1
-                             #   }
-                                $SourceFiles = Compare-RJSourceAndTarget -ScrSite $MUForValidation.SourceURL -scrListTitle $MuforValidation.ListTitle  
-                                $DestinationFiles = Compare-RJSourceAndTarget -ScrSite $MUForValidation.DestinationURL -scrListTitle $MuforValidation.ListTitle  -UseWebLogin
+                                #   $Fields = Get-PnPField -List $List -Identity 'FileLeafRef' -ErrorAction SilentlyContinue
+                                #   try {
+                                #       $DestinationFiles = (Get-PnPListItem -List $List -Fields $Fields).FieldValues 
+                                #   }
+                                #   catch {
+                                #       $a=1
+                                #   }
+                                #$SourceFiles = Compare-RJSourceAndTarget -ScrSite $MUForValidation.SourceURL -scrListTitle $MuforValidation.ListTitle  
+                                #$DestinationFiles = Compare-RJSourceAndTarget -ScrSite $MUForValidation.DestinationURL -scrListTitle $MuforValidation.ListTitle  -UseWebLogin
+                                $SourceFiles = Compare-RJSourceAndTarget -MuforValidation $MUForValidation
+                                $DestinationFiles = Compare-RJSourceAndTarget -MuforValidation $MUForValidation -UseWebLogin
 
                                 #$Diff = Compare-Object -ReferenceObject $SourceFiles -DifferenceObject $DestinationFiles  -Property FileLeafRef -ErrorAction SilentlyContinue | Select-Object -Property FileLeafRef
-                                $Diff = $SourceFiles.FileLeafRef | Where-Object {$_ -NotIN $DestinationFiles.FileLeafRef}
+                                $Diff = $SourceFiles.FileLeafRef | Where-Object { $_ -NotIN $DestinationFiles.FileLeafRef }
                                 if ($null -ne $diff) {
                                     $ListsWithIssues.Add( -Join ('Source list ', $MuForValidation.ListTitle, " " , $MuForValidation.ListURL , ' | Target list ', $List.Title, " " , $List.RootFolder.ServerRelativeUrl , ' ', ' Itemcount mismatch  ->  SOurceItemCount : ' , $MUForValidation.ItemCount, '- TargetItemCount : ' , $List.ItemCount, ' Merged : ', $MUForValidation.MergeMUS))   
+                                    $Diff  | ForEach-Object {
+                                        $ListsWithIssues.add(-Join($MUForValidation.SourceURL, $_))
+                                    }
+                                    $ListWithIssuePath = -Join ($Settings.FilePath.Logging, "\ListsWithIssues", $MuForValidation.ListTitle, ".csv")
+                                    $ListsWithIssues | Out-File  $ListWithIssuePath 
+                                    #$ListsWithIssues | Export-Csv -Path $ListWithIssuePath -Delimiter ';' -Encoding UTF8 -notypeinformation
                                     Write-Host "Source itemcount : $($MuforValidation.ItemCount) - Target itemcount $($List.ItemCount) -> match : $($ItemCountMatch) MUsMerged : $($MuforValidation.MergeMUS)" -f yellow 
                                     Write-Host "$($Diff)" -f yellow 
                                 }
                                 else {
-                                    Write-Host "Source itemcount : $($SourceFiles.Count) - Target itemcount $($DestinationFiles.Count) -> match : $($ItemCountMatch) MUsMerged : $($MuforValidation.MergeMUS)" -f green    
+                                    Write-Host "Source itemcount : $($SourceFiles.Count) - Target itemcount $($DestinationFiles.Count) -> match : $($ItemCountMatch) MUsMerged : $($MuforValidation.MergeMUS)" -f red    
                                 }
                             }
                         }            
